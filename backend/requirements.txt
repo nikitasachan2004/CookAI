@@ -1,0 +1,32 @@
+Flask==2.3.3# Core Flask Framework
+
+Flask-CORS==4.0.0Flask==2.3.3
+
+python-dotenv==1.0.0Flask-CORS==4.0.0
+Werkzeug==2.3.7
+
+# Optional: Machine Learning (for advanced features)
+# scikit-learn>=1.2.0
+# numpy==1.24.3
+# pandas==2.0.3
+
+# Optional: Database (for advanced features)
+# SQLAlchemy==2.0.21
+# Flask-SQLAlchemy==3.0.5
+
+# Optional: Authentication & Security (for advanced features)
+# PyJWT==2.8.0
+
+# Optional: AI Integration (for advanced features)
+# openai>=1.0.0
+
+# Environment & Configuration
+python-dotenv==1.0.0
+
+# Development & Testing
+pytest==7.4.2
+pytest-flask==1.2.0
+
+# Optional: Enhanced Features
+# redis==4.6.0  # For caching
+# celery==5.3.2  # For background tasks
