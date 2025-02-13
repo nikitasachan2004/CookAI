@@ -25,6 +25,10 @@ dist/
 build/
 *.egg-info/
 
+# Database
+*.db
+*.sqlite3
+
 # Logs
 *.log
 npm-debug.log*
