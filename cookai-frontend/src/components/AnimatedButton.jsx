@@ -3,18 +3,6 @@ import { motion } from 'framer-motion'
 import { Loader2 } from 'lucide-react'
 import PropTypes from 'prop-types'
 
-/**
- * AnimatedButton component with loading states and hover effects
- * @param {Object} props - Component props
- * @param {React.ReactNode} props.children - Button content
- * @param {Function} props.onClick - Click handler
- * @param {boolean} props.loading - Loading state
- * @param {boolean} props.disabled - Disabled state
- * @param {string} props.variant - Button style variant
- * @param {string} props.size - Button size
- * @param {string} props.className - Additional CSS classes
- * @param {Object} props.icon - Icon component
- */
 const AnimatedButton = ({
   children,
   onClick,
@@ -26,53 +14,38 @@ const AnimatedButton = ({
   icon: Icon,
   ...props
 }) => {
-  // Variant styles
   const variants = {
     primary: 'btn-primary',
     secondary: 'btn-secondary',
     ghost: 'btn-ghost',
-    danger: 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/30',
-    success: 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30'
+    danger: 'btn-primary bg-none !bg-[linear-gradient(135deg,#9d4b5a_0%,#b85c38_100%)]',
+    success: 'btn-primary bg-none !bg-[linear-gradient(135deg,#5d7b5d_0%,#d98f2b_100%)]',
   }
 
-  // Size styles
   const sizes = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg'
+    sm: 'px-4 py-2.5 text-sm',
+    md: 'px-6 py-3 text-sm sm:text-base',
+    lg: 'px-7 py-4 text-base',
   }
-
-  const baseClasses = `
-    inline-flex items-center justify-center space-x-2 font-semibold rounded-2xl
-    transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-orange-500/20
-    disabled:opacity-50 disabled:cursor-not-allowed
-  `
-
-  const buttonClasses = `
-    ${baseClasses}
-    ${variants[variant] || variants.primary}
-    ${sizes[size] || sizes.md}
-    ${className}
-  `
 
   return (
     <motion.button
-      whileHover={!disabled && !loading ? { y: -2 } : {}}
-      whileTap={!disabled && !loading ? { y: 0, scale: 0.98 } : {}}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      whileHover={!disabled && !loading ? { y: -2, scale: 1.01 } : {}}
+      whileTap={!disabled && !loading ? { scale: 0.985 } : {}}
+      transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       onClick={onClick}
       disabled={disabled || loading}
-      className={buttonClasses}
+      className={`inline-flex items-center justify-center gap-2 ${variants[variant] || variants.primary} ${sizes[size] || sizes.md} ${className} ${(disabled || loading) ? 'cursor-not-allowed opacity-60' : ''}`}
       {...props}
     >
       {loading ? (
         <>
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Loading...</span>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Working...</span>
         </>
       ) : (
         <>
-          {Icon && <Icon className="h-5 w-5" />}
+          {Icon ? <Icon className="h-4 w-4" /> : null}
           <span>{children}</span>
         </>
       )}
@@ -88,7 +61,7 @@ AnimatedButton.propTypes = {
   variant: PropTypes.oneOf(['primary', 'secondary', 'ghost', 'danger', 'success']),
   size: PropTypes.oneOf(['sm', 'md', 'lg']),
   className: PropTypes.string,
-  icon: PropTypes.elementType
+  icon: PropTypes.elementType,
 }
 
 export default AnimatedButton

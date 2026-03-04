@@ -1,112 +1,105 @@
-﻿from flask import Flask, jsonify, request
+﻿from flask import Flask, jsonify
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from sqlalchemy.exc import IntegrityError
+from config import Config
+from db import db
+from utils.auth_utils import bcrypt
+from routes import register_routes
 
-app = Flask(__name__)
-CORS(app)
 
-@app.route("/favicon.ico")
-def favicon():
-    return "", 204
+def create_app():
+    """Application factory — creates and configures the Flask app."""
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-@app.route("/")
-def index():
-    return jsonify({
-        "message": "CookAI Recipe API", 
-        "version": "3.0.0",
-        "status": "running",
-        "endpoints": {
-            "GET /": "API information",
-            "GET /health": "Health check", 
-            "POST /recommend": "Get recipe recommendations",
-            "GET /recipes": "List sample recipes"
-        },
-        "server_info": {
-            "host": "127.0.0.1:5001",
-            "debug_mode": True,
-            "cors_enabled": True
-        }
-    })
+    if not app.config.get("SQLALCHEMY_DATABASE_URI"):
+        raise RuntimeError("DATABASE_URL is not configured")
+    if not app.config.get("JWT_SECRET_KEY"):
+        raise RuntimeError("JWT_SECRET_KEY is not configured")
 
-@app.route("/health")
-def health():
-    return jsonify({"status": "healthy", "api": "CookAI", "timestamp": "2024-12-28"})
+    # Extensions
+    CORS(app)
+    db.init_app(app)
+    bcrypt.init_app(app)
+    jwt = JWTManager(app)
 
-@app.route("/recommend", methods=["POST"])
-def recommend():
-    data = request.get_json() if request.is_json else {}
-    
-    ingredients = data.get("ingredients", [])
-    preferences = data.get("preferences", [])
-    equipment = data.get("equipment", [])
-    
-    mock_recipes = [
-        {
-            "id": 1,
-            "name": "Quick Pasta Primavera",
-            "description": "Fresh vegetables with pasta in a light garlic sauce",
-            "prep_time": "15 minutes",
-            "cook_time": "20 minutes",
-            "difficulty": "Easy",
-            "ingredients": ["pasta", "bell peppers", "zucchini", "garlic", "olive oil"],
-            "equipment": ["pot", "pan"],
-            "rating": 4.5,
-            "calories": 350
-        },
-        {
-            "id": 2,
-            "name": "Mediterranean Salad",
-            "description": "Fresh mixed greens with feta, olives, and tomatoes",
-            "prep_time": "10 minutes",
-            "cook_time": "0 minutes",
-            "difficulty": "Very Easy",
-            "ingredients": ["mixed greens", "feta cheese", "olives", "tomatoes", "cucumber"],
-            "equipment": ["bowl"],
-            "rating": 4.2,
-            "calories": 250
-        },
-        {
-            "id": 3,
-            "name": "Hearty Vegetable Soup",
-            "description": "Warming soup with seasonal vegetables and herbs",
-            "prep_time": "20 minutes",
-            "cook_time": "30 minutes",
-            "difficulty": "Easy",
-            "ingredients": ["carrots", "celery", "onions", "vegetable broth", "herbs"],
-            "equipment": ["pot", "ladle"],
-            "rating": 4.7,
-            "calories": 180
-        }
-    ]
-    
-    return jsonify({
-        "recommendations": mock_recipes,
-        "total_found": len(mock_recipes),
-        "user_input": {
-            "ingredients": ingredients,
-            "preferences": preferences,
-            "equipment": equipment
-        },
-        "message": "Here are your personalized recipe recommendations!"
-    })
+    # Register route blueprints
+    register_routes(app)
 
-@app.route("/recipes")
-def get_recipes():
-    sample_recipes = [
-        {"id": 1, "name": "Pasta Primavera", "category": "Italian", "difficulty": "Easy"},
-        {"id": 2, "name": "Mediterranean Salad", "category": "Healthy", "difficulty": "Very Easy"},
-        {"id": 3, "name": "Vegetable Soup", "category": "Comfort Food", "difficulty": "Easy"},
-        {"id": 4, "name": "Chicken Stir Fry", "category": "Asian", "difficulty": "Medium"},
-        {"id": 5, "name": "Chocolate Chip Cookies", "category": "Dessert", "difficulty": "Easy"}
-    ]
-    
-    return jsonify({
-        "recipes": sample_recipes,
-        "total_count": len(sample_recipes),
-        "categories": ["Italian", "Healthy", "Comfort Food", "Asian", "Dessert"]
-    })
+    # ── Core routes ──────────────────────────────────────────
+
+    @app.route("/")
+    def index():
+        return jsonify({
+            "message": "CookAI Recipe API",
+            "version": "1.0.0",
+            "status": "running",
+        })
+
+    @app.route("/health")
+    def health():
+        return jsonify({"status": "healthy", "api": "CookAI"})
+
+    # ── Error handlers ───────────────────────────────────────
+
+    @jwt.unauthorized_loader
+    def handle_missing_jwt(reason):
+        return jsonify({"error": "Authorization token is required", "details": {"reason": reason}}), 401
+
+    @jwt.invalid_token_loader
+    def handle_invalid_jwt(reason):
+        return jsonify({"error": "Invalid authentication token", "details": {"reason": reason}}), 401
+
+    @jwt.expired_token_loader
+    def handle_expired_jwt(jwt_header, jwt_payload):
+        return jsonify({"error": "Authentication token has expired"}), 401
+
+    @jwt.needs_fresh_token_loader
+    def handle_non_fresh_token(jwt_header, jwt_payload):
+        return jsonify({"error": "Fresh authentication token required"}), 401
+
+    @jwt.revoked_token_loader
+    def handle_revoked_token(jwt_header, jwt_payload):
+        return jsonify({"error": "Authentication token has been revoked"}), 401
+
+    @jwt.user_lookup_error_loader
+    def handle_missing_user(jwt_header, jwt_payload):
+        return jsonify({"error": "Authenticated user could not be loaded"}), 401
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({"error": "Not found"}), 404
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({"error": "Bad request"}), 400
+
+    @app.errorhandler(IntegrityError)
+    def integrity_error(error):
+        db.session.rollback()
+        return jsonify({"error": "Database constraint violation"}), 409
+
+    @app.errorhandler(500)
+    def server_error(error):
+        db.session.rollback()
+        return jsonify({"error": "Internal server error"}), 500
+
+    return app
+
+
+# ── Entry point ──────────────────────────────────────────────
+
+app = create_app()
 
 if __name__ == "__main__":
-    print("Starting CookAI API Server...")
-    print("Available at: http://127.0.0.1:5001")
-    print("API Endpoints: /, /health, /recommend, /recipes")
+    # Import models so create_all() sees every table
+    import models  # noqa: F401
+
+    with app.app_context():
+        db.create_all()
+        print("✓ Database tables created")
+
+    print("Starting CookAI API …")
+    print("→ http://127.0.0.1:5001")
     app.run(host="0.0.0.0", port=5001, debug=True)

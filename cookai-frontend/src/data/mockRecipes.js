@@ -28,7 +28,7 @@ export const mockRecipes = [
     ],
     time: 25,
     difficulty: "easy",
-    image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&h=600&fit=crop",
+    image: null,
     nutrition: {
       calories: 320,
       protein: "35g",
@@ -64,7 +64,7 @@ export const mockRecipes = [
     ],
     time: 30,
     difficulty: "medium",
-    image: "https://images.unsplash.com/photo-1621996346565-e3dbc92d2abb?w=800&h=600&fit=crop",
+    image: null,
     nutrition: {
       calories: 485,
       protein: "18g",
@@ -100,7 +100,7 @@ export const mockRecipes = [
     ],
     time: 15,
     difficulty: "easy",
-    image: "https://images.unsplash.com/photo-1541519227354-08fa5d50c44d?w=800&h=600&fit=crop",
+    image: null,
     nutrition: {
       calories: 280,
       protein: "14g",
@@ -136,7 +136,7 @@ export const mockRecipes = [
     ],
     time: 20,
     difficulty: "medium",
-    image: "https://images.unsplash.com/photo-1603496987351-f84a3ba5ec85?w=800&h=600&fit=crop",
+    image: null,
     nutrition: {
       calories: 340,
       protein: "28g",
@@ -171,7 +171,7 @@ export const mockRecipes = [
     ],
     time: 45,
     difficulty: "easy",
-    image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=800&h=600&fit=crop",
+    image: null,
     nutrition: {
       calories: 180,
       protein: "2g",
@@ -207,7 +207,7 @@ export const mockRecipes = [
     ],
     time: 35,
     difficulty: "easy",
-    image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop",
+    image: null,
     nutrition: {
       calories: 380,
       protein: "16g",

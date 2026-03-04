@@ -1,81 +1,49 @@
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useParams, useNavigate } from 'react-router-dom'
-import { 
-  Clock, Users, ChefHat, Star, Heart, Share2, 
-  ArrowLeft, Play, Pause, RotateCcw, Timer,
-  CheckCircle2, Circle, MessageCircle, Bookmark
-} from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+import { useNavigate, useParams } from 'react-router-dom'
+import { ArrowLeft, CheckCircle2, ChefHat, Circle, Clock, Heart, Play, Share2, Star, Users } from 'lucide-react'
 import { fetchRecipeById, likeRecipe } from '../api/apiClient'
 import { useAuth } from '../context/AuthContext'
 import { mockRecipes } from '../data/mockRecipes'
 import { formatTime, getDifficultyColor } from '../utils/helpers'
 import AnimatedButton from '../components/AnimatedButton'
 
-/**
- * RecipeDetail page with step-by-step cooking mode and AI assistance
- * TODO: Complete implementation with cooking timer and AI chat integration
- */
 const RecipeDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { currentUser, isAuthenticated, isRecipeLiked, addLikedRecipe, removeLikedRecipe } = useAuth()
-  
-  // State management
   const [recipe, setRecipe] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
   const [isLiked, setIsLiked] = useState(false)
-  
-  // Cooking mode state
   const [cookingMode, setCookingMode] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState(new Set())
-  const [timer, setTimer] = useState({ minutes: 0, seconds: 0, isActive: false })
-  
-  // Load recipe data
+
   useEffect(() => {
+    const loadRecipe = async () => {
+      setIsLoading(true)
+      try {
+        const result = await fetchRecipeById(id)
+        setRecipe(result.recipe || mockRecipes.find((candidate) => String(candidate.id) === String(id)))
+      } catch (error) {
+        console.error('Failed to load recipe:', error)
+        setRecipe(mockRecipes.find((candidate) => String(candidate.id) === String(id)))
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     loadRecipe()
   }, [id])
-  
-  // Check if recipe is liked
+
   useEffect(() => {
     if (recipe && isAuthenticated) {
       setIsLiked(isRecipeLiked(recipe.id))
     }
-  }, [recipe, isAuthenticated, isRecipeLiked])
-  
-  const loadRecipe = async () => {
-    setIsLoading(true)
-    setError(null)
-    
-    try {
-      const result = await fetchRecipeById(id)
-      
-      if (result.success) {
-        setRecipe(result.recipe)
-      } else {
-        throw new Error(result.message || 'Recipe not found')
-      }
-    } catch (error) {
-      console.error('Failed to load recipe:', error)
-      setError(error.message)
-      
-      // Fallback to mock data
-      const mockRecipe = mockRecipes.find(r => r.id.toString() === id)
-      if (mockRecipe) {
-        setRecipe(mockRecipe)
-        setError(null)
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }
-  
-  // Handle like/unlike
+  }, [isAuthenticated, isRecipeLiked, recipe])
+
   const handleLike = async () => {
     if (!isAuthenticated || !recipe) return
-    
     try {
       if (isLiked) {
         removeLikedRecipe(recipe.id)
@@ -83,432 +51,225 @@ const RecipeDetail = () => {
         await likeRecipe(currentUser.id, recipe.id)
         addLikedRecipe(recipe)
       }
-      setIsLiked(!isLiked)
+      setIsLiked((current) => !current)
     } catch (error) {
       console.error('Failed to like recipe:', error)
     }
   }
-  
-  // Cooking mode functions
-  const startCookingMode = () => {
-    setCookingMode(true)
-    setCurrentStep(0)
-    setCompletedSteps(new Set())
-  }
-  
-  const exitCookingMode = () => {
-    setCookingMode(false)
-    setCurrentStep(0)
-    setCompletedSteps(new Set())
-    setTimer({ minutes: 0, seconds: 0, isActive: false })
-  }
-  
+
   const toggleStepComplete = (stepIndex) => {
-    const newCompleted = new Set(completedSteps)
-    if (newCompleted.has(stepIndex)) {
-      newCompleted.delete(stepIndex)
-    } else {
-      newCompleted.add(stepIndex)
-    }
-    setCompletedSteps(newCompleted)
+    setCompletedSteps((current) => {
+      const next = new Set(current)
+      if (next.has(stepIndex)) next.delete(stepIndex)
+      else next.add(stepIndex)
+      return next
+    })
   }
-  
-  const nextStep = () => {
-    if (currentStep < recipe.steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-    }
-  }
-  
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-    }
-  }
-  
-  // Timer functions (TODO: Implement full timer functionality)
-  const startTimer = (minutes) => {
-    setTimer({ minutes, seconds: 0, isActive: true })
-    // TODO: Implement countdown logic
-  }
-  
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
-          <p className="text-gray-600 dark:text-gray-300">Loading recipe...</p>
+      <section className="section-shell">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+          <div className="glass-panel p-12">
+            <div className="cooking-loader" />
+            <h1 className="mt-6 font-display text-4xl">Plating the details</h1>
+          </div>
         </div>
-      </div>
+      </section>
     )
   }
-  
-  if (error || !recipe) {
+
+  if (!recipe) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Recipe Not Found</h1>
-          <p className="text-gray-600 dark:text-gray-300">{error || 'The recipe you\'re looking for doesn\'t exist.'}</p>
-          <button onClick={() => navigate('/')} className="btn-primary">
-            Back to Home
-          </button>
+      <section className="section-shell">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+          <div className="glass-panel p-12">
+            <h1 className="font-display text-5xl">Recipe not found</h1>
+            <p className="mt-3 text-base leading-8 text-[color:var(--text-secondary)]">
+              The dish you requested is not available right now.
+            </p>
+            <button onClick={() => navigate('/recommendations')} className="btn-primary mt-8">
+              Back to recipes
+            </button>
+          </div>
         </div>
-      </div>
+      </section>
     )
   }
-  
-  // Cooking Mode View
+
   if (cookingMode) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {/* Cooking Mode Header */}
-        <div className="bg-white dark:bg-gray-800 shadow-lg p-4">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <button
-              onClick={exitCookingMode}
-              className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Exit Cooking Mode</span>
-            </button>
-            
-            <div className="text-center">
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{recipe.name}</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Step {currentStep + 1} of {recipe.steps.length}
-              </p>
+      <section className="section-shell pt-8">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="glass-panel p-6 sm:p-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="eyebrow mb-2">Cooking mode</p>
+                <h1 className="font-display text-4xl">{recipe.name}</h1>
+              </div>
+              <AnimatedButton onClick={() => setCookingMode(false)} variant="secondary">
+                Exit cooking mode
+              </AnimatedButton>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              {/* TODO: Add timer display */}
-              <button
-                onClick={() => startTimer(5)}
-                className="p-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600"
-              >
-                <Timer className="h-5 w-5" />
-              </button>
+
+            <div className="mt-8 rounded-[28px] border border-[color:var(--border-soft)] bg-white/75 p-6 sm:p-8">
+              <div className="mb-5 flex items-center gap-3">
+                <span className="meta-pill">Step {currentStep + 1} of {recipe.steps.length}</span>
+              </div>
+              <div className="flex gap-4">
+                <button onClick={() => toggleStepComplete(currentStep)} className="mt-1 text-[color:var(--brand)]">
+                  {completedSteps.has(currentStep) ? <CheckCircle2 className="h-6 w-6" /> : <Circle className="h-6 w-6" />}
+                </button>
+                <p className="text-lg leading-9 text-[color:var(--text-primary)]">{recipe.steps[currentStep]}</p>
+              </div>
+              <div className="mt-8 flex items-center justify-between">
+                <AnimatedButton onClick={() => setCurrentStep((step) => Math.max(step - 1, 0))} variant="secondary">
+                  Previous
+                </AnimatedButton>
+                <div className="flex gap-2">
+                  {recipe.steps.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentStep(index)}
+                      className={`h-3 w-3 rounded-full ${index === currentStep ? 'bg-[color:var(--brand)]' : completedSteps.has(index) ? 'bg-[color:var(--herb)]' : 'bg-[rgba(112,71,33,0.18)]'}`}
+                    />
+                  ))}
+                </div>
+                <AnimatedButton onClick={() => setCurrentStep((step) => Math.min(step + 1, recipe.steps.length - 1))}>
+                  {currentStep === recipe.steps.length - 1 ? 'Finish' : 'Next'}
+                </AnimatedButton>
+              </div>
             </div>
           </div>
         </div>
-        
-        {/* Current Step */}
-        <div className="max-w-4xl mx-auto p-6">
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg"
-          >
-            <div className="flex items-start space-x-4">
-              <button
-                onClick={() => toggleStepComplete(currentStep)}
-                className={`flex-shrink-0 mt-1 ${
-                  completedSteps.has(currentStep) ? 'text-green-500' : 'text-gray-400'
-                }`}
-              >
-                {completedSteps.has(currentStep) ? (
-                  <CheckCircle2 className="h-6 w-6" />
-                ) : (
-                  <Circle className="h-6 w-6" />
-                )}
-              </button>
-              
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Step {currentStep + 1}
-                </h2>
-                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {recipe.steps[currentStep]}
-                </p>
-              </div>
-            </div>
-            
-            {/* Step Navigation */}
-            <div className="flex items-center justify-between mt-8">
-              <button
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              
-              <div className="flex space-x-2">
-                {recipe.steps.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentStep(index)}
-                    className={`w-3 h-3 rounded-full transition-colors ${
-                      index === currentStep
-                        ? 'bg-primary-500'
-                        : completedSteps.has(index)
-                        ? 'bg-green-500'
-                        : 'bg-gray-300 dark:bg-gray-600'
-                    }`}
-                  />
-                ))}
-              </div>
-              
-              <button
-                onClick={nextStep}
-                disabled={currentStep === recipe.steps.length - 1}
-                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {currentStep === recipe.steps.length - 1 ? 'Finish' : 'Next'}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </div>
+      </section>
     )
   }
-  
-  // Normal Recipe View
+
   return (
-    <div className="min-h-screen py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
-        <motion.button
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          onClick={() => navigate(-1)}
-          className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5" />
-          <span>Back to Recipes</span>
-        </motion.button>
-        
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Recipe Image and Quick Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="lg:col-span-2 space-y-6"
-          >
-            {/* Hero Image */}
-            <div className="relative h-96 rounded-2xl overflow-hidden bg-gray-200 dark:bg-gray-700">
-              <img
-                src={recipe.image}
-                alt={recipe.name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none'
-                  e.target.nextSibling.style.display = 'flex'
-                }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-100 to-secondary-100 dark:from-primary-900/20 dark:to-secondary-900/20 hidden items-center justify-center">
-                <ChefHat className="h-16 w-16 text-gray-400" />
-              </div>
-              
-              {/* Floating Action Buttons */}
-              <div className="absolute top-4 right-4 flex space-x-2">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={handleLike}
-                  className={`p-3 rounded-full backdrop-blur-sm shadow-lg transition-colors ${
-                    isLiked 
-                      ? 'bg-red-500 text-white' 
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300'
-                  }`}
-                >
-                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 backdrop-blur-sm shadow-lg"
-                >
-                  <Share2 className="h-5 w-5" />
-                </motion.button>
-              </div>
-            </div>
-            
-            {/* Recipe Title and Meta */}
-            <div>
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                    {recipe.name}
-                  </h1>
-                  
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-4">
+    <section className="section-shell pt-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <button onClick={() => navigate(-1)} className="btn-ghost mb-6">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
+
+        <div className="grid gap-8 lg:grid-cols-[1.1fr,0.9fr]">
+          <div className="space-y-6">
+            <div className="card overflow-hidden">
+              <div className="relative h-[24rem] overflow-hidden">
+                {recipe.image ? (
+                  <img src={recipe.image} alt={recipe.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(145deg,rgba(184,92,56,0.12),rgba(217,143,43,0.18))]">
+                    <div className="text-center">
+                      <ChefHat className="mx-auto h-16 w-16 text-[color:var(--brand-deep)]" />
+                      <p className="mt-4 text-sm font-semibold text-[color:var(--text-primary)]">Recipe image placeholder</p>
+                      <p className="mt-1 text-xs text-[color:var(--text-secondary)]">You can add your own image asset later</p>
+                    </div>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(38,23,15,0.72)] via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                  <div className="mb-4 flex flex-wrap gap-2">
                     {recipe.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 
-                                 text-sm rounded-full capitalize"
-                      >
+                      <span key={tag} className="meta-pill bg-[rgba(255,255,255,0.18)] text-white backdrop-blur-md">
                         {tag}
                       </span>
                     ))}
                   </div>
-                </div>
-                
-                {/* Rating */}
-                <div className="flex items-center space-x-1">
-                  <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white">4.8</span>
-                  <span className="text-gray-500 dark:text-gray-400">(124 reviews)</span>
-                </div>
-              </div>
-              
-              {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl">
-                <div className="text-center">
-                  <Clock className="h-6 w-6 text-primary-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Cook Time</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{formatTime(recipe.time)}</p>
-                </div>
-                
-                <div className="text-center">
-                  <Users className="h-6 w-6 text-primary-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Servings</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{recipe.servings || 4}</p>
-                </div>
-                
-                <div className="text-center">
-                  <ChefHat className="h-6 w-6 text-primary-500 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Difficulty</p>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
-                    getDifficultyColor(recipe.difficulty)
-                  }`}>
-                    {recipe.difficulty}
-                  </span>
+                  <h1 className="font-display text-5xl text-white sm:text-6xl">{recipe.name}</h1>
                 </div>
               </div>
             </div>
-          </motion.div>
-          
-          {/* Sidebar - Ingredients and Actions */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-6"
-          >
-            {/* Start Cooking Button */}
-            <AnimatedButton
-              onClick={startCookingMode}
-              icon={Play}
-              className="w-full py-4 text-lg font-semibold"
-            >
-              Start Cooking
-            </AnimatedButton>
-            
-            {/* Ingredients */}
-            <div className="glass-panel p-6 rounded-2xl">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Ingredients
-              </h3>
-              <ul className="space-y-3">
-                {recipe.ingredients.map((ingredient, index) => (
-                  <motion.li
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="flex items-center space-x-3 text-gray-700 dark:text-gray-300"
-                  >
-                    <Circle className="h-2 w-2 text-primary-500 fill-current flex-shrink-0" />
-                    <span className="capitalize">{ingredient}</span>
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
-            
-            {/* Equipment */}
-            {recipe.equipment && recipe.equipment.length > 0 && (
-              <div className="glass-panel p-6 rounded-2xl">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Equipment Needed
-                </h3>
-                <ul className="space-y-2">
-                  {recipe.equipment.map((item, index) => (
-                    <li key={index} className="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-                      <ChefHat className="h-4 w-4 text-primary-500" />
-                      <span className="capitalize">{item}</span>
-                    </li>
-                  ))}
-                </ul>
+
+            <div className="grid gap-4 sm:grid-cols-4">
+              <div className="rounded-[24px] bg-[rgba(255,252,246,0.72)] p-5">
+                <Clock className="mb-3 h-5 w-5 text-[color:var(--brand)]" />
+                <p className="text-sm text-[color:var(--text-muted)]">Cook time</p>
+                <p className="mt-1 font-semibold">{formatTime(recipe.time)}</p>
               </div>
-            )}
-            
-            {/* Nutrition Info */}
-            {recipe.nutrition && (
-              <div className="glass-panel p-6 rounded-2xl">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Nutrition Info
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Calories</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{recipe.nutrition.calories}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Protein</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{recipe.nutrition.protein}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Carbs</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{recipe.nutrition.carbs}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Fat</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{recipe.nutrition.fat}</span>
-                  </div>
-                </div>
+              <div className="rounded-[24px] bg-[rgba(255,252,246,0.72)] p-5">
+                <Users className="mb-3 h-5 w-5 text-[color:var(--herb)]" />
+                <p className="text-sm text-[color:var(--text-muted)]">Servings</p>
+                <p className="mt-1 font-semibold">{recipe.servings || 2}</p>
               </div>
-            )}
-          </motion.div>
-        </div>
-        
-        {/* Instructions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-12"
-        >
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Instructions
-          </h2>
-          
-          <div className="space-y-6">
-            {recipe.steps.map((step, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex space-x-4 glass-panel p-6 rounded-2xl"
-              >
-                <div className="flex-shrink-0 w-8 h-8 bg-primary-500 text-white rounded-full flex items-center justify-center font-semibold">
-                  {index + 1}
-                </div>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                  {step}
+              <div className="rounded-[24px] bg-[rgba(255,252,246,0.72)] p-5">
+                <Star className="mb-3 h-5 w-5 text-[color:var(--highlight)]" />
+                <p className="text-sm text-[color:var(--text-muted)]">Rating</p>
+                <p className="mt-1 font-semibold">4.8</p>
+              </div>
+              <div className="rounded-[24px] bg-[rgba(255,252,246,0.72)] p-5">
+                <ChefHat className="mb-3 h-5 w-5 text-[color:var(--berry)]" />
+                <p className="text-sm text-[color:var(--text-muted)]">Difficulty</p>
+                <p className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${getDifficultyColor(recipe.difficulty)}`}>
+                  {recipe.difficulty}
                 </p>
-              </motion.div>
-            ))}
+              </div>
+            </div>
+
+            <div className="glass-panel p-6 sm:p-8">
+              <p className="eyebrow mb-4">Instructions</p>
+              <h2 className="font-display text-4xl">Cook it step by step</h2>
+              <div className="mt-8 grid gap-4">
+                {recipe.steps.map((step, index) => (
+                  <motion.div key={index} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }} className="flex gap-4 rounded-[24px] border border-[color:var(--border-soft)] bg-white/75 p-5">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--brand)_0%,var(--highlight)_100%)] text-sm font-bold text-white">
+                      {index + 1}
+                    </div>
+                    <p className="text-base leading-8 text-[color:var(--text-secondary)]">{step}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
           </div>
-        </motion.div>
-        
-        {/* AI Assistant Button (TODO) */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="fixed bottom-6 right-6"
-        >
-          <button className="p-4 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-full shadow-lg hover:shadow-xl transition-shadow">
-            <MessageCircle className="h-6 w-6" />
-          </button>
-        </motion.div>
+
+          <aside className="space-y-6">
+            <div className="glass-panel p-6 sm:p-8">
+              <div className="flex gap-3">
+                <AnimatedButton onClick={() => setCookingMode(true)} icon={Play} className="flex-1 justify-center">
+                  Start cooking
+                </AnimatedButton>
+                <button onClick={handleLike} className={`flex h-12 w-12 items-center justify-center rounded-full ${isLiked ? 'bg-[linear-gradient(135deg,var(--berry)_0%,var(--brand)_100%)] text-white' : 'border border-[color:var(--border-soft)] bg-white/70 text-[color:var(--text-primary)]'}`}>
+                  <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                </button>
+                <button className="flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--border-soft)] bg-white/70 text-[color:var(--text-primary)]">
+                  <Share2 className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="glass-panel p-6 sm:p-8">
+              <p className="eyebrow mb-4">Ingredients</p>
+              <h2 className="font-display text-4xl">Everything you need</h2>
+              <div className="mt-8 grid gap-3">
+                {recipe.ingredients.map((ingredient, index) => (
+                  <div key={index} className="flex items-center gap-3 rounded-[18px] bg-white/70 px-4 py-3 text-sm text-[color:var(--text-secondary)]">
+                    <Circle className="h-2.5 w-2.5 fill-current text-[color:var(--brand)]" />
+                    <span className="capitalize">{ingredient}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {recipe.equipment?.length ? (
+              <div className="glass-panel p-6 sm:p-8">
+                <p className="eyebrow mb-4">Equipment</p>
+                <h2 className="font-display text-4xl">Tools for the job</h2>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  {recipe.equipment.map((item) => (
+                    <span key={item} className="meta-pill capitalize">
+                      <ChefHat className="h-3.5 w-3.5" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </aside>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
 

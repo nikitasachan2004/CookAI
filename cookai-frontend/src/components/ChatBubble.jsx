@@ -1,125 +1,58 @@
 import React from 'react'
 import { motion } from 'framer-motion'
-import { User, Bot, Copy, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { Bot, Copy, ThumbsDown, ThumbsUp, User } from 'lucide-react'
 import PropTypes from 'prop-types'
 
-/**
- * ChatBubble component for displaying chat messages
- * @param {Object} props - Component props
- * @param {Object} props.message - Message object
- * @param {boolean} props.isBot - Whether message is from bot
- * @param {Function} props.onCopy - Copy message handler
- * @param {Function} props.onFeedback - Feedback handler
- */
-const ChatBubble = ({ 
-  message, 
-  isBot = false, 
-  onCopy, 
-  onFeedback 
-}) => {
-  const handleCopy = () => {
-    navigator.clipboard.writeText(message.content)
-    if (onCopy) onCopy(message.id)
-  }
-
-  const bubbleVariants = {
-    hidden: { opacity: 0, y: 20, scale: 0.8 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 500,
-        damping: 30
-      }
+const ChatBubble = ({ message, isBot = false, onCopy, onFeedback }) => {
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content)
+      onCopy?.(message.id)
+    } catch (error) {
+      console.error('Copy failed:', error)
     }
   }
 
   return (
     <motion.div
-      variants={bubbleVariants}
-      initial="hidden"
-      animate="visible"
-      className={`flex items-start space-x-3 mb-6 ${
-        isBot ? 'justify-start' : 'justify-end flex-row-reverse space-x-reverse'
-      }`}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex items-start gap-4 ${isBot ? '' : 'justify-end'}`}
     >
-      {/* Avatar */}
-      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-        isBot 
-          ? 'bg-gradient-to-r from-primary-500 to-secondary-500' 
-          : 'bg-gradient-to-r from-secondary-500 to-accent-500'
+      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+        isBot
+          ? 'bg-[linear-gradient(135deg,var(--brand)_0%,var(--highlight)_100%)] text-white'
+          : 'bg-[linear-gradient(135deg,var(--herb)_0%,var(--brand)_100%)] text-white'
       }`}>
-        {isBot ? (
-          <Bot className="h-4 w-4 text-white" />
-        ) : (
-          <User className="h-4 w-4 text-white" />
-        )}
+        {isBot ? <Bot className="h-5 w-5" /> : <User className="h-5 w-5" />}
       </div>
 
-      {/* Message Content */}
-      <div className={`max-w-xs lg:max-w-md group ${
-        isBot ? 'order-1' : 'order-2'
-      }`}>
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          className={`px-4 py-3 rounded-2xl shadow-lg relative ${
+      <div className={`group max-w-[min(42rem,calc(100%-4rem))] ${isBot ? '' : 'order-first'}`}>
+        <div
+          className={`rounded-[26px] px-5 py-4 shadow-[var(--shadow-soft)] ${
             isBot
-              ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700'
-              : 'bg-gradient-to-r from-primary-500 to-primary-600 text-white'
+              ? 'border border-[color:var(--border-soft)] bg-[rgba(255,252,246,0.92)] text-[color:var(--text-primary)]'
+              : 'bg-[linear-gradient(135deg,var(--brand-deep)_0%,var(--brand)_100%)] text-white'
           }`}
         >
-          {/* Message Text */}
-          <div className="text-sm leading-relaxed whitespace-pre-wrap">
-            {message.content}
-          </div>
+          <div className="whitespace-pre-wrap text-sm leading-7 sm:text-[15px]">{message.content}</div>
+        </div>
 
-          {/* Message Actions */}
-          {isBot && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 1 }}
-              className="absolute -bottom-8 left-0 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleCopy}
-                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                aria-label="Copy message"
-              >
-                <Copy className="h-3 w-3" />
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => onFeedback?.(message.id, 'positive')}
-                className="p-1 text-gray-400 hover:text-green-600 transition-colors"
-                aria-label="Good response"
-              >
-                <ThumbsUp className="h-3 w-3" />
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => onFeedback?.(message.id, 'negative')}
-                className="p-1 text-gray-400 hover:text-red-600 transition-colors"
-                aria-label="Poor response"
-              >
-                <ThumbsDown className="h-3 w-3" />
-              </motion.button>
-            </motion.div>
-          )}
-        </motion.div>
-
-        {/* Timestamp */}
-        <div className={`text-xs text-gray-500 dark:text-gray-400 mt-1 ${
-          isBot ? 'text-left' : 'text-right'
-        }`}>
-          {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : 'Now'}
+        <div className={`mt-2 flex items-center gap-3 text-xs text-[color:var(--text-muted)] ${isBot ? '' : 'justify-end'}`}>
+          <span>{message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : 'Now'}</span>
+          {isBot ? (
+            <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+              <button onClick={handleCopy} className="rounded-full p-1.5 hover:bg-white/70" aria-label="Copy message">
+                <Copy className="h-3.5 w-3.5" />
+              </button>
+              <button onClick={() => onFeedback?.(message.id, 'positive')} className="rounded-full p-1.5 hover:bg-white/70" aria-label="Positive feedback">
+                <ThumbsUp className="h-3.5 w-3.5" />
+              </button>
+              <button onClick={() => onFeedback?.(message.id, 'negative')} className="rounded-full p-1.5 hover:bg-white/70" aria-label="Negative feedback">
+                <ThumbsDown className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </motion.div>
@@ -130,11 +63,11 @@ ChatBubble.propTypes = {
   message: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     content: PropTypes.string.isRequired,
-    timestamp: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)])
+    timestamp: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
   }).isRequired,
   isBot: PropTypes.bool,
   onCopy: PropTypes.func,
-  onFeedback: PropTypes.func
+  onFeedback: PropTypes.func,
 }
 
 export default ChatBubble
