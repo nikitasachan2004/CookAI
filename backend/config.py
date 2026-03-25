@@ -26,7 +26,6 @@ class Config:
     JWT_HEADER_NAME = "Authorization"
     JWT_HEADER_TYPE = "Bearer"
 
-    # OpenAI
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    OPENAI_CHAT_MODEL = os.getenv("OPENAI_CHAT_MODEL", "gpt-4.1-mini")
-    OPENAI_TIMEOUT_SECONDS = float(os.getenv("OPENAI_TIMEOUT_SECONDS", "20"))
+    # Gemini
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")

@@ -61,10 +61,13 @@ def recommend_recipes(user_input, filters: dict | None = None, top_n: int = 5) -
     """Recommend recipes using TF-IDF ingredient similarity with optional filters."""
     ranked = get_content_scores(user_input, filters)
     if ranked.empty:
-        return []
+        return {
+            "recommendations": [],
+            "message": "No recipes found matching your ingredients. Try different ingredients!",
+        }
 
     top_results = ranked.head(top_n)
-    return [
+    recommendations = [
         {
             "id": int(row["id"]),
             "title": row["title"],
@@ -74,3 +77,4 @@ def recommend_recipes(user_input, filters: dict | None = None, top_n: int = 5) -
         }
         for _, row in top_results.iterrows()
     ]
+    return recommendations

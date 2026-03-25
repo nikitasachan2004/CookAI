@@ -63,9 +63,10 @@ def get_recommendations():
                 top_n=5,
             )
         else:
-            recommendations = _format_content_recommendations(
-                recommend_recipes(user_input=user_input, filters=filters, top_n=5)
-            )
+            raw_recommendations = recommend_recipes(user_input=user_input, filters=filters, top_n=5)
+            if isinstance(raw_recommendations, dict):
+                return raw_recommendations, 200
+            recommendations = _format_content_recommendations(raw_recommendations)
     except ValueError as exc:
         return error_response(str(exc), 400)
     except Exception:
