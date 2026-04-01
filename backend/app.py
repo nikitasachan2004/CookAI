@@ -4,7 +4,8 @@ from flask_jwt_extended import JWTManager
 from sqlalchemy.exc import IntegrityError
 from config import Config
 from db import db
-from utils.auth_utils import bcrypt
+from db_schema import ensure_schema
+from utils.auth_utils import bcrypt, error_response
 from routes import register_routes
 
 
@@ -45,45 +46,45 @@ def create_app():
 
     @jwt.unauthorized_loader
     def handle_missing_jwt(reason):
-        return jsonify({"error": "Authorization token is required", "details": {"reason": reason}}), 401
+        return error_response("Authorization token is required", 401, details={"reason": reason})
 
     @jwt.invalid_token_loader
     def handle_invalid_jwt(reason):
-        return jsonify({"error": "Invalid authentication token", "details": {"reason": reason}}), 401
+        return error_response("Invalid authentication token", 401, details={"reason": reason})
 
     @jwt.expired_token_loader
     def handle_expired_jwt(jwt_header, jwt_payload):
-        return jsonify({"error": "Authentication token has expired"}), 401
+        return error_response("Authentication token has expired", 401)
 
     @jwt.needs_fresh_token_loader
     def handle_non_fresh_token(jwt_header, jwt_payload):
-        return jsonify({"error": "Fresh authentication token required"}), 401
+        return error_response("Fresh authentication token required", 401)
 
     @jwt.revoked_token_loader
     def handle_revoked_token(jwt_header, jwt_payload):
-        return jsonify({"error": "Authentication token has been revoked"}), 401
+        return error_response("Authentication token has been revoked", 401)
 
     @jwt.user_lookup_error_loader
     def handle_missing_user(jwt_header, jwt_payload):
-        return jsonify({"error": "Authenticated user could not be loaded"}), 401
+        return error_response("Authenticated user could not be loaded", 401)
 
     @app.errorhandler(404)
     def not_found(error):
-        return jsonify({"error": "Not found"}), 404
+        return error_response("Not found", 404)
 
     @app.errorhandler(400)
     def bad_request(error):
-        return jsonify({"error": "Bad request"}), 400
+        return error_response("Bad request", 400)
 
     @app.errorhandler(IntegrityError)
     def integrity_error(error):
         db.session.rollback()
-        return jsonify({"error": "Database constraint violation"}), 409
+        return error_response("Database constraint violation", 409)
 
     @app.errorhandler(500)
     def server_error(error):
         db.session.rollback()
-        return jsonify({"error": "Internal server error"}), 500
+        return error_response("Internal server error", 500)
 
     return app
 
@@ -98,6 +99,7 @@ if __name__ == "__main__":
 
     with app.app_context():
         db.create_all()
+        ensure_schema()
         print("✓ Database tables created")
 
     print("Starting CookAI API …")

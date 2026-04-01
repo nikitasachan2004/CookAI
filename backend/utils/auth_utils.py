@@ -50,7 +50,21 @@ def success_response(payload: dict, status_code: int = 200):
 
 def error_response(message: str, status_code: int, *, details: dict | None = None):
     """Return a consistent JSON error response."""
-    payload = {"error": message}
+    default_codes = {
+        400: "BAD_REQUEST",
+        401: "UNAUTHORIZED",
+        403: "FORBIDDEN",
+        404: "NOT_FOUND",
+        409: "CONFLICT",
+        429: "RATE_LIMITED",
+        500: "INTERNAL_SERVER_ERROR",
+        502: "BAD_GATEWAY",
+    }
+    payload = {
+        "error": message,
+        "code": default_codes.get(status_code, "ERROR"),
+        "status": status_code,
+    }
     if details:
         payload["details"] = details
     return jsonify(payload), status_code

@@ -14,29 +14,52 @@ const getStoredRefreshToken = () => localStorage.getItem('cookaiRefreshToken')
 const normalizeRecipe = (recipe = {}) => {
   const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
   const instructionText = recipe.instructions || ''
-  const steps = Array.isArray(recipe.steps)
-    ? recipe.steps
+  const stepObjects = Array.isArray(recipe.steps)
+    ? recipe.steps.map((step, index) =>
+        typeof step === 'string'
+          ? { step: index + 1, instruction: step, timer_minutes: null }
+          : {
+              step: step.step ?? index + 1,
+              instruction: step.instruction || '',
+              timer_minutes: step.timer_minutes ?? null,
+            },
+      )
     : instructionText
         .split(/\n+|\.\s+/)
-        .map((step) => step.trim())
-        .filter(Boolean)
+        .map((step, index) => ({ step: index + 1, instruction: step.trim(), timer_minutes: null }))
+        .filter((step) => step.instruction)
+
+  const structuredIngredients = ingredients.map((ingredient) =>
+    typeof ingredient === 'string'
+      ? { item: ingredient, amount: '' }
+      : {
+          item: ingredient.item || '',
+          amount: ingredient.amount || '',
+        },
+  )
 
   return {
     id: recipe.id,
     name: recipe.name || recipe.title || 'Untitled recipe',
     title: recipe.title || recipe.name || 'Untitled recipe',
     description: recipe.description || '',
-    ingredients,
-    steps,
+    ingredients: structuredIngredients,
+    ingredientLines: structuredIngredients.map((ingredient) =>
+      [ingredient.amount, ingredient.item].filter(Boolean).join(' ').trim(),
+    ),
+    steps: stepObjects.map((step) => step.instruction),
+    stepDetails: stepObjects,
     instructions: instructionText,
-    time: recipe.time ?? recipe.prep_time ?? 0,
+    time: recipe.time ?? ((recipe.prep_time ?? 0) + (recipe.cook_time ?? 0)),
     prep_time: recipe.prep_time ?? recipe.time ?? 0,
+    cook_time: recipe.cook_time ?? 0,
     cuisine: recipe.cuisine || '',
     difficulty: recipe.difficulty || 'easy',
     tags: Array.isArray(recipe.tags)
       ? recipe.tags
       : [recipe.cuisine, recipe.description?.includes('healthy') ? 'healthy' : null].filter(Boolean),
-    image: recipe.image || null,
+    image: recipe.image || recipe.image_url || null,
+    image_url: recipe.image_url || recipe.image || null,
     nutrition: recipe.nutrition || null,
     servings: recipe.servings || 2,
     equipment: Array.isArray(recipe.equipment) ? recipe.equipment : [],
@@ -153,8 +176,14 @@ export async function fetchRecommendations(payload) {
 
 export async function fetchAllRecipes(params = {}) {
   const response = await api.get('/api/recipes', { params })
-  const recipes = Array.isArray(response.data) ? response.data : response.data?.recipes || []
-  return recipes.map(normalizeRecipe)
+  const payload = response.data || {}
+  const recipes = Array.isArray(payload) ? payload : payload.recipes || []
+  return {
+    recipes: recipes.map(normalizeRecipe),
+    total: payload.total ?? recipes.length,
+    page: payload.page ?? 1,
+    pages: payload.pages ?? 1,
+  }
 }
 
 export async function fetchRecipeById(recipeId) {
@@ -165,19 +194,14 @@ export async function fetchRecipeById(recipeId) {
 }
 
 export async function searchRecipes(params = {}) {
-  const recipes = await fetchAllRecipes()
-  const query = String(params.q || '').trim().toLowerCase()
-  if (!query) return { recipes }
-
-  const filtered = recipes.filter((recipe) =>
-    [recipe.name, recipe.cuisine, ...(recipe.tags || []), ...(recipe.ingredients || [])]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase()
-      .includes(query),
-  )
-
-  return { recipes: filtered }
+  const response = await api.get('/api/recipes/search', { params })
+  const payload = response.data || {}
+  return {
+    recipes: (payload.recipes || []).map(normalizeRecipe),
+    total: payload.total ?? 0,
+    page: payload.page ?? 1,
+    pages: payload.pages ?? 1,
+  }
 }
 
 export async function likeRecipe(userId, recipeId) {
