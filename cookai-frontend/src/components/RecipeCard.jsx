@@ -6,6 +6,7 @@ import PropTypes from 'prop-types'
 import { useAuth } from '../context/AuthContext'
 import { likeRecipe } from '../api/apiClient'
 import { formatTime, getDifficultyColor } from '../utils/helpers'
+import { RECIPE_PLACEHOLDER_IMAGE, resolveRecipeImage } from '../utils/recipeImage'
 
 const RecipeCard = ({
   recipe,
@@ -19,6 +20,7 @@ const RecipeCard = ({
   const [isLiking, setIsLiking] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const resolvedImage = imageError ? RECIPE_PLACEHOLDER_IMAGE : resolveRecipeImage(recipe)
 
   const isLiked = isRecipeLiked(recipe.id)
 
@@ -82,10 +84,10 @@ const RecipeCard = ({
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
             </button>
 
-            {!imageError && recipe.image ? (
+            {resolvedImage ? (
               <>
                 <img
-                  src={recipe.image}
+                  src={resolvedImage}
                   alt={recipe.name}
                   className={`h-60 w-full object-cover transition duration-700 ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
                   onLoad={() => setImageLoaded(true)}
@@ -110,11 +112,11 @@ const RecipeCard = ({
 
           <div className="flex flex-1 flex-col p-5 sm:p-6">
             <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-2xl leading-tight text-[color:var(--text-primary)] transition-colors group-hover:text-[color:var(--brand-deep)]">
+              <div className="min-w-0 flex-1">
+                <h3 className="min-h-[3.8rem] overflow-hidden text-2xl leading-tight text-[color:var(--text-primary)] transition-colors group-hover:text-[color:var(--brand-deep)]">
                   {recipe.name}
                 </h3>
-                <p className="mt-2 text-sm leading-7 text-[color:var(--text-secondary)]">
+                <p className="mt-2 min-h-[3.5rem] text-sm leading-7 text-[color:var(--text-secondary)]">
                   {recipe.tags?.slice(0, 2).join(' · ') || 'A comforting kitchen favorite'}
                 </p>
               </div>

@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { mockRecipes } from '../data/mockRecipes'
 import { formatTime, getDifficultyColor } from '../utils/helpers'
 import AnimatedButton from '../components/AnimatedButton'
+import { RECIPE_PLACEHOLDER_IMAGE, resolveRecipeImage } from '../utils/recipeImage'
 
 const RecipeDetail = () => {
   const { id } = useParams()
@@ -18,6 +19,7 @@ const RecipeDetail = () => {
   const [cookingMode, setCookingMode] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [completedSteps, setCompletedSteps] = useState(new Set())
+  const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
     const loadRecipe = async () => {
@@ -41,6 +43,10 @@ const RecipeDetail = () => {
       setIsLiked(isRecipeLiked(recipe.id))
     }
   }, [isAuthenticated, isRecipeLiked, recipe])
+
+  useEffect(() => {
+    setImageError(false)
+  }, [recipe?.id])
 
   const handleLike = async () => {
     if (!isAuthenticated || !recipe) return
@@ -153,6 +159,8 @@ const RecipeDetail = () => {
     )
   }
 
+  const detailImage = imageError ? RECIPE_PLACEHOLDER_IMAGE : resolveRecipeImage(recipe)
+
   return (
     <section className="section-shell pt-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -165,8 +173,13 @@ const RecipeDetail = () => {
           <div className="space-y-6">
             <div className="card overflow-hidden">
               <div className="relative h-[24rem] overflow-hidden">
-                {recipe.image ? (
-                  <img src={recipe.image} alt={recipe.name} className="h-full w-full object-cover" />
+                {detailImage ? (
+                  <img
+                    src={detailImage}
+                    alt={recipe.name}
+                    className="h-full w-full object-cover"
+                    onError={() => setImageError(true)}
+                  />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(145deg,rgba(184,92,56,0.12),rgba(217,143,43,0.18))]">
                     <div className="text-center">
@@ -179,7 +192,7 @@ const RecipeDetail = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgba(38,23,15,0.72)] via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
                   <div className="mb-4 flex flex-wrap gap-2">
-                    {recipe.tags.map((tag) => (
+                    {(recipe.tags || []).map((tag) => (
                       <span key={tag} className="meta-pill bg-[rgba(255,255,255,0.18)] text-white backdrop-blur-md">
                         {tag}
                       </span>
