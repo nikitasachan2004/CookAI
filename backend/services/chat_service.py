@@ -19,6 +19,8 @@ COMMON_FILLER_WORDS = {
     "quick", "easy", "best", "help", "what", "make", "meal",
     "tonight", "today", "dinner", "lunch", "breakfast", "snack",
     "fresh", "dried",
+    "related",
+    "leftover",
 }
 TRIM_FILLER_WORDS = COMMON_FILLER_WORDS | {"with", "using"}
 COMPOUND_INGREDIENT_PHRASES = (
@@ -184,7 +186,8 @@ def _fallback_response(message: str, recipes: list[dict]) -> str:
 def _call_llm(prompt: dict[str, str]) -> str:
     model = _build_client()
     response = model.generate_content(
-        f"System: {prompt['system']}\n\nUser: {prompt['user']}"
+        f"System: {prompt['system']}\n\nUser: {prompt['user']}",
+        request_options={"timeout": 10},
     )
     response_text = getattr(response, "text", "") or ""
     return response_text.strip()

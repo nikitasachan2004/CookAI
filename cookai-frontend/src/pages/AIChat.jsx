@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, Download, Loader2, RotateCcw, Send, Sparkles } from 'lucide-react'
-import { sendChatMessage, generateRecipeFromChat } from '../api/apiClient'
+import { fetchRecommendations, sendChatMessage, generateRecipeFromChat } from '../api/apiClient'
 import { useAuth } from '../context/AuthContext'
 import ChatBubble from '../components/ChatBubble'
 import AnimatedButton from '../components/AnimatedButton'
@@ -18,6 +18,14 @@ const starterPrompts = [
 const getFallbackResponse = (message) => {
   const query = message.toLowerCase()
 
+  if (query.includes('beef')) {
+    return 'Beef gives you a few strong directions: a quick garlic stir-fry, tacos, a tomato-rich mince sauce, or a simple skillet with onions and peppers. Add one or two ingredients you already have and I can narrow it down properly.'
+  }
+
+  if (query.includes('rice') || query.includes('vegetable')) {
+    return 'Leftover rice and vegetables are perfect for fried rice, a quick skillet bowl, or a soupier rice pan with garlic, soy, chili, or egg if you have them. Tell me which extras you have and I will tighten the plan.'
+  }
+
   if (query.includes('pasta')) {
     return 'A tomato-forward pasta is your strongest direction. If you have garlic, olive oil, or basil, build a quick sauce, finish with pasta water, and top with something sharp like parmesan or chili flakes. Keep it simple and let the ingredients do the work.'
   }
@@ -27,6 +35,25 @@ const getFallbackResponse = (message) => {
   }
 
   return 'Tell me the ingredients you have, how much time you want to spend, and the kind of meal you are craving. I can turn that into a useful cooking direction right away.'
+}
+
+const buildRecommendationFallback = (message, recipes = []) => {
+  if (recipes.length > 0) {
+    const topRecipes = recipes.slice(0, 3).map((recipe) => recipe.title || recipe.name).filter(Boolean)
+    return `I could not get a full AI reply just now, but these recipe matches look strong: ${topRecipes.join(', ')}. Tell me which one sounds best and I can help you adapt it.`
+  }
+
+  return getFallbackResponse(message)
+}
+
+const resolveBotReply = (response, messageText) => {
+  const primaryReply = response?.response || response?.message
+  if (primaryReply && primaryReply.trim()) {
+    return primaryReply.trim()
+  }
+
+  const suggestedRecipes = Array.isArray(response?.recipes) ? response.recipes : []
+  return buildRecommendationFallback(messageText, suggestedRecipes)
 }
 
 const AIChat = () => {
@@ -80,7 +107,7 @@ const AIChat = () => {
 
       const botMessage = {
         id: Date.now() + 1,
-        content: response.response || response.message || getFallbackResponse(messageText),
+        content: resolveBotReply(response, messageText),
         isBot: true,
         timestamp: new Date(),
       }
@@ -92,11 +119,15 @@ const AIChat = () => {
     } catch (error) {
       console.error('Chat error:', error)
       setIsTyping(false)
+      const fallbackRecommendations = await fetchRecommendations({
+        user_input: messageText.trim(),
+      }).catch(() => ({ recommendations: [] }))
+
       setMessages((current) => [
         ...current,
         {
           id: Date.now() + 1,
-          content: getFallbackResponse(messageText),
+          content: buildRecommendationFallback(messageText, fallbackRecommendations.recommendations),
           isBot: true,
           timestamp: new Date(),
         },
