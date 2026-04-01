@@ -1,525 +1,366 @@
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowRight, CheckCircle2, Clock3, Search, Sparkles, Stars, Users2, UtensilsCrossed } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Search, 
-  ChefHat, 
-  Sparkles, 
-  TrendingUp, 
-  Users, 
-  Clock,
-  ArrowRight,
-  Play,
-  CheckCircle,
-  Loader2
-} from 'lucide-react'
 import { fetchRecommendations } from '../api/apiClient'
-import { useAuth } from '../context/AuthContext'
 import RecipeCard from '../components/RecipeCard'
 import IngredientInput from '../components/IngredientInput'
 import EquipmentSelector from '../components/EquipmentSelector'
+import AnimatedButton from '../components/AnimatedButton'
 import { mockRecipes } from '../data/mockRecipes'
-import { getContainerClass, animations, transitions } from '../utils/theme'
+import { getContainerClass, animations } from '../utils/theme'
 
-/**
- * Home page component with hero section and recipe discovery
- * Features ingredient input, equipment selection, and AI-powered recommendations
- */
+const healthOptions = [
+  { value: '', label: 'Open to anything' },
+  { value: 'healthy', label: 'Light & nourishing' },
+  { value: 'vegetarian', label: 'Vegetarian' },
+  { value: 'vegan', label: 'Plant-forward' },
+  { value: 'gluten-free', label: 'Gluten free' },
+  { value: 'low-carb', label: 'Low carb' },
+]
+
+const stats = [
+  { icon: Users2, value: '50K+', label: 'home cooks inspired' },
+  { icon: UtensilsCrossed, value: '10K+', label: 'recipes to explore' },
+  { icon: Clock3, value: '<30 min', label: 'average weeknight win' },
+]
+
+const featureCards = [
+  {
+    title: 'Built from what you already have',
+    copy: 'Turn one fridge glance into a dinner plan with ingredient-led discovery that feels intuitive, not robotic.',
+  },
+  {
+    title: 'Personalized to your rhythm',
+    copy: 'CookAI learns your favorite cuisines, cooking pace, and preferences so suggestions feel increasingly like you.',
+  },
+  {
+    title: 'Helpful when you are stuck',
+    copy: 'Use the cooking assistant to figure out substitutions, quick ideas, and what to do when dinner needs saving.',
+  },
+]
+
 const Home = () => {
-  const { isAuthenticated, currentUser } = useAuth()
   const navigate = useNavigate()
-  
-  // Component state
   const [availableIngredients, setAvailableIngredients] = useState([])
   const [selectedEquipment, setSelectedEquipment] = useState([])
   const [healthPreference, setHealthPreference] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [recommendations, setRecommendations] = useState([])
-  const [error, setError] = useState(null)
+  const [error, setError] = useState('')
   const [showResults, setShowResults] = useState(false)
 
-  // Health preference options
-  const healthOptions = [
-    { value: '', label: 'Any' },
-    { value: 'healthy', label: 'Healthy' },
-    { value: 'vegetarian', label: 'Vegetarian' },
-    { value: 'vegan', label: 'Vegan' },
-    { value: 'gluten-free', label: 'Gluten Free' },
-    { value: 'low-carb', label: 'Low Carb' },
-  ]
-
-  // Featured recipes for display when no search is made
   const featuredRecipes = mockRecipes.slice(0, 3)
 
-  // Stats for hero section
-  const stats = [
-    { icon: Users, value: '50K+', label: 'Happy Cooks' },
-    { icon: ChefHat, value: '10K+', label: 'Recipes' },
-    { icon: Clock, value: '<30min', label: 'Avg Cook Time' },
-  ]
-
-  // Handle finding recipes
   const handleFindRecipes = async () => {
     if (availableIngredients.length === 0) {
-      setError('Please add at least one ingredient')
+      setError('Start with at least one ingredient so CookAI can build a thoughtful recommendation set.')
       return
     }
 
     setIsLoading(true)
-    setError(null)
-    
+    setError('')
+
     try {
-      const payload = {
+      const response = await fetchRecommendations({
         available_ingredients: availableIngredients,
         equipment: selectedEquipment,
-        health_preference: healthPreference || undefined
+        health_preference: healthPreference || undefined,
+      })
+
+      const nextRecommendations = response.recommendations || response.data?.recommendations || []
+
+      if (nextRecommendations.length === 0) {
+        throw new Error('No matching recipes were found for this pantry combination.')
       }
-      
-      const response = await fetchRecommendations(payload)
-      
-      if (response.success && response.recommendations) {
-        setRecommendations(response.recommendations)
-        setShowResults(true)
-        
-        // Scroll to results
-        setTimeout(() => {
-          document.getElementById('results-section')?.scrollIntoView({ 
-            behavior: 'smooth' 
-          })
-        }, 100)
-      } else {
-        throw new Error(response.message || 'Failed to get recommendations')
-      }
-    } catch (error) {
-      console.error('Recommendation error:', error)
-      setError(error.message || 'Failed to get recommendations. Please try again.')
-      
-      // Fallback to mock data for demo
+
+      setRecommendations(nextRecommendations)
+      setShowResults(true)
+      setTimeout(() => {
+        document.getElementById('results-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 120)
+    } catch (apiError) {
+      console.error('Recommendation error:', apiError)
+
       const fallbackRecipes = mockRecipes
-        .filter(recipe => {
-          // Simple ingredient matching for demo
-          const hasIngredient = availableIngredients.some(ingredient =>
-            recipe.ingredients.some(recipeIngredient =>
-              recipeIngredient.toLowerCase().includes(ingredient.toLowerCase())
-            )
+        .filter((recipe) => {
+          const ingredientMatch = availableIngredients.some((ingredient) =>
+            recipe.ingredients.some((recipeIngredient) => recipeIngredient.toLowerCase().includes(ingredient.toLowerCase())),
           )
-          
-          // Health preference filtering
-          const matchesHealth = !healthPreference || 
-            recipe.tags.some(tag => tag.toLowerCase().includes(healthPreference.toLowerCase()))
-          
-          return hasIngredient && matchesHealth
+          const preferenceMatch = !healthPreference || recipe.tags.some((tag) => tag.toLowerCase().includes(healthPreference.toLowerCase()))
+          return ingredientMatch && preferenceMatch
         })
         .slice(0, 6)
-      
-      setRecommendations(fallbackRecipes)
-      setShowResults(true)
-      setError(null) // Clear error since we have fallback data
+
+      if (fallbackRecipes.length > 0) {
+        setRecommendations(fallbackRecipes)
+        setShowResults(true)
+      } else {
+        setError('Nothing matched perfectly yet. Try a broader ingredient list or remove one of the constraints.')
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
-  // Handle viewing all recommendations
   const handleViewAllRecommendations = () => {
     const params = new URLSearchParams()
-    if (availableIngredients.length > 0) {
-      params.set('ingredients', availableIngredients.join(','))
-    }
-    if (selectedEquipment.length > 0) {
-      params.set('equipment', selectedEquipment.join(','))
-    }
-    if (healthPreference) {
-      params.set('health', healthPreference)
-    }
-    
+    if (availableIngredients.length > 0) params.set('ingredients', availableIngredients.join(','))
+    if (selectedEquipment.length > 0) params.set('equipment', selectedEquipment.join(','))
+    if (healthPreference) params.set('health', healthPreference)
     navigate(`/recommendations?${params.toString()}`)
   }
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28">
-        {/* Background Elements - Subtle and Premium */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500/5 rounded-full blur-3xl" />
-        </div>
-        
-        <div className={getContainerClass('lg')}>
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Hero Content */}
+    <div>
+      <section className="section-shell overflow-hidden pt-10 sm:pt-12">
+        <div className={getContainerClass('xl')}>
+          <div className="grid items-center gap-10 lg:grid-cols-[1.12fr,0.88fr] lg:gap-14">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-8 lg:space-y-10"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55 }}
+              className="space-y-8"
             >
+              <span className="section-label">
+                <Sparkles className="h-3.5 w-3.5" />
+                Your warm, AI-powered kitchen companion
+              </span>
+
               <div className="space-y-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  className="inline-flex items-center space-x-2 badge badge-primary text-sm font-semibold"
-                >
-                  <Sparkles className="h-4 w-4" />
-                  <span>AI-Powered Recipe Discovery</span>
-                </motion.div>
-                
-                <h1 className="text-gray-900 dark:text-white">
-                  Cook Smarter With{' '}
-                  <span className="gradient-text block sm:inline mt-2 sm:mt-0">CookAI</span>
+                <h1 className="editorial-title text-balance">
+                  Turn what is in your kitchen into something <span className="gradient-text">worth gathering around.</span>
                 </h1>
-                
-                <p className="text-xl lg:text-2xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl">
-                  Transform your ingredients into delicious meals with 
-                  AI-powered recipe recommendations tailored to your taste.
+                <p className="hero-copy max-w-2xl">
+                  CookAI helps you discover beautiful dishes from the ingredients already on hand. Think fewer “what do
+                  I make tonight?” moments and more quick, delicious, confidence-building wins.
                 </p>
               </div>
 
-              {/* CTA Buttons */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                className="flex flex-col sm:flex-row gap-4"
-              >
-                <button
-                  onClick={() => document.getElementById('recipe-finder')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="btn-primary flex items-center justify-center space-x-2 text-base group"
+              <div className="flex flex-col gap-4 sm:flex-row">
+                <AnimatedButton
+                  onClick={() => document.getElementById('recipe-finder')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  size="lg"
+                  icon={Search}
                 >
-                  <Search className="h-5 w-5" />
-                  <span>Find Recipes Now</span>
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-                
-                <button className="btn-secondary flex items-center justify-center space-x-2 text-base">
-                  <Play className="h-4 w-4" />
-                  <span>Watch Demo</span>
-                </button>
-              </motion.div>
+                  Start with my ingredients
+                </AnimatedButton>
+                <AnimatedButton variant="secondary" size="lg" onClick={() => navigate('/chat')} icon={Stars}>
+                  Ask the cooking assistant
+                </AnimatedButton>
+              </div>
 
-              {/* Stats */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="grid grid-cols-3 gap-8 pt-10 border-t border-gray-200 dark:border-gray-800"
-              >
-                {stats.map((stat, index) => {
+              <div className="grid gap-4 border-t border-[color:var(--border-soft)] pt-8 sm:grid-cols-3">
+                {stats.map((stat) => {
                   const Icon = stat.icon
                   return (
-                    <div key={stat.label} className="text-center space-y-2">
-                      <div className="flex items-center justify-center mb-3">
-                        <div className="p-2.5 bg-orange-100 dark:bg-orange-900/20 rounded-xl">
-                          <Icon className="h-5 w-5 text-orange-600 dark:text-orange-500" />
-                        </div>
-                      </div>
-                      <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                        {stat.value}
-                      </div>
-                      <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                        {stat.label}
-                      </div>
+                    <div key={stat.label} className="rounded-[22px] bg-[rgba(255,252,246,0.65)] p-4">
+                      <Icon className="mb-3 h-5 w-5 text-[color:var(--brand)]" />
+                      <p className="text-2xl font-extrabold text-[color:var(--text-primary)]">{stat.value}</p>
+                      <p className="mt-1 text-sm text-[color:var(--text-secondary)]">{stat.label}</p>
                     </div>
                   )
                 })}
-              </motion.div>
+              </div>
             </motion.div>
 
-            {/* Hero Visual */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 28 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative lg:pl-8"
+              transition={{ duration: 0.6, delay: 0.08 }}
+              className="relative"
             >
-              <div className="relative z-10">
-                <motion.div
-                  animate={{ 
-                    y: [0, -10, 0]
-                  }}
-                  transition={{ 
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="grid grid-cols-2 gap-4 lg:gap-6"
-                >
+              <div className="absolute -left-8 top-10 hidden h-24 w-24 rounded-full border border-white/50 bg-white/30 blur-2xl lg:block" />
+              <div className="glass-panel overflow-hidden p-5 sm:p-6">
+                <div className="mb-5 flex items-center justify-between">
+                  <div>
+                    <p className="eyebrow mb-2">Tonight’s inspiration</p>
+                    <h2 className="font-display text-3xl">A kitchen moodboard</h2>
+                  </div>
+                  <span className="meta-pill">Fresh picks</span>
+                </div>
+                <div className="grid gap-5 md:grid-cols-2">
                   {featuredRecipes.map((recipe, index) => (
                     <motion.div
                       key={recipe.id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.5, delay: index * 0.15 + 0.3 }}
-                      className={index === 0 ? 'col-span-2' : ''}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.14 + index * 0.1 }}
+                      className={index === 0 ? 'md:col-span-2' : ''}
                     >
-                      <RecipeCard 
-                        recipe={recipe} 
-                        size="sm"
-                        showMatchScore={false}
-                      />
+                      <RecipeCard recipe={recipe} size={index === 0 ? 'md' : 'sm'} />
                     </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-              
-              {/* Subtle background decoration */}
-              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-orange-50 to-teal-50 
-                            dark:from-orange-900/10 dark:to-teal-900/10 rounded-3xl transform rotate-2 scale-105" />
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Recipe Finder Section */}
-      <section id="recipe-finder" className="py-20 lg:py-28 bg-gray-50 dark:bg-gray-900/50">
-        <div className={getContainerClass()}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12 lg:mb-16"
-          >
-            <h2 className="text-gray-900 dark:text-white mb-4">
-              What can you cook today?
-            </h2>
-            <p className="text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              Tell us what ingredients you have and your dietary preferences. 
-              Our AI will find the perfect recipes for you.
-            </p>
-          </motion.div>
-
-          <div className="max-w-4xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl p-8 lg:p-10 space-y-8"
-            >
-              {/* Ingredients Input */}
-              <div className="space-y-3">
-                <label className="block text-lg font-bold text-gray-900 dark:text-white">
-                  Available Ingredients
-                </label>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Add ingredients you have on hand</p>
-                <IngredientInput
-                  ingredients={availableIngredients}
-                  onChange={setAvailableIngredients}
-                  placeholder="Type an ingredient and press Enter (e.g., chicken, tomatoes, rice)"
-                />
-              </div>
-
-              {/* Equipment Selection */}
-              <div className="space-y-3">
-                <label className="block text-lg font-bold text-gray-900 dark:text-white">
-                  Available Equipment
-                </label>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Select kitchen tools you can use</p>
-                <EquipmentSelector
-                  selectedEquipment={selectedEquipment}
-                  onChange={setSelectedEquipment}
-                />
-              </div>
-
-              {/* Health Preferences */}
-              <div className="space-y-3">
-                <label className="block text-lg font-bold text-gray-900 dark:text-white">
-                  Dietary Preferences
-                </label>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Choose your dietary requirements</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {healthOptions.map((option) => (
-                    <motion.button
-                      key={option.value}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setHealthPreference(
-                        healthPreference === option.value ? '' : option.value
-                      )}
-                      className={`p-3.5 rounded-xl border-2 transition-all duration-200 text-sm font-semibold ${
-                        healthPreference === option.value
-                          ? 'bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/25'
-                          : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800 hover:border-orange-300 dark:hover:border-orange-700 hover:bg-orange-50 dark:hover:bg-orange-900/10'
-                      }`}
-                    >
-                      {option.label}
-                    </motion.button>
                   ))}
                 </div>
               </div>
-
-              {/* Error Message */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="p-4 bg-red-50 dark:bg-red-900/10 border-2 border-red-200 dark:border-red-800/50 rounded-2xl"
-                  >
-                    <p className="text-red-700 dark:text-red-400 text-sm font-medium">{error}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Find Recipes Button */}
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={handleFindRecipes}
-                disabled={isLoading}
-                className="w-full btn-primary flex items-center justify-center space-x-2 py-4 text-lg font-bold shadow-xl"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    <span>Finding perfect recipes...</span>
-                  </>
-                ) : (
-                  <>
-                    <Search className="h-6 w-6" />
-                    <span>Find My Recipes</span>
-                    <ArrowRight className="h-5 w-5" />
-                  </>
-                )}
-              </motion.button>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Results Section */}
+      <section id="recipe-finder" className="section-shell">
+        <div className={getContainerClass('lg')}>
+          <div className="grid gap-8 lg:grid-cols-[0.72fr,1.28fr] lg:gap-12">
+            <div className="space-y-6">
+              <span className="eyebrow">Cook from the pantry outward</span>
+              <h2 className="section-title text-balance">Tell CookAI what you have, and it will shape dinner around you.</h2>
+              <p className="text-base leading-8 text-[color:var(--text-secondary)]">
+                Start with ingredients, add what equipment you can use, and choose any preference that matters tonight.
+                The system keeps the logic intact; the experience now feels more like planning with a thoughtful cook.
+              </p>
+              <div className="feature-card">
+                <p className="eyebrow mb-3">How it feels</p>
+                <ul className="space-y-4 text-sm leading-7 text-[color:var(--text-secondary)]">
+                  <li>Ingredient-first discovery that respects time, equipment, and dietary needs.</li>
+                  <li>Better visual feedback, warmer empty states, and refined interaction details.</li>
+                  <li>Seamless path into recipe recommendations and AI chat when you need more guidance.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="glass-panel p-6 sm:p-8">
+              <div className="panel-grid">
+                <section className="space-y-4">
+                  <div>
+                    <p className="eyebrow mb-2">Step 1</p>
+                    <h3 className="font-display text-3xl">What is in the kitchen?</h3>
+                  </div>
+                  <IngredientInput
+                    ingredients={availableIngredients}
+                    onChange={setAvailableIngredients}
+                    placeholder="Tomato, olive oil, pasta, mushrooms..."
+                  />
+                </section>
+
+                <section className="space-y-4">
+                  <div>
+                    <p className="eyebrow mb-2">Step 2</p>
+                    <h3 className="font-display text-3xl">What can you cook with?</h3>
+                  </div>
+                  <EquipmentSelector selectedEquipment={selectedEquipment} onChange={setSelectedEquipment} />
+                </section>
+
+                <section className="space-y-4">
+                  <div>
+                    <p className="eyebrow mb-2">Step 3</p>
+                    <h3 className="font-display text-3xl">Any mood or dietary direction?</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {healthOptions.map((option) => (
+                      <button
+                        key={option.label}
+                        onClick={() => setHealthPreference(healthPreference === option.value ? '' : option.value)}
+                        className={`rounded-full px-4 py-3 text-sm font-semibold transition-all ${
+                          healthPreference === option.value
+                            ? 'bg-[linear-gradient(135deg,var(--brand)_0%,var(--highlight)_100%)] text-white shadow-[var(--shadow-soft)]'
+                            : 'border border-[color:var(--border-soft)] bg-white/70 text-[color:var(--text-secondary)] hover:border-[rgba(184,92,56,0.2)] hover:text-[color:var(--brand-deep)]'
+                        }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                <AnimatePresence>
+                  {error ? (
+                    <motion.div
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      className="rounded-[22px] border border-[rgba(157,75,90,0.18)] bg-[rgba(157,75,90,0.08)] px-5 py-4 text-sm leading-7 text-[color:var(--text-secondary)]"
+                    >
+                      {error}
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-sm leading-7 text-[color:var(--text-secondary)]">
+                    <p className="font-semibold text-[color:var(--text-primary)]">Pantry preview</p>
+                    <p>{availableIngredients.length || 0} ingredients, {selectedEquipment.length || 0} tools, {healthPreference || 'no dietary filter'}.</p>
+                  </div>
+                  <AnimatedButton onClick={handleFindRecipes} loading={isLoading} icon={ArrowRight} size="lg">
+                    Find my recipes
+                  </AnimatedButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <AnimatePresence>
-        {showResults && (
+        {showResults ? (
           <motion.section
             id="results-section"
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.6 }}
-            className="py-20"
+            exit={{ opacity: 0, y: 18 }}
+            className="section-shell"
           >
-            <div className={getContainerClass()}>
-              <div className="text-center mb-12 lg:mb-16">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="inline-flex items-center space-x-2 badge badge-secondary shadow-md mb-6"
-                >
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Found {recommendations.length} perfect recipes</span>
-                </motion.div>
-                
-                <h2 className="text-gray-900 dark:text-white mb-4">
-                  Your Recipe Recommendations
-                </h2>
-                <p className="text-lg lg:text-xl text-gray-600 dark:text-gray-400">
-                  Based on your ingredients and preferences
-                </p>
+            <div className={getContainerClass('xl')}>
+              <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <span className="section-label">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Pantry matched
+                  </span>
+                  <h2 className="section-title mt-4">Recipes that make sense for tonight.</h2>
+                  <p className="mt-3 max-w-2xl text-base leading-8 text-[color:var(--text-secondary)]">
+                    These matches are shaped by your ingredients, equipment, and preference cues. You can browse now or
+                    open the full recommendations view for a broader pass.
+                  </p>
+                </div>
+                <AnimatedButton variant="secondary" onClick={handleViewAllRecommendations} icon={ArrowRight}>
+                  View all recommendations
+                </AnimatedButton>
               </div>
 
-              {/* Recipe Grid */}
               <motion.div
                 variants={animations.containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12"
+                className="recipe-grid"
               >
                 {recommendations.map((recipe, index) => (
-                  <motion.div
-                    key={recipe.id}
-                    variants={animations.listItemVariants}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                  >
+                  <motion.div key={recipe.id} variants={animations.listItemVariants} transition={{ delay: index * 0.04 }}>
                     <RecipeCard
                       recipe={recipe}
-                      showMatchScore={true}
-                      matchScore={Math.floor(Math.random() * 30) + 70} // Mock match score
-                      whySuggested={`Contains ${availableIngredients[0] || 'key ingredients'} and matches your preferences`}
+                      showMatchScore
+                      matchScore={Math.max(72, 94 - index * 4)}
+                      whySuggested={`It lines up with ${availableIngredients[0] || 'your pantry picks'} and stays close to the cooking mood you selected.`}
                     />
                   </motion.div>
                 ))}
               </motion.div>
-
-              {/* View All Button */}
-              <div className="text-center">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleViewAllRecommendations}
-                  className="btn-secondary inline-flex items-center space-x-2 text-base font-semibold px-8"
-                >
-                  <TrendingUp className="h-5 w-5" />
-                  <span>View All Recommendations</span>
-                  <ArrowRight className="h-4 w-4" />
-                </motion.button>
-              </div>
             </div>
           </motion.section>
-        )}
+        ) : null}
       </AnimatePresence>
 
-      {/* Features Section */}
-      <section className="py-20 lg:py-28 bg-white dark:bg-gray-950">
-        <div className={getContainerClass()}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16 lg:mb-20"
-          >
-            <h2 className="text-gray-900 dark:text-white mb-4">
-              Why Choose CookAI?
-            </h2>
-            <p className="text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-              Experience the future of cooking with AI-powered personalization
-            </p>
-          </motion.div>
+      <section className="section-shell pt-4">
+        <div className={getContainerClass('xl')}>
+          <div className="mb-10 text-center">
+            <span className="eyebrow">Why it feels better</span>
+            <h2 className="section-title mt-4">A cooking product that feels inviting before it feels technical.</h2>
+          </div>
 
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
-            {[
-              {
-                icon: Sparkles,
-                title: 'AI-Powered Matching',
-                description: 'Advanced AI analyzes your ingredients and preferences to suggest the perfect recipes every time'
-              },
-              {
-                icon: Users,
-                title: 'Personalized Experience',
-                description: 'Get recommendations tailored to your taste, dietary restrictions, and cooking style'
-              },
-              {
-                icon: TrendingUp,
-                title: 'Smart Learning',
-                description: 'The more you cook with us, the better our recommendations become for your unique taste'
-              }
-            ].map((feature, index) => {
-              const Icon = feature.icon
-              return (
-                <motion.div
-                  key={feature.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
-                  className="text-center p-8 lg:p-10 card group hover:border-orange-200 dark:hover:border-orange-800"
-                >
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600
-                                rounded-2xl mb-6 shadow-lg shadow-orange-500/25 group-hover:shadow-xl group-hover:shadow-orange-500/30
-                                transition-all duration-300">
-                    <Icon className="h-8 w-8 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {feature.description}
-                  </p>
-                </motion.div>
-              )
-            })}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {featureCards.map((feature, index) => (
+              <motion.article
+                key={feature.title}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.35 }}
+                transition={{ delay: index * 0.08 }}
+                className="feature-card"
+              >
+                <p className="eyebrow mb-4">0{index + 1}</p>
+                <h3 className="mb-4 font-display text-3xl leading-tight">{feature.title}</h3>
+                <p className="text-base leading-8 text-[color:var(--text-secondary)]">{feature.copy}</p>
+              </motion.article>
+            ))}
           </div>
         </div>
       </section>

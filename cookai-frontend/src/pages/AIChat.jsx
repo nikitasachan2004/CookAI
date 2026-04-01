@@ -1,335 +1,262 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Sparkles, Loader2, RotateCcw, Download } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowUpRight, Download, Loader2, RotateCcw, Send, Sparkles } from 'lucide-react'
 import { sendChatMessage, generateRecipeFromChat } from '../api/apiClient'
 import { useAuth } from '../context/AuthContext'
 import ChatBubble from '../components/ChatBubble'
 import AnimatedButton from '../components/AnimatedButton'
 
-/**
- * AIChat page for conversational recipe assistance
- * TODO: Complete implementation with OpenAI integration and recipe generation
- */
+const starterPrompts = [
+  'I have tomato sauce, basil, and pasta. What should I cook?',
+  'Give me a quick vegetarian dinner in 20 minutes.',
+  'What can I make for a cozy Sunday breakfast?',
+  'I need a light dinner with chicken and greens.',
+  'Suggest something comforting but not too heavy.',
+  'Help me rescue leftover rice and vegetables.',
+]
+
+const getFallbackResponse = (message) => {
+  const query = message.toLowerCase()
+
+  if (query.includes('pasta')) {
+    return 'A tomato-forward pasta is your strongest direction. If you have garlic, olive oil, or basil, build a quick sauce, finish with pasta water, and top with something sharp like parmesan or chili flakes. Keep it simple and let the ingredients do the work.'
+  }
+
+  if (query.includes('breakfast')) {
+    return 'For breakfast, think in layers: something warm, something fresh, and a little texture. Toast with eggs and greens, yogurt with fruit and nuts, or a quick savory skillet all work beautifully depending on what you have.'
+  }
+
+  return 'Tell me the ingredients you have, how much time you want to spend, and the kind of meal you are craving. I can turn that into a useful cooking direction right away.'
+}
+
 const AIChat = () => {
-  const { isAuthenticated, currentUser } = useAuth()
+  const { currentUser } = useAuth()
   const [messages, setMessages] = useState([
     {
       id: 1,
-      content: "Hi there! I'm your AI cooking assistant. I can help you find recipes, answer cooking questions, provide substitutions, and even generate custom recipes based on your preferences. What would you like to cook today?",
+      content: 'Welcome in. Tell me what is in your kitchen, what mood you are cooking for, or what problem dinner needs to solve.',
       isBot: true,
-      timestamp: new Date()
-    }
+      timestamp: new Date(),
+    },
   ])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
-  
+  const [isGeneratingRecipe, setIsGeneratingRecipe] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
-  
-  // Quick action prompts
-  const quickPrompts = [
-    "What can I make with chicken and rice?",
-    "I need a quick 15-minute dinner",
-    "Suggest a healthy breakfast recipe",
-    "Help me plan a romantic dinner",
-    "What's a good vegetarian pasta dish?",
-    "I have 30 minutes, what can I cook?"
-  ]
-  
-  // Scroll to bottom when new messages arrive
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
-  
-  // Focus input on mount
+  }, [messages, isTyping])
+
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
-  
-  // Handle sending messages
+
   const handleSendMessage = async (messageText = inputMessage) => {
     if (!messageText.trim() || isLoading) return
-    
+
     const userMessage = {
       id: Date.now(),
       content: messageText.trim(),
       isBot: false,
-      timestamp: new Date()
+      timestamp: new Date(),
     }
-    
-    setMessages(prev => [...prev, userMessage])
+
+    setMessages((current) => [...current, userMessage])
     setInputMessage('')
     setIsLoading(true)
     setIsTyping(true)
-    
+
     try {
-      // TODO: Implement actual API call to AI service
       const response = await sendChatMessage({
-        message: messageText,
-        context: {
-          userId: currentUser?.id,
-          previousMessages: messages.slice(-5) // Send last 5 messages for context
-        }
+        message: messageText.trim(),
+        history: messages.slice(-2).map((message) => ({
+          role: message.isBot ? 'assistant' : 'user',
+          content: message.content,
+        })),
       })
-      
-      // Simulate typing delay
+
+      const botMessage = {
+        id: Date.now() + 1,
+        content: response.response || response.message || getFallbackResponse(messageText),
+        isBot: true,
+        timestamp: new Date(),
+      }
+
       setTimeout(() => {
         setIsTyping(false)
-        
-        const botMessage = {
-          id: Date.now() + 1,
-          content: response.message || generateMockResponse(messageText),
-          isBot: true,
-          timestamp: new Date()
-        }
-        
-        setMessages(prev => [...prev, botMessage])
-      }, 1000)
-      
+        setMessages((current) => [...current, botMessage])
+      }, 700)
     } catch (error) {
       console.error('Chat error:', error)
       setIsTyping(false)
-      
-      // Fallback response
-      const errorMessage = {
-        id: Date.now() + 1,
-        content: generateMockResponse(messageText),
-        isBot: true,
-        timestamp: new Date()
-      }
-      
-      setMessages(prev => [...prev, errorMessage])
+      setMessages((current) => [
+        ...current,
+        {
+          id: Date.now() + 1,
+          content: getFallbackResponse(messageText),
+          isBot: true,
+          timestamp: new Date(),
+        },
+      ])
     } finally {
       setIsLoading(false)
     }
   }
-  
-  // Generate mock AI responses for demo
-  const generateMockResponse = (userMessage) => {
-    const message = userMessage.toLowerCase()
-    
-    if (message.includes('chicken')) {
-      return "Great choice! Chicken is versatile and delicious. Here are some ideas:\n\n🍗 **Garlic Herb Roasted Chicken** - Perfect for dinner with herbs and vegetables\n🥗 **Chicken Caesar Salad** - Light and refreshing for lunch\n🍜 **Chicken Noodle Soup** - Comforting and warming\n🌮 **Chicken Tacos** - Quick and flavorful\n\nWhich style sounds most appealing to you? I can provide a detailed recipe!"
-    }
-    
-    if (message.includes('quick') || message.includes('15 minute')) {
-      return "Perfect! Here are some fantastic 15-minute meals:\n\n⚡ **Spaghetti Aglio e Olio** - Pasta with garlic and olive oil\n🥪 **Grilled Cheese & Tomato Soup** - Classic comfort combo\n🍳 **Scrambled Eggs with Toast** - Protein-packed and filling\n🥙 **Mediterranean Wrap** - Fresh and healthy\n\nWould you like the full recipe for any of these?"
-    }
-    
-    if (message.includes('healthy') || message.includes('breakfast')) {
-      return "Wonderful! Healthy breakfasts set the tone for the day. Try these:\n\n🥣 **Overnight Oats with Berries** - Prep the night before\n🥑 **Avocado Toast with Poached Egg** - Rich in healthy fats\n🫐 **Greek Yogurt Parfait** - Protein and probiotics\n🥤 **Green Smoothie Bowl** - Packed with nutrients\n\nWhich one interests you most? I can share the complete recipe!"
-    }
-    
-    if (message.includes('vegetarian') || message.includes('pasta')) {
-      return "Excellent! Vegetarian pasta dishes are so satisfying. Here are my favorites:\n\n🍝 **Creamy Mushroom Alfredo** - Rich and indulgent\n🍅 **Fresh Tomato Basil Pasta** - Light and aromatic\n🧄 **Cacio e Pepe** - Simple Roman classic\n🥬 **Spinach and Ricotta Ravioli** - Homemade goodness\n\nShall I walk you through making any of these?"
-    }
-    
-    return "That's an interesting question! I'd love to help you with that. Could you provide a bit more detail about what you're looking for? For example:\n\n• What ingredients do you have available?\n• Any dietary restrictions or preferences?\n• How much time do you have for cooking?\n• What type of meal are you planning?\n\nThe more you tell me, the better I can assist you! 👨‍🍳"
-  }
-  
-  // Handle quick prompt selection
-  const handleQuickPrompt = (prompt) => {
-    handleSendMessage(prompt)
-  }
-  
-  // Handle key press in input
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
-  
-  // Clear conversation
+
   const clearConversation = () => {
     setMessages([
       {
         id: 1,
-        content: "Hi there! I'm your AI cooking assistant. How can I help you today?",
+        content: 'Welcome in. Tell me what is in your kitchen, what mood you are cooking for, or what problem dinner needs to solve.',
         isBot: true,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     ])
   }
-  
-  // TODO: Implement recipe generation from conversation
+
   const generateRecipe = async () => {
-    setIsLoading(true)
+    setIsGeneratingRecipe(true)
     try {
-      const response = await generateRecipeFromChat({
+      await generateRecipeFromChat({
         conversation: messages,
-        preferences: currentUser?.preferences || {}
+        preferences: currentUser?.preferences || {},
       })
-      
-      // Handle generated recipe
-      console.log('Generated recipe:', response)
     } catch (error) {
       console.error('Recipe generation failed:', error)
     } finally {
-      setIsLoading(false)
+      setIsGeneratingRecipe(false)
     }
   }
-  
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto h-screen flex flex-col">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 p-6"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-white" />
+    <section className="section-shell pt-8">
+      <div className="mx-auto flex min-h-[calc(100vh-10rem)] max-w-7xl flex-col gap-8 px-4 sm:px-6 lg:grid lg:grid-cols-[0.72fr,1.28fr] lg:px-8">
+        <aside className="space-y-6">
+          <div className="glass-panel p-6 sm:p-8">
+            <span className="section-label">
+              <Sparkles className="h-3.5 w-3.5" />
+              Kitchen chat
+            </span>
+            <h1 className="page-title mt-5 text-balance">Talk through dinner like you are standing at the counter with a smart sous chef.</h1>
+            <p className="mt-4 text-base leading-8 text-[color:var(--text-secondary)]">
+              Ask for ideas, substitutions, quick meals, or what to do with the ingredients already sitting in front of
+              you. The backend logic is unchanged; the experience is now more intimate and calm.
+            </p>
+
+            <div className="mt-8 grid gap-3">
+              {starterPrompts.map((prompt) => (
+                <button
+                  key={prompt}
+                  onClick={() => handleSendMessage(prompt)}
+                  className="rounded-[22px] border border-[color:var(--border-soft)] bg-white/70 px-4 py-4 text-left text-sm leading-7 text-[color:var(--text-secondary)] transition-all hover:border-[rgba(184,92,56,0.2)] hover:bg-white"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        <div className="glass-panel flex min-h-[70vh] flex-col overflow-hidden">
+          <div className="flex flex-col gap-5 border-b border-[color:var(--border-soft)] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--brand)_0%,var(--highlight)_100%)] text-white shadow-[var(--shadow-soft)]">
+                <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  AI Cooking Assistant
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Your personal chef for recipe ideas and cooking tips
-                </p>
+                <p className="eyebrow mb-1">AI cooking assistant</p>
+                <h2 className="font-display text-3xl">Grounded, practical help</h2>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-2">
-              {/* TODO: Add recipe generation button */}
+
+            <div className="flex items-center gap-3">
               <AnimatedButton
                 onClick={generateRecipe}
                 variant="secondary"
                 size="sm"
                 icon={Download}
+                loading={isGeneratingRecipe}
                 disabled={messages.length < 3}
               >
-                Generate Recipe
+                Build recipe
               </AnimatedButton>
-              
-              <button
-                onClick={clearConversation}
-                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                title="Clear conversation"
-              >
-                <RotateCcw className="h-5 w-5" />
-              </button>
+              <AnimatedButton onClick={clearConversation} variant="ghost" size="sm" icon={RotateCcw}>
+                Reset
+              </AnimatedButton>
             </div>
           </div>
-        </motion.div>
-        
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          <AnimatePresence>
+
+          <div className="flex-1 space-y-5 overflow-y-auto px-5 py-6 sm:px-6">
             {messages.map((message) => (
-              <ChatBubble
-                key={message.id}
-                message={message}
-                isBot={message.isBot}
-                onCopy={(messageId) => {
-                  // TODO: Show copy success feedback
-                  console.log('Copied message:', messageId)
-                }}
-                onFeedback={(messageId, type) => {
-                  // TODO: Send feedback to improve AI responses
-                  console.log('Feedback:', messageId, type)
-                }}
-              />
+              <ChatBubble key={message.id} message={message} isBot={message.isBot} />
             ))}
-          </AnimatePresence>
-          
-          {/* Typing Indicator */}
-          <AnimatePresence>
-            {isTyping && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                className="flex items-center space-x-3"
-              >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary-500 to-secondary-500 flex items-center justify-center">
-                  <Sparkles className="h-4 w-4 text-white" />
-                </div>
-                <div className="bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl shadow-lg">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+
+            <AnimatePresence>
+              {isTyping ? (
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--brand)_0%,var(--highlight)_100%)] text-white">
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <div className="rounded-[24px] border border-[color:var(--border-soft)] bg-[rgba(255,252,246,0.92)] px-5 py-4 shadow-[var(--shadow-soft)]">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 animate-simmer rounded-full bg-[color:var(--brand)]" />
+                        <span className="h-2 w-2 animate-simmer rounded-full bg-[color:var(--highlight)] [animation-delay:0.1s]" />
+                        <span className="h-2 w-2 animate-simmer rounded-full bg-[color:var(--herb)] [animation-delay:0.2s]" />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          
-          <div ref={messagesEndRef} />
-        </div>
-        
-        {/* Quick Prompts */}
-        {messages.length <= 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="px-6 pb-4"
-          >
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
-              Try asking me about:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {quickPrompts.map((prompt, index) => (
-                <motion.button
-                  key={index}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleQuickPrompt(prompt)}
-                  className="p-3 text-left text-sm bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 
-                           border border-gray-200 dark:border-gray-700 rounded-xl transition-colors"
-                >
-                  {prompt}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-        
-        {/* Input Area */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-6"
-        >
-          <div className="flex items-end space-x-4">
-            <div className="flex-1">
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className="border-t border-[color:var(--border-soft)] px-5 py-5 sm:px-6">
+            <div className="rounded-[26px] border border-[color:var(--border-soft)] bg-white/75 p-3 shadow-[var(--shadow-soft)]">
               <textarea
                 ref={inputRef}
                 value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask me anything about cooking, recipes, or ingredients..."
-                rows={1}
-                className="w-full resize-none px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl 
-                         bg-gray-50 dark:bg-gray-900 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 
-                         transition-all duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                style={{ minHeight: '48px', maxHeight: '120px' }}
+                onChange={(event) => setInputMessage(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault()
+                    handleSendMessage()
+                  }
+                }}
+                placeholder="Tell me what you have, what you want to eat, or what is going wrong in the pan..."
+                rows={2}
+                className="textarea-field !min-h-[7rem] !border-0 !bg-transparent !px-2 !py-2 !shadow-none"
               />
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs uppercase tracking-[0.22em] text-[color:var(--text-muted)]">
+                  Enter to send. Shift + Enter for a new line.
+                </p>
+                <AnimatedButton
+                  onClick={() => handleSendMessage()}
+                  loading={isLoading}
+                  disabled={!inputMessage.trim() || isLoading}
+                  icon={isLoading ? Loader2 : Send}
+                >
+                  Send
+                </AnimatedButton>
+              </div>
             </div>
-            
-            <AnimatedButton
-              onClick={() => handleSendMessage()}
-              disabled={!inputMessage.trim() || isLoading}
-              loading={isLoading}
-              icon={isLoading ? Loader2 : Send}
-              className="px-4 py-3"
-            >
-              {isLoading ? 'Sending...' : 'Send'}
-            </AnimatedButton>
+
+            <div className="mt-4 flex flex-wrap gap-3 text-xs text-[color:var(--text-muted)]">
+              <span className="meta-pill">Ask for substitutions</span>
+              <span className="meta-pill">Find a quick dinner</span>
+              <span className="meta-pill">Plan around ingredients you already own</span>
+              <span className="meta-pill"><ArrowUpRight className="h-3 w-3" /> Grounded in retrieved recipes when available</span>
+            </div>
           </div>
-          
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Press Enter to send, Shift+Enter for new line
-          </p>
-        </motion.div>
+        </div>
       </div>
-    </div>
+    </section>
   )
 }
 

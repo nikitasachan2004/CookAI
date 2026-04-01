@@ -1,38 +1,19 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { 
-  Clock, 
-  Users, 
-  Heart, 
-  Star, 
-  ChefHat, 
-  Flame,
-  CheckCircle,
-  Sparkles
-} from 'lucide-react'
+import { Clock, Flame, Heart, Star, Users, ChefHat, CheckCircle2 } from 'lucide-react'
 import PropTypes from 'prop-types'
 import { useAuth } from '../context/AuthContext'
 import { likeRecipe } from '../api/apiClient'
 import { formatTime, getDifficultyColor } from '../utils/helpers'
 
-/**
- * RecipeCard component displaying recipe information with interactive features
- * @param {Object} props - Component props
- * @param {Object} props.recipe - Recipe object
- * @param {number} props.matchScore - Match percentage (0-100)
- * @param {string} props.whySuggested - Reason for suggestion
- * @param {Function} props.onLike - Callback for like action
- * @param {boolean} props.showMatchScore - Whether to show match score
- * @param {string} props.size - Card size variant ('sm', 'md', 'lg')
- */
-const RecipeCard = ({ 
-  recipe, 
-  matchScore = null, 
+const RecipeCard = ({
+  recipe,
+  matchScore = null,
   whySuggested = null,
   onLike = null,
   showMatchScore = false,
-  size = 'md'
+  size = 'md',
 }) => {
   const { currentUser, isAuthenticated, isRecipeLiked, addLikedRecipe, removeLikedRecipe } = useAuth()
   const [isLiking, setIsLiking] = useState(false)
@@ -41,19 +22,11 @@ const RecipeCard = ({
 
   const isLiked = isRecipeLiked(recipe.id)
 
-  // Handle like/unlike recipe
-  const handleLike = async (e) => {
-    e.preventDefault() // Prevent navigation when clicking like button
-    
-    if (!isAuthenticated) {
-      // Redirect to login or show auth modal
-      return
-    }
-
-    if (isLiking) return
+  const handleLike = async (event) => {
+    event.preventDefault()
+    if (!isAuthenticated || isLiking) return
 
     setIsLiking(true)
-    
     try {
       if (isLiked) {
         removeLikedRecipe(recipe.id)
@@ -61,199 +34,137 @@ const RecipeCard = ({
         await likeRecipe(currentUser.id, recipe.id)
         addLikedRecipe(recipe)
       }
-      
-      // Call parent callback if provided
-      if (onLike) {
-        onLike(recipe, !isLiked)
-      }
+      onLike?.(recipe, !isLiked)
     } catch (error) {
       console.error('Failed to like recipe:', error)
-      // Revert optimistic update on error
-      if (isLiked) {
-        addLikedRecipe(recipe)
-      } else {
-        removeLikedRecipe(recipe.id)
-      }
     } finally {
       setIsLiking(false)
     }
   }
 
-  // Card size variants
   const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg'
-  }
-
-  const imageClasses = {
-    sm: 'h-40',
-    md: 'h-48',
-    lg: 'h-56'
+    sm: 'min-h-[20rem]',
+    md: 'min-h-[23rem]',
+    lg: 'min-h-[25rem]',
   }
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8 }}
-      transition={{ 
-        duration: 0.3,
-        type: "spring",
-        stiffness: 400,
-        damping: 25
-      }}
-      className={`${sizeClasses[size]} w-full`}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.28, ease: 'easeOut' }}
+      className="h-full"
     >
-      <Link to={`/recipe/${recipe.id}`} className="block group">
-        <div className="card overflow-hidden h-full flex flex-col">
-          {/* Recipe Image */}
-          <div className={`relative ${imageClasses[size]} overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900`}>
-            {!imageError ? (
+      <Link to={`/recipe/${recipe.id}`} className="block h-full">
+        <article className={`card flex h-full flex-col ${sizeClasses[size] || sizeClasses.md}`}>
+          <div className="relative overflow-hidden rounded-t-[28px]">
+            <div className="absolute left-4 top-4 z-10 flex items-center gap-2">
+              {showMatchScore && matchScore !== null ? (
+                <span className="meta-pill bg-[rgba(38,23,15,0.74)] text-white">
+                  {matchScore}% match
+                </span>
+              ) : null}
+              {recipe.cuisine ? <span className="meta-pill capitalize">{recipe.cuisine}</span> : null}
+            </div>
+
+            <button
+              onClick={handleLike}
+              disabled={isLiking}
+              className={`absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full border transition-all ${
+                isLiked
+                  ? 'border-transparent bg-[linear-gradient(135deg,var(--berry)_0%,var(--brand)_100%)] text-white'
+                  : 'border-white/40 bg-white/70 text-[color:var(--text-primary)] backdrop-blur-md'
+              }`}
+              aria-label={isLiked ? 'Unlike recipe' : 'Like recipe'}
+            >
+              <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+            </button>
+
+            {!imageError && recipe.image ? (
               <>
                 <img
                   src={recipe.image}
                   alt={recipe.name}
-                  loading="lazy"
-                  className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:brightness-110 ${
-                    imageLoaded ? 'opacity-100' : 'opacity-0'
-                  }`}
+                  className={`h-60 w-full object-cover transition duration-700 ${imageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
                   onLoad={() => setImageLoaded(true)}
                   onError={() => setImageError(true)}
                 />
-                
-                {/* Loading skeleton */}
-                {!imageLoaded && (
-                  <div className="absolute inset-0 skeleton" />
-                )}
-                
-                {/* Gradient overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                {!imageLoaded ? <div className="skeleton absolute inset-0 h-60 w-full" /> : null}
               </>
             ) : (
-              // Fallback when image fails to load
-              <div className="w-full h-full bg-gradient-to-br from-orange-100 to-teal-100 
-                            dark:from-orange-900/20 dark:to-teal-900/20 
-                            flex items-center justify-center">
-                <ChefHat className="h-16 w-16 text-gray-300 dark:text-gray-600" />
+              <div className="flex h-60 w-full items-center justify-center bg-[linear-gradient(145deg,rgba(184,92,56,0.12),rgba(217,143,43,0.18))]">
+                <div className="flex flex-col items-center gap-3 text-center">
+                  <ChefHat className="h-12 w-12 text-[color:var(--brand-deep)]" />
+                  <div>
+                    <p className="text-sm font-semibold text-[color:var(--text-primary)]">Image placeholder</p>
+                    <p className="mt-1 text-xs text-[color:var(--text-secondary)]">Add your recipe image here later</p>
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* Match Score Badge */}
-            {showMatchScore && matchScore !== null && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="absolute top-3 left-3 badge badge-primary shadow-lg backdrop-blur-sm"
-              >
-                <Sparkles className="h-3 w-3 mr-1" />
-                {matchScore}% match
-              </motion.div>
-            )}
-
-            {/* Like Button */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleLike}
-              disabled={isLiking}
-              className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 shadow-lg ${
-                isLiked 
-                  ? 'bg-red-500 text-white scale-110' 
-                  : 'bg-white/90 dark:bg-gray-900/90 text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-900'
-              } ${isLiking ? 'opacity-50 cursor-not-allowed' : ''}`}
-              aria-label={isLiked ? 'Unlike recipe' : 'Like recipe'}
-            >
-              <Heart 
-                className={`h-5 w-5 transition-all duration-300 ${
-                  isLiked ? 'fill-current' : ''
-                }`} 
-              />
-            </motion.button>
-
-            {/* Difficulty Badge */}
-            <div className={`absolute bottom-3 right-3 px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-md shadow-md ${
-              getDifficultyColor(recipe.difficulty)
-            }`}>
-              {recipe.difficulty}
-            </div>
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[rgba(38,23,15,0.65)] to-transparent" />
           </div>
 
-          {/* Recipe Content */}
-          <div className="p-5 space-y-4 flex-1 flex flex-col">
-            {/* Recipe Title */}
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-2 group-hover:text-orange-600 dark:group-hover:text-orange-500 transition-colors duration-200">
-              {recipe.name}
-            </h3>
+          <div className="flex flex-1 flex-col p-5 sm:p-6">
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-2xl leading-tight text-[color:var(--text-primary)] transition-colors group-hover:text-[color:var(--brand-deep)]">
+                  {recipe.name}
+                </h3>
+                <p className="mt-2 text-sm leading-7 text-[color:var(--text-secondary)]">
+                  {recipe.tags?.slice(0, 2).join(' · ') || 'A comforting kitchen favorite'}
+                </p>
+              </div>
+              <div className="meta-pill shrink-0">
+                <Star className="h-3.5 w-3.5 fill-current text-[color:var(--highlight)]" />
+                <span>4.8</span>
+              </div>
+            </div>
 
-            {/* Recipe Tags */}
-            <div className="flex flex-wrap gap-2">
+            <div className="mb-4 flex flex-wrap gap-2">
               {recipe.tags?.slice(0, 3).map((tag) => (
-                <span
-                  key={tag}
-                  className="tag"
-                >
+                <span key={tag} className="rounded-full bg-[rgba(184,92,56,0.08)] px-3 py-1 text-xs font-semibold capitalize text-[color:var(--brand-deep)]">
                   {tag}
                 </span>
               ))}
-              {recipe.tags?.length > 3 && (
-                <span className="tag text-gray-500 dark:text-gray-500">
-                  +{recipe.tags.length - 3} more
-                </span>
-              )}
             </div>
 
-            {/* Recipe Meta Information */}
-            <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 pt-2 mt-auto">
-              <div className="flex items-center space-x-4">
-                {/* Cooking Time */}
-                <div className="flex items-center space-x-1.5">
-                  <Clock className="h-4 w-4 text-orange-500" />
-                  <span className="font-medium">{formatTime(recipe.time)}</span>
+            <div className="mt-auto space-y-4">
+              <div className="grid grid-cols-3 gap-2 text-sm text-[color:var(--text-secondary)]">
+                <div className="rounded-2xl bg-[rgba(255,255,255,0.56)] px-3 py-3">
+                  <Clock className="mb-2 h-4 w-4 text-[color:var(--brand)]" />
+                  <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--text-muted)]">Time</p>
+                  <p className="mt-1 font-semibold text-[color:var(--text-primary)]">{formatTime(recipe.time)}</p>
                 </div>
-                
-                {/* Servings */}
-                {recipe.servings && (
-                  <div className="flex items-center space-x-1.5">
-                    <Users className="h-4 w-4 text-teal-500" />
-                    <span className="font-medium">{recipe.servings}</span>
-                  </div>
-                )}
+                <div className="rounded-2xl bg-[rgba(255,255,255,0.56)] px-3 py-3">
+                  <Users className="mb-2 h-4 w-4 text-[color:var(--secondary-500)] text-[color:var(--herb)]" />
+                  <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--text-muted)]">Serves</p>
+                  <p className="mt-1 font-semibold text-[color:var(--text-primary)]">{recipe.servings || 2}</p>
+                </div>
+                <div className="rounded-2xl bg-[rgba(255,255,255,0.56)] px-3 py-3">
+                  <Flame className="mb-2 h-4 w-4 text-[color:var(--highlight)]" />
+                  <p className="text-xs uppercase tracking-[0.24em] text-[color:var(--text-muted)]">Skill</p>
+                  <p className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${getDifficultyColor(recipe.difficulty)}`}>
+                    {recipe.difficulty}
+                  </p>
+                </div>
               </div>
 
-              {/* Rating */}
-              <div className="flex items-center space-x-1">
-                <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                <span className="font-semibold text-gray-900 dark:text-white">4.8</span>
-              </div>
+              {whySuggested ? (
+                <div className="rounded-[20px] border border-[rgba(93,123,93,0.16)] bg-[rgba(93,123,93,0.08)] p-4 text-sm text-[color:var(--text-secondary)]">
+                  <p className="inline-flex items-center gap-2 font-semibold text-[color:var(--secondary-700)]">
+                    <CheckCircle2 className="h-4 w-4" />
+                    Why it fits
+                  </p>
+                  <p className="mt-2 leading-6">{whySuggested}</p>
+                </div>
+              ) : null}
             </div>
-
-            {/* Why Suggested */}
-            {whySuggested && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="flex items-start space-x-2 p-3 bg-orange-50 dark:bg-orange-900/10 rounded-xl border border-orange-200/50 dark:border-orange-800/30"
-              >
-                <CheckCircle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-orange-700 dark:text-orange-300 leading-relaxed">
-                  <span className="font-semibold">Perfect match:</span> {whySuggested}
-                </p>
-              </motion.div>
-            )}
-
-            {/* Nutrition Preview */}
-            {recipe.nutrition && (
-              <div className="flex items-center justify-between text-xs font-medium text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-200 dark:border-gray-800">
-                <span>{recipe.nutrition.calories} cal</span>
-                <span>{recipe.nutrition.protein}g protein</span>
-                <span>{recipe.nutrition.carbs}g carbs</span>
-              </div>
-            )}
           </div>
-        </div>
+        </article>
       </Link>
     </motion.div>
   )
@@ -269,12 +180,13 @@ RecipeCard.propTypes = {
     difficulty: PropTypes.string,
     servings: PropTypes.number,
     nutrition: PropTypes.object,
+    cuisine: PropTypes.string,
   }).isRequired,
   matchScore: PropTypes.number,
   whySuggested: PropTypes.string,
   onLike: PropTypes.func,
   showMatchScore: PropTypes.bool,
-  size: PropTypes.oneOf(['sm', 'md', 'lg'])
+  size: PropTypes.oneOf(['sm', 'md', 'lg']),
 }
 
 export default RecipeCard
