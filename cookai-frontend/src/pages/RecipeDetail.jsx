@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, ChefHat, Circle, Clock, Heart, Play, Share2, Star, Users } from 'lucide-react'
-import { fetchRecipeById, likeRecipe } from '../api/apiClient'
+import { fetchRecipeById, likeRecipe, normalizeRecipe } from '../api/apiClient'
 import { useAuth } from '../context/AuthContext'
 import { mockRecipes } from '../data/mockRecipes'
 import { formatTime, getDifficultyColor } from '../utils/helpers'
@@ -24,10 +24,10 @@ const RecipeDetail = () => {
       setIsLoading(true)
       try {
         const result = await fetchRecipeById(id)
-        setRecipe(result.recipe || mockRecipes.find((candidate) => String(candidate.id) === String(id)))
+        setRecipe(result.recipe || normalizeRecipe(mockRecipes.find((candidate) => String(candidate.id) === String(id))))
       } catch (error) {
         console.error('Failed to load recipe:', error)
-        setRecipe(mockRecipes.find((candidate) => String(candidate.id) === String(id)))
+        setRecipe(normalizeRecipe(mockRecipes.find((candidate) => String(candidate.id) === String(id))))
       } finally {
         setIsLoading(false)
       }
@@ -114,20 +114,27 @@ const RecipeDetail = () => {
 
             <div className="mt-8 rounded-[28px] border border-[color:var(--border-soft)] bg-white/75 p-6 sm:p-8">
               <div className="mb-5 flex items-center gap-3">
-                <span className="meta-pill">Step {currentStep + 1} of {recipe.steps.length}</span>
+                <span className="meta-pill">Step {currentStep + 1} of {recipe.stepDetails.length}</span>
               </div>
               <div className="flex gap-4">
                 <button onClick={() => toggleStepComplete(currentStep)} className="mt-1 text-[color:var(--brand)]">
                   {completedSteps.has(currentStep) ? <CheckCircle2 className="h-6 w-6" /> : <Circle className="h-6 w-6" />}
                 </button>
-                <p className="text-lg leading-9 text-[color:var(--text-primary)]">{recipe.steps[currentStep]}</p>
+                <div>
+                  <p className="text-lg leading-9 text-[color:var(--text-primary)]">{recipe.stepDetails[currentStep]?.instruction}</p>
+                  {recipe.stepDetails[currentStep]?.timer_minutes ? (
+                    <p className="mt-2 text-sm font-semibold text-[color:var(--brand)]">
+                      Timer: {recipe.stepDetails[currentStep].timer_minutes} min
+                    </p>
+                  ) : null}
+                </div>
               </div>
               <div className="mt-8 flex items-center justify-between">
                 <AnimatedButton onClick={() => setCurrentStep((step) => Math.max(step - 1, 0))} variant="secondary">
                   Previous
                 </AnimatedButton>
                 <div className="flex gap-2">
-                  {recipe.steps.map((_, index) => (
+                  {recipe.stepDetails.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => setCurrentStep(index)}
@@ -135,8 +142,8 @@ const RecipeDetail = () => {
                     />
                   ))}
                 </div>
-                <AnimatedButton onClick={() => setCurrentStep((step) => Math.min(step + 1, recipe.steps.length - 1))}>
-                  {currentStep === recipe.steps.length - 1 ? 'Finish' : 'Next'}
+                <AnimatedButton onClick={() => setCurrentStep((step) => Math.min(step + 1, recipe.stepDetails.length - 1))}>
+                  {currentStep === recipe.stepDetails.length - 1 ? 'Finish' : 'Next'}
                 </AnimatedButton>
               </div>
             </div>
@@ -212,12 +219,17 @@ const RecipeDetail = () => {
               <p className="eyebrow mb-4">Instructions</p>
               <h2 className="font-display text-4xl">Cook it step by step</h2>
               <div className="mt-8 grid gap-4">
-                {recipe.steps.map((step, index) => (
+                {recipe.stepDetails.map((step, index) => (
                   <motion.div key={index} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }} className="flex gap-4 rounded-[24px] border border-[color:var(--border-soft)] bg-white/75 p-5">
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--brand)_0%,var(--highlight)_100%)] text-sm font-bold text-white">
                       {index + 1}
                     </div>
-                    <p className="text-base leading-8 text-[color:var(--text-secondary)]">{step}</p>
+                    <div>
+                      <p className="text-base leading-8 text-[color:var(--text-secondary)]">{step.instruction}</p>
+                      {step.timer_minutes ? (
+                        <p className="mt-2 text-sm font-semibold text-[color:var(--brand)]">Timer: {step.timer_minutes} min</p>
+                      ) : null}
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -246,7 +258,9 @@ const RecipeDetail = () => {
                 {recipe.ingredients.map((ingredient, index) => (
                   <div key={index} className="flex items-center gap-3 rounded-[18px] bg-white/70 px-4 py-3 text-sm text-[color:var(--text-secondary)]">
                     <Circle className="h-2.5 w-2.5 fill-current text-[color:var(--brand)]" />
-                    <span className="capitalize">{ingredient}</span>
+                    <span className="capitalize">
+                      {[ingredient.amount, ingredient.item].filter(Boolean).join(' ').trim() || ingredient.item}
+                    </span>
                   </div>
                 ))}
               </div>
