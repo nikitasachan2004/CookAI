@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, CheckCircle2, Clock3, Search, Sparkles, Stars, Users2, UtensilsCrossed } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
@@ -7,7 +7,6 @@ import RecipeCard from '../components/RecipeCard'
 import IngredientInput from '../components/IngredientInput'
 import EquipmentSelector from '../components/EquipmentSelector'
 import AnimatedButton from '../components/AnimatedButton'
-import { mockRecipes } from '../data/mockRecipes'
 import { getContainerClass, animations } from '../utils/theme'
 
 const healthOptions = [
@@ -47,11 +46,11 @@ const Home = () => {
   const [healthPreference, setHealthPreference] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [recommendations, setRecommendations] = useState([])
-  const [featuredRecipes, setFeaturedRecipes] = useState(mockRecipes.slice(0, 3))
+  const [featuredRecipes, setFeaturedRecipes] = useState([])
   const [error, setError] = useState('')
   const [showResults, setShowResults] = useState(false)
 
-  React.useEffect(() => {
+  useEffect(() => {
     const loadFeaturedRecipes = async () => {
       try {
         const result = await fetchAllRecipes({ page: 1, per_page: 3 })
@@ -60,6 +59,7 @@ const Home = () => {
         }
       } catch (loadError) {
         console.error('Failed to load featured recipes:', loadError)
+        setFeaturedRecipes([])
       }
     }
 
@@ -95,23 +95,9 @@ const Home = () => {
       }, 120)
     } catch (apiError) {
       console.error('Recommendation error:', apiError)
-
-      const fallbackRecipes = mockRecipes
-        .filter((recipe) => {
-          const ingredientMatch = availableIngredients.some((ingredient) =>
-            recipe.ingredients.some((recipeIngredient) => recipeIngredient.toLowerCase().includes(ingredient.toLowerCase())),
-          )
-          const preferenceMatch = !healthPreference || recipe.tags.some((tag) => tag.toLowerCase().includes(healthPreference.toLowerCase()))
-          return ingredientMatch && preferenceMatch
-        })
-        .slice(0, 6)
-
-      if (fallbackRecipes.length > 0) {
-        setRecommendations(fallbackRecipes)
-        setShowResults(true)
-      } else {
-        setError('Nothing matched perfectly yet. Try a broader ingredient list or remove one of the constraints.')
-      }
+      setRecommendations([])
+      setShowResults(false)
+      setError('CookAI could not load live recommendations right now. Please try again in a moment.')
     } finally {
       setIsLoading(false)
     }
