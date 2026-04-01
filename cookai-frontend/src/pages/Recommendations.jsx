@@ -4,7 +4,6 @@ import { Grid, List, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchAllRecipes, fetchRecommendations, searchRecipes } from '../api/apiClient'
 import RecipeCard from '../components/RecipeCard'
-import { mockRecipes } from '../data/mockRecipes'
 import { animations, getContainerClass } from '../utils/theme'
 
 const Recommendations = () => {
@@ -45,10 +44,10 @@ const Recommendations = () => {
           result = await fetchAllRecipes({ page: 1, per_page: 24 })
         }
 
-        setRecipes(result.recommendations || result.recipes || mockRecipes)
+        setRecipes(result.recommendations || result.recipes || [])
       } catch (error) {
         console.error('Failed to load recommendations:', error)
-        setRecipes(mockRecipes)
+        setRecipes([])
       } finally {
         setIsLoading(false)
       }
