@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Plus, Search, X } from 'lucide-react'
 import PropTypes from 'prop-types'
-import { getAllIngredients } from '../data/mockRecipes'
 import { debounce } from '../utils/helpers'
+import { fetchIngredientSuggestions } from '../api/apiClient'
 
 const IngredientInput = ({
   ingredients = [],
@@ -17,20 +17,26 @@ const IngredientInput = ({
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1)
   const inputRef = useRef(null)
   const suggestionRefs = useRef([])
-  const allIngredients = getAllIngredients()
 
-  const debouncedSearch = debounce((query) => {
+  const debouncedSearch = debounce(async (query) => {
     if (query.length < 2) {
       setSuggestions([])
       setShowSuggestions(false)
       return
     }
 
-    const filtered = allIngredients
-      .filter((ingredient) => ingredient.toLowerCase().includes(query.toLowerCase()) && !ingredients.includes(ingredient))
-      .slice(0, 8)
-    setSuggestions(filtered)
-    setShowSuggestions(filtered.length > 0)
+    try {
+      const liveIngredients = await fetchIngredientSuggestions(query)
+      const filtered = liveIngredients
+        .filter((ingredient) => !ingredients.includes(ingredient.toLowerCase()))
+        .slice(0, 8)
+      setSuggestions(filtered)
+      setShowSuggestions(filtered.length > 0)
+    } catch (error) {
+      console.error('Failed to load ingredient suggestions:', error)
+      setSuggestions([])
+      setShowSuggestions(false)
+    }
   }, 250)
 
   const addIngredient = (ingredient) => {

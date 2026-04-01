@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, CheckCircle2, ChefHat, Circle, Clock, Heart, Play, Share2, Star, Users } from 'lucide-react'
-import { fetchRecipeById, likeRecipe, normalizeRecipe } from '../api/apiClient'
+import { fetchRecipeById, likeRecipe } from '../api/apiClient'
 import { useAuth } from '../context/AuthContext'
-import { mockRecipes } from '../data/mockRecipes'
 import { formatTime, getDifficultyColor } from '../utils/helpers'
 import AnimatedButton from '../components/AnimatedButton'
 import { RECIPE_PLACEHOLDER_IMAGE, resolveRecipeImage } from '../utils/recipeImage'
@@ -26,10 +25,10 @@ const RecipeDetail = () => {
       setIsLoading(true)
       try {
         const result = await fetchRecipeById(id)
-        setRecipe(result.recipe || normalizeRecipe(mockRecipes.find((candidate) => String(candidate.id) === String(id))))
+        setRecipe(result.recipe || null)
       } catch (error) {
         console.error('Failed to load recipe:', error)
-        setRecipe(normalizeRecipe(mockRecipes.find((candidate) => String(candidate.id) === String(id))))
+        setRecipe(null)
       } finally {
         setIsLoading(false)
       }

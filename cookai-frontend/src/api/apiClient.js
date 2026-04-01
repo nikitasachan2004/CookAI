@@ -243,6 +243,20 @@ export async function searchRecipes(params = {}) {
   }
 }
 
+export async function fetchIngredientSuggestions(search = '') {
+  let response
+  try {
+    response = await api.get('/api/ingredients', { params: { search } })
+  } catch (error) {
+    throw toApiError(error, 'Could not load ingredient suggestions')
+  }
+
+  const ingredients = response.data?.ingredients || []
+  return ingredients
+    .map((ingredient) => ingredient?.name || '')
+    .filter(Boolean)
+}
+
 export async function likeRecipe(userId, recipeId) {
   const response = await api.post(`/api/favorites/${recipeId}`)
   return response.data
