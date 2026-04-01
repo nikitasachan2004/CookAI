@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Award, Calendar, Heart, Settings, TrendingUp, User, ChefHat, Clock3, Save, Edit3, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { getUserStatistics, updateUserPreferences } from '../api/apiClient'
+import { getFavorites, getUserStatistics, updateUserPreferences } from '../api/apiClient'
 import AnimatedButton from '../components/AnimatedButton'
 import RecipeCard from '../components/RecipeCard'
-import { mockRecipes } from '../data/mockRecipes'
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: User },
@@ -28,8 +27,12 @@ const Profile = () => {
   useEffect(() => {
     const loadProfile = async () => {
       try {
-        const stats = await getUserStatistics(currentUser.id)
+        const [stats, favorites] = await Promise.all([
+          getUserStatistics(currentUser.id),
+          getFavorites(),
+        ])
         setStatistics(stats)
+        setLikedRecipes(favorites)
       } catch (error) {
         console.error('Failed to load stats:', error)
         setStatistics({
@@ -41,9 +44,8 @@ const Profile = () => {
             { date: '2026-03-10', action: 'Asked for weeknight dinner ideas' },
           ],
         })
+        setLikedRecipes([])
       }
-
-      setLikedRecipes(mockRecipes.slice(0, 3))
     }
 
     loadProfile()
