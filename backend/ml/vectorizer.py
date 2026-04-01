@@ -22,7 +22,7 @@ _vector_store: VectorStore | None = None
 
 def _build_vector_store() -> VectorStore:
     dataframe = load_recipe_dataframe()
-    corpus = dataframe["ingredients_text"].fillna("").tolist() if not dataframe.empty else []
+    corpus = dataframe["search_text"].fillna("").tolist() if not dataframe.empty else []
 
     vectorizer = TfidfVectorizer(stop_words="english", ngram_range=(1, 2))
     matrix = vectorizer.fit_transform(corpus) if corpus else None

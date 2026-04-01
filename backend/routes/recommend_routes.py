@@ -8,21 +8,6 @@ from utils.auth_utils import error_response
 recommend_bp = Blueprint("recommend", __name__, url_prefix="/api/recommend")
 
 
-def _format_content_recommendations(recommendations: list[dict]) -> list[dict]:
-    return [
-        {
-            "id": recommendation["id"],
-            "title": recommendation["title"],
-            "final_score": recommendation["similarity_score"],
-            "similarity_score": recommendation["similarity_score"],
-            "explanation": "Recommended because it closely matches your ingredient input",
-            "cuisine": recommendation.get("cuisine"),
-            "prep_time": recommendation.get("prep_time"),
-        }
-        for recommendation in recommendations
-    ]
-
-
 @recommend_bp.route("", methods=["POST"])
 def get_recommendations():
     data = request.get_json(silent=True)
@@ -40,11 +25,22 @@ def get_recommendations():
         filters["cuisine"] = data.get("cuisine")
     if data.get("prep_time") is not None:
         filters["prep_time"] = data.get("prep_time")
+    if data.get("dietary"):
+        filters["dietary"] = data.get("dietary")
+    if data.get("max_time") is not None:
+        filters["max_time"] = data.get("max_time")
+    if data.get("difficulty"):
+        filters["difficulty"] = data.get("difficulty")
 
     if filters.get("prep_time") is not None and (
         not isinstance(filters["prep_time"], int) or filters["prep_time"] < 0
     ):
         return error_response("Field 'prep_time' must be a non-negative integer", 400)
+
+    if filters.get("max_time") is not None and (
+        not isinstance(filters["max_time"], int) or filters["max_time"] < 0
+    ):
+        return error_response("Field 'max_time' must be a non-negative integer", 400)
 
     user_id = None
     try:
@@ -63,10 +59,9 @@ def get_recommendations():
                 top_n=5,
             )
         else:
-            raw_recommendations = recommend_recipes(user_input=user_input, filters=filters, top_n=5)
-            if isinstance(raw_recommendations, dict):
-                return raw_recommendations, 200
-            recommendations = _format_content_recommendations(raw_recommendations)
+            recommendations = recommend_recipes(user_input=user_input, filters=filters, top_n=5)
+            if isinstance(recommendations, dict):
+                return recommendations, 200
     except ValueError as exc:
         return error_response(str(exc), 400)
     except Exception:
