@@ -39,7 +39,7 @@ def create_app():
 
     @app.route("/health")
     def health():
-        return jsonify({"status": "healthy", "api": "CookAI"})
+        return jsonify({"status": "ok", "api": "CookAI"})
 
     # ── Error handlers ───────────────────────────────────────
 
@@ -101,5 +101,5 @@ if __name__ == "__main__":
         print("✓ Database tables created")
 
     print("Starting CookAI API …")
-    print("→ http://127.0.0.1:5001")
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    print("→ http://127.0.0.1:5000")
+    app.run(host="0.0.0.0", port=5000, debug=True)

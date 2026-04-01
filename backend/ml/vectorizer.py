@@ -41,6 +41,13 @@ def get_vector_store(force_refresh: bool = False) -> VectorStore:
 
     current_signature = get_recipe_dataset_signature()
 
+    if (
+        not force_refresh
+        and _vector_store is not None
+        and _vector_store.signature == current_signature
+    ):
+        return _vector_store
+
     with _cache_lock:
         if (
             force_refresh

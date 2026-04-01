@@ -14,7 +14,7 @@ psycopg2-binary==2.9.10
 
 # Environment variables
 python-dotenv==1.0.1
-openai==1.68.2
+google-generativeai==0.8.5
 pandas==2.2.3
 scikit-learn==1.5.2
 

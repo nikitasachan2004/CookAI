@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from openai import OpenAI
+import google.generativeai as genai
 
 from config import Config
 from ml.hybrid_recommender import recommend_for_user
@@ -18,9 +18,51 @@ COMMON_FILLER_WORDS = {
     "could", "should", "would", "can", "my", "me", "we", "us", "need", "something",
     "quick", "easy", "best", "help", "what", "make", "meal",
     "tonight", "today", "dinner", "lunch", "breakfast", "snack",
+    "fresh", "dried",
 }
 TRIM_FILLER_WORDS = COMMON_FILLER_WORDS | {"with", "using"}
-SPLIT_PATTERN = re.compile(r",|\band\b|\bwith\b|\busing\b", re.IGNORECASE)
+COMPOUND_INGREDIENT_PHRASES = (
+    "mac and cheese",
+    "fish and chips",
+    "salt and pepper",
+    "oil and vinegar",
+    "half and half",
+    "sweet and sour sauce",
+)
+FILLER_PHRASES = (
+    "a bit of",
+    "bit of",
+    "some",
+    "fresh",
+    "dried",
+)
+SPLIT_PATTERN = re.compile(r"\s+\b(?:and|with|using)\b\s+", re.IGNORECASE)
+
+
+def _protect_compound_ingredient_names(text: str) -> str:
+    protected = text
+    for phrase in COMPOUND_INGREDIENT_PHRASES:
+        placeholder = phrase.replace(" and ", " andkeeper ")
+        protected = re.sub(rf"\b{re.escape(phrase)}\b", placeholder, protected, flags=re.IGNORECASE)
+    return protected
+
+
+def _strip_filler_phrases(text: str) -> str:
+    cleaned = text.strip(" ,.-")
+    changed = True
+    while cleaned and changed:
+        changed = False
+        lowered = cleaned.lower()
+        for phrase in FILLER_PHRASES:
+            if lowered.startswith(f"{phrase} "):
+                cleaned = cleaned[len(phrase):].strip(" ,.-")
+                changed = True
+                break
+            if lowered.endswith(f" {phrase}"):
+                cleaned = cleaned[: -len(phrase)].strip(" ,.-")
+                changed = True
+                break
+    return cleaned
 
 
 def _normalize_history(history: object) -> list[dict]:
@@ -43,30 +85,33 @@ def extract_ingredient_terms(message: str) -> list[str]:
     if not lowered:
         return []
 
-    raw_parts = SPLIT_PATTERN.split(lowered)
+    comma_chunks = re.split(r"[,;\n]+", _protect_compound_ingredient_names(lowered))
     ingredients = []
     seen = set()
-    for part in raw_parts:
-        tokens = re.findall(r"[a-zA-Z]{2,}", part)
-        if not tokens:
-            continue
+    for chunk in comma_chunks:
+        raw_parts = SPLIT_PATTERN.split(chunk)
+        for part in raw_parts:
+            stripped_part = _strip_filler_phrases(part)
+            tokens = re.findall(r"[a-zA-Z]{2,}", stripped_part)
+            if not tokens:
+                continue
 
-        while tokens and tokens[0] in TRIM_FILLER_WORDS:
-            tokens.pop(0)
-        while tokens and tokens[-1] in TRIM_FILLER_WORDS:
-            tokens.pop()
-        if not tokens:
-            continue
+            while tokens and tokens[0] in TRIM_FILLER_WORDS:
+                tokens.pop(0)
+            while tokens and tokens[-1] in TRIM_FILLER_WORDS:
+                tokens.pop()
+            if not tokens:
+                continue
 
-        meaningful_tokens = [token for token in tokens if token not in COMMON_FILLER_WORDS]
-        if not meaningful_tokens:
-            continue
+            meaningful_tokens = [token for token in tokens if token not in COMMON_FILLER_WORDS]
+            if not meaningful_tokens:
+                continue
 
-        phrase_tokens = meaningful_tokens[:3]
-        ingredient = " ".join(phrase_tokens).strip()
-        if ingredient and ingredient not in seen:
-            seen.add(ingredient)
-            ingredients.append(ingredient)
+            phrase_tokens = meaningful_tokens[:4]
+            ingredient = " ".join(phrase_tokens).replace("andkeeper", "and").strip()
+            if ingredient and ingredient not in seen:
+                seen.add(ingredient)
+                ingredients.append(ingredient)
     return ingredients
 
 
@@ -80,13 +125,17 @@ def _get_recommended_recipes(user_id: int | None, message: str, limit: int = 5) 
     if user_id is not None:
         return recommend_for_user(user_id=user_id, user_input=retrieval_input, filters=None, top_n=limit)
 
-    return recommend_recipes(user_input=retrieval_input, filters=None, top_n=limit)
+    recommendations = recommend_recipes(user_input=retrieval_input, filters=None, top_n=limit)
+    if isinstance(recommendations, dict):
+        return recommendations.get("recommendations", [])
+    return recommendations
 
 
-def _build_client() -> OpenAI:
-    if not Config.OPENAI_API_KEY:
-        raise RuntimeError("OPENAI_API_KEY is not configured")
-    return OpenAI(api_key=Config.OPENAI_API_KEY, timeout=Config.OPENAI_TIMEOUT_SECONDS)
+def _build_client():
+    if not Config.GEMINI_API_KEY:
+        raise RuntimeError("GEMINI_API_KEY is not configured")
+    genai.configure(api_key=Config.GEMINI_API_KEY)
+    return genai.GenerativeModel(Config.GEMINI_MODEL)
 
 
 def _hydrate_recipe_context(recommendations: list[dict]) -> list[dict]:
@@ -133,15 +182,12 @@ def _fallback_response(message: str, recipes: list[dict]) -> str:
 
 
 def _call_llm(prompt: dict[str, str]) -> str:
-    client = _build_client()
-    response = client.responses.create(
-        model=Config.OPENAI_CHAT_MODEL,
-        input=[
-            {"role": "system", "content": prompt["system"]},
-            {"role": "user", "content": prompt["user"]},
-        ],
+    model = _build_client()
+    response = model.generate_content(
+        f"System: {prompt['system']}\n\nUser: {prompt['user']}"
     )
-    return response.output_text.strip()
+    response_text = getattr(response, "text", "") or ""
+    return response_text.strip()
 
 
 def generate_chat_response(message: str, user_id: int | None = None, history: object = None) -> dict:
