@@ -8,10 +8,12 @@ CookAI is a full-stack web application that uses machine learning and AI to reco
 
 - **🧠 Hybrid Recommendation Engine**: Combines content-based scoring, user preferences, and popularity metrics
 - **🔐 User Authentication**: Secure JWT-based authentication with email/password registration
-- **💬 AI Chat Assistant**: OpenAI-powered chat for cooking guidance and recipe variations
+- **💬 AI Chat Assistant**: Gemini-powered chat for cooking guidance and recipe variations
 - **❤️ Favorites & Ratings**: Save favorite recipes and rate them (1-5 stars)
 - **📊 Personalized Preferences**: Store diet type, preferred cuisine, and max prep time
 - **📈 Recommendation Evaluation**: Built-in metrics for precision@k and hit rate analysis
+- **🖼️ Offline Recipe Media**: Cache recipe images locally for offline browsing
+- **📝 Offline Step-by-Step Cooking**: Parse and store recipe instructions as structured steps
 
 ## 🏗️ Project Structure
 
@@ -111,8 +113,8 @@ cookai/
 
 - **Python 3.10+**
 - **Node.js 16+**
-- **PostgreSQL 13+** (or SQLite for development)
-- **OpenAI API Key** (for chat features)
+- **PostgreSQL 13+**
+- **Gemini API Key** (for chat features)
 
 ### Backend Setup
 
@@ -134,9 +136,8 @@ cookai/
    DATABASE_URL=postgresql://user:password@localhost/cookai_db
    SECRET_KEY=your-secret-key
    JWT_SECRET_KEY=your-jwt-secret-key
-   OPENAI_API_KEY=sk-your-openai-api-key
-   OPENAI_CHAT_MODEL=gpt-4-mini
-   OPENAI_TIMEOUT_SECONDS=20
+   GEMINI_API_KEY=your-gemini-api-key
+   GEMINI_MODEL=gemini-flash-latest
    ```
 
 4. **Initialize the database:**
@@ -173,7 +174,9 @@ cookai/
 - `GET /api/auth/me` - Get current user profile
 
 ### Recipes
-- `GET /api/recipes` - List all recipes
+- `GET /api/recipes?page=1&per_page=20` - List paginated recipes
+- `GET /api/recipes/search?q=pasta&page=1&per_page=20` - Search recipes
+- `GET /api/recipes/categories` - Get cuisine counts
 - `GET /api/recipes/<id>` - Get recipe by ID
 - `POST /api/recipes` - Create new recipe (requires auth)
 - `DELETE /api/recipes/<id>` - Delete recipe (requires auth)
@@ -184,7 +187,10 @@ cookai/
   {
     "user_input": "tomato pasta olive oil",
     "cuisine": "italian",
-    "prep_time": 30
+    "prep_time": 30,
+    "difficulty": "medium",
+    "dietary": "vegetarian",
+    "max_time": 45
   }
   ```
 
@@ -213,14 +219,35 @@ cookai/
 
 The system uses a **hybrid approach** that combines three signals:
 
-1. **Content-Based (60%)**: TF-IDF similarity between user input and recipe ingredients
-2. **Preference-Based (20%)**: User cuisine preferences and prep time constraints
-3. **Popularity-Based (20%)**: Normalized recipe ratings and favorite counts
+1. **Ingredient Match (50%)**: TF-IDF + direct ingredient overlap
+2. **Cuisine Match (30%)**: Cuisine awareness from query and filters
+3. **Difficulty Match (10%)**: Difficulty alignment
+4. **Popularity (10%)**: View count and community signals
 
 Score calculation:
 ```
-final_score = (content_score × 0.6) + (preference_score × 0.2) + (popularity_score × 0.2)
+final_score = (ingredient_match × 0.5) + (cuisine_match × 0.3) + (difficulty_match × 0.1) + (popularity × 0.1)
 ```
+
+## 🗃️ Database Scripts
+
+Run these from the project root:
+
+```bash
+psql -U nishant -d cookai_db -f database/schema.sql
+python3 -m pip install google-generativeai requests Pillow
+python3 backend/scripts/seed_recipes.py
+python3 backend/scripts/download_images.py
+python3 backend/scripts/update_image_paths.py
+python3 backend/scripts/seed_steps.py
+```
+
+Script overview:
+- `python3 backend/scripts/download_recipes.py` downloads and caches MealDB recipes to `database/seed_data/recipes.json`
+- `python3 backend/scripts/seed_recipes.py` inserts/upserts recipes into PostgreSQL and refreshes the vectorizer
+- `python3 backend/scripts/download_images.py` downloads and converts recipe images to local JPG assets in `cookai-frontend/public/recipe-images`
+- `python3 backend/scripts/update_image_paths.py` updates recipe records to point at local image paths
+- `python3 backend/scripts/seed_steps.py` parses stored instructions into `recipe_steps`
 
 ## 🧪 Testing
 
@@ -244,7 +271,9 @@ Response includes:
 - scikit-learn - TF-IDF vectorization
 - pandas - Data manipulation
 - python-dotenv - Environment management
-- openai - ChatGPT API client
+- google-generativeai - Gemini API client
+- Pillow - image conversion to JPG
+- requests - HTTP downloads for image caching
 
 ### Frontend
 - React 18 - UI library
