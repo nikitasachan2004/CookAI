@@ -11,6 +11,25 @@ const api = axios.create({
 const getStoredAccessToken = () => localStorage.getItem('cookaiToken')
 const getStoredRefreshToken = () => localStorage.getItem('cookaiRefreshToken')
 
+const toApiError = (error, fallbackMessage = 'Request failed') => {
+  const payload = error?.response?.data
+  if (payload?.error || payload?.message) {
+    return {
+      ...payload,
+      message: payload.error || payload.message,
+    }
+  }
+
+  if (error?.code === 'ECONNABORTED') {
+    return { error: 'The request took too long. Please try again.', message: 'The request took too long. Please try again.' }
+  }
+
+  return {
+    error: error?.message || fallbackMessage,
+    message: error?.message || fallbackMessage,
+  }
+}
+
 const normalizeRecipe = (recipe = {}) => {
   const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : []
   const instructionText = recipe.instructions || ''
@@ -93,11 +112,16 @@ api.interceptors.response.use(
 )
 
 export const registerUser = async (userData) => {
-  const response = await api.post('/api/auth/register', {
-    name: userData.name,
-    email: userData.email,
-    password: userData.password,
-  })
+  let response
+  try {
+    response = await api.post('/api/auth/register', {
+      name: userData.name,
+      email: userData.email,
+      password: userData.password,
+    })
+  } catch (error) {
+    throw toApiError(error, 'Registration failed')
+  }
 
   const payload = response.data || {}
   if (payload.access_token) localStorage.setItem('cookaiToken', payload.access_token)
@@ -113,7 +137,12 @@ export const registerUser = async (userData) => {
 }
 
 export const loginUser = async (email, password) => {
-  const response = await api.post('/api/auth/login', { email, password })
+  let response
+  try {
+    response = await api.post('/api/auth/login', { email, password })
+  } catch (error) {
+    throw toApiError(error, 'Login failed')
+  }
   const payload = response.data || {}
 
   if (payload.access_token) localStorage.setItem('cookaiToken', payload.access_token)
@@ -130,17 +159,22 @@ export const loginUser = async (email, password) => {
 
 export const refreshToken = async () => {
   const refresh = getStoredRefreshToken()
-  const response = await api.post(
-    '/api/auth/refresh',
-    {},
-    refresh
-      ? {
-          headers: {
-            Authorization: `Bearer ${refresh}`,
-          },
-        }
-      : {},
-  )
+  let response
+  try {
+    response = await api.post(
+      '/api/auth/refresh',
+      {},
+      refresh
+        ? {
+            headers: {
+              Authorization: `Bearer ${refresh}`,
+            },
+          }
+        : {},
+    )
+  } catch (error) {
+    throw toApiError(error, 'Session refresh failed')
+  }
 
   const payload = response.data || {}
   if (payload.access_token) localStorage.setItem('cookaiToken', payload.access_token)
@@ -168,7 +202,12 @@ export const logoutUser = () => {
 }
 
 export async function fetchRecommendations(payload) {
-  const response = await api.post('/api/recommend', payload)
+  let response
+  try {
+    response = await api.post('/api/recommend', payload)
+  } catch (error) {
+    throw toApiError(error, 'Could not load recommendations')
+  }
   return {
     recommendations: (response.data?.recommendations || []).map(normalizeRecipe),
   }
@@ -251,10 +290,15 @@ export async function getUserStatistics(userId) {
 }
 
 export async function sendChatMessage(payload) {
-  const response = await api.post('/api/chat', {
-    message: payload.message,
-    history: payload.history || payload.context?.previousMessages || [],
-  })
+  let response
+  try {
+    response = await api.post('/api/chat', {
+      message: payload.message,
+      history: payload.history || payload.context?.previousMessages || [],
+    })
+  } catch (error) {
+    throw toApiError(error, 'AI chat failed')
+  }
   return response.data
 }
 
@@ -271,4 +315,4 @@ export async function checkHealth() {
   return response.data
 }
 
-export { api, normalizeRecipe }
+export { api, normalizeRecipe, toApiError }
