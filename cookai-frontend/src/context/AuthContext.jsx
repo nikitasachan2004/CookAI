@@ -28,10 +28,20 @@ export const AuthProvider = ({ children }) => {
       try {
         const storedToken = localStorage.getItem('cookaiToken')
         const storedUser = localStorage.getItem('cookaiUser')
-        if (!storedToken || !storedUser) return
+        if (!storedToken) return
 
-        const parsedUser = JSON.parse(storedUser)
-        setCurrentUser(parsedUser)
+        let parsedUser = null
+        if (storedUser) {
+          try {
+            parsedUser = JSON.parse(storedUser)
+          } catch (error) {
+            localStorage.removeItem('cookaiUser')
+          }
+        }
+
+        if (parsedUser) {
+          setCurrentUser(parsedUser)
+        }
         setToken(storedToken)
 
         const valid = await verifyToken()
@@ -47,6 +57,14 @@ export const AuthProvider = ({ children }) => {
         }
 
         const freshUser = await getCurrentUserProfile().catch(() => parsedUser)
+        if (!freshUser) {
+          logoutUser()
+          setCurrentUser(null)
+          setToken(null)
+          setIsAuthenticated(false)
+          return
+        }
+
         const favorites = await getFavorites().catch(() => [])
         const enrichedUser = {
           ...freshUser,
