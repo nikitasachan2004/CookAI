@@ -36,13 +36,44 @@ def load_recipe_dataframe() -> pd.DataFrame:
             "ingredients_text": _ingredients_to_text(recipe.ingredients),
             "cuisine": recipe.cuisine,
             "prep_time": recipe.prep_time,
+            "cook_time": recipe.cook_time,
+            "difficulty": recipe.difficulty,
+            "tags": recipe.tags or [],
+            "tags_text": " ".join(str(tag).strip().lower() for tag in (recipe.tags or []) if str(tag).strip()),
+            "search_text": " ".join(
+                part
+                for part in [
+                    recipe.title.strip().lower() if recipe.title else "",
+                    _ingredients_to_text(recipe.ingredients),
+                    (recipe.cuisine or "").strip().lower(),
+                    " ".join(str(tag).strip().lower() for tag in (recipe.tags or []) if str(tag).strip()),
+                    (recipe.difficulty or "").strip().lower(),
+                ]
+                if part
+            ),
+            "image_url": recipe.image_url,
+            "view_count": recipe.view_count or 0,
         }
         for recipe in recipes
     ]
 
     return pd.DataFrame(
         rows,
-        columns=["id", "title", "ingredients", "ingredients_text", "cuisine", "prep_time"],
+        columns=[
+            "id",
+            "title",
+            "ingredients",
+            "ingredients_text",
+            "cuisine",
+            "prep_time",
+            "cook_time",
+            "difficulty",
+            "tags",
+            "tags_text",
+            "search_text",
+            "image_url",
+            "view_count",
+        ],
     )
 
 

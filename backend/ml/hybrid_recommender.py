@@ -114,21 +114,20 @@ def recommend_for_user(user_id: int, user_input, filters: dict | None = None, to
     recommendations: list[dict] = []
     for _, row in ranked_df.iterrows():
         recipe_id = int(row["id"])
-        content_score = float(row["similarity_score"])
+        content_score = float(row["final_score"])
         preference_score = preference_scores.get(recipe_id, 0.0)
-        popularity_score = popularity_scores.get(recipe_id, 0.0)
+        popularity_score = max(float(row.get("popularity_score", 0.0)), popularity_scores.get(recipe_id, 0.0))
         final_score = (
-            (content_score * 0.6)
-            + (preference_score * 0.2)
-            + (popularity_score * 0.2)
+            (content_score * 0.9)
+            + (preference_score * 0.05)
+            + (popularity_score * 0.05)
         )
 
         explanation = preference_explanations.get(recipe_id)
         if explanation is None:
-            if popularity_score > 0:
-                explanation = "Recommended because it matches your ingredients and is popular with other users"
-            else:
-                explanation = "Recommended because it closely matches your ingredient input"
+            explanation = row.get("explanation")
+        elif row.get("explanation"):
+            explanation = f"{row['explanation']}; Recommended because {explanation.removeprefix('Recommended because ')}"
 
         recommendations.append(
             {
@@ -139,6 +138,9 @@ def recommend_for_user(user_id: int, user_input, filters: dict | None = None, to
                 "explanation": explanation,
                 "cuisine": row["cuisine"],
                 "prep_time": int(row["prep_time"]) if row["prep_time"] is not None else None,
+                "cook_time": int(row["cook_time"]) if row["cook_time"] is not None else None,
+                "difficulty": row["difficulty"],
+                "image_url": row["image_url"],
             }
         )
 
