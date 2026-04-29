@@ -32,8 +32,13 @@ build/
 # Logs
 *.log
 npm-debug.log*
+backend/logs/*.jsonl
 
 # Testing
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Generated offline assets
+cookai-frontend/public/recipe-images/*
+!cookai-frontend/public/recipe-images/placeholder.jpg
