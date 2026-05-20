@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Grid, List, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { fetchRecommendations, searchRecipes } from '../api/apiClient'
+import { fetchAllRecipes, fetchRecommendations, searchRecipes } from '../api/apiClient'
 import RecipeCard from '../components/RecipeCard'
 import { mockRecipes } from '../data/mockRecipes'
 import { animations, getContainerClass } from '../utils/theme'
@@ -42,7 +42,7 @@ const Recommendations = () => {
             health_preference: health,
           })
         } else {
-          result = await fetchRecommendations({})
+          result = await fetchAllRecipes({ page: 1, per_page: 24 })
         }
 
         setRecipes(result.recommendations || result.recipes || mockRecipes)
@@ -66,7 +66,9 @@ const Recommendations = () => {
           recipe.name,
           recipe.cuisine,
           ...(recipe.tags || []),
-          ...(recipe.ingredients || []),
+          ...((recipe.ingredients || []).map((ingredient) =>
+            typeof ingredient === 'string' ? ingredient : [ingredient.amount, ingredient.item].filter(Boolean).join(' '),
+          )),
         ]
           .filter(Boolean)
           .join(' ')

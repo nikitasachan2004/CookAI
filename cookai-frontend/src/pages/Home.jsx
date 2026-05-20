@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, CheckCircle2, Clock3, Search, Sparkles, Stars, Users2, UtensilsCrossed } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { fetchRecommendations } from '../api/apiClient'
+import { fetchAllRecipes, fetchRecommendations } from '../api/apiClient'
 import RecipeCard from '../components/RecipeCard'
 import IngredientInput from '../components/IngredientInput'
 import EquipmentSelector from '../components/EquipmentSelector'
@@ -47,10 +47,24 @@ const Home = () => {
   const [healthPreference, setHealthPreference] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [recommendations, setRecommendations] = useState([])
+  const [featuredRecipes, setFeaturedRecipes] = useState(mockRecipes.slice(0, 3))
   const [error, setError] = useState('')
   const [showResults, setShowResults] = useState(false)
 
-  const featuredRecipes = mockRecipes.slice(0, 3)
+  React.useEffect(() => {
+    const loadFeaturedRecipes = async () => {
+      try {
+        const result = await fetchAllRecipes({ page: 1, per_page: 3 })
+        if (result.recipes?.length) {
+          setFeaturedRecipes(result.recipes)
+        }
+      } catch (loadError) {
+        console.error('Failed to load featured recipes:', loadError)
+      }
+    }
+
+    loadFeaturedRecipes()
+  }, [])
 
   const handleFindRecipes = async () => {
     if (availableIngredients.length === 0) {
