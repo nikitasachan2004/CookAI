@@ -153,14 +153,14 @@ function magnitude(vec: SparseVector): number {
   return Math.sqrt(sum);
 }
 
-function cosineSimilarity(a: SparseVector, b: SparseVector, magA: number, magB: number): number {
-  if (magA === 0 || magB === 0) return 0;
+function recipeCoverageScore(query: SparseVector, recipe: SparseVector, recipeMag: number): number {
+  if (recipeMag === 0) return 0;
   let dot = 0;
-  for (const [term, weightA] of a) {
-    const weightB = b.get(term);
-    if (weightB !== undefined) dot += weightA * weightB;
+  for (const [term, weightRecipe] of recipe) {
+    const weightQuery = query.get(term);
+    if (weightQuery !== undefined) dot += weightQuery * weightRecipe;
   }
-  return dot / (magA * magB);
+  return dot / (recipeMag * recipeMag);
 }
 
 // Pre-compute at server startup — O(R * I) once, then O(I) per request
@@ -197,10 +197,9 @@ export function matchRecipes(input: {
 
   // Build the query vector once for all comparisons
   const queryVec = buildQueryVector(available);
-  const queryMag = magnitude(queryVec);
 
   const results = recipeVectors
-    .map(({ recipe, vec, mag }) => scoreRecipe(recipe, vec, mag, queryVec, queryMag, available, userIngredients, tools, input.goal))
+    .map(({ recipe, vec, mag }) => scoreRecipe(recipe, vec, mag, queryVec, available, userIngredients, tools, input.goal))
     .filter((result) => {
       if (!result.equipmentCompatible) return false;
       if (result.sharedIngredients === 0) return false;
@@ -240,7 +239,6 @@ function scoreRecipe(
   recipeVec: SparseVector,
   recipeMag: number,
   queryVec: SparseVector,
-  queryMag: number,
   available: Set<string>,
   userOwned: Set<string>,
   tools: Set<string>,
@@ -276,8 +274,8 @@ function scoreRecipe(
     }
   }
 
-  // Core TF-IDF cosine similarity score
-  let cosineSim = cosineSimilarity(queryVec, effectiveVec, queryMag, magnitude(effectiveVec));
+  // Core TF-IDF coverage score (does not penalize extra user ingredients)
+  let baseScore = recipeCoverageScore(queryVec, effectiveVec, magnitude(effectiveVec));
 
   // Goal alignment bonus: up to +15% added to cosine score, then clamped to 1
   const goalBonus = goal && recipe.tags.includes(goal) ? 0.15 : 0;
@@ -285,7 +283,7 @@ function scoreRecipe(
   const missingFrac = required.length > 0 ? missingIngredients.length / required.length : 0;
   const missingPenalty = missingFrac * 0.10;
 
-  const matchScore = Math.max(0, Math.min(1, cosineSim + goalBonus - missingPenalty));
+  const matchScore = Math.max(0, Math.min(1, baseScore + goalBonus - missingPenalty));
 
   return {
     id: recipe.id,
