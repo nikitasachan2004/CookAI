@@ -97,22 +97,21 @@ function GlobalHeader({
   return (
     <header className={`app-header${isAppRoute ? ' app-header--app' : ''}`}>
       <div className="header-inner">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          {/* Brand */}
+          <button
+            type="button"
+            onClick={onGoHome}
+            className="brand-button"
+            aria-label="COOKAI — go to home"
+          >
+            <span className="brand-mark" aria-hidden="true">
+              <BrandMark />
+            </span>
+            COOKAI
+          </button>
 
-        {/* Brand */}
-        <button
-          type="button"
-          onClick={onGoHome}
-          className="brand-button"
-          aria-label="COOKAI — go to home"
-        >
-          <span className="brand-mark" aria-hidden="true">
-            <BrandMark />
-          </span>
-          COOKAI
-        </button>
-
-        {/* Marketing nav — shown on landing, about, recipes */}
-        {!isAppRoute && (
+          {/* Nav links — shown everywhere */}
           <nav className="header-nav" aria-label="Site navigation">
             <Link
               to="/"
@@ -132,42 +131,46 @@ function GlobalHeader({
             >
               About
             </Link>
-            {isLanding && (
-              <Link
-                to="/app"
-                className="primary-button"
-                style={{ padding: '9px 22px', minHeight: 40, fontSize: 'var(--text-sm)' }}
-              >
-                Get started
-              </Link>
-            )}
           </nav>
-        )}
+        </div>
 
-        {/* In-app nav — shown on /app */}
-        {isAppRoute && appScreen && (
-          <div className="header-actions">
-            <AppProgress screen={appScreen} />
-            {profile && (
-              <>
-                <span className="profile-pill">
-                  <span className="profile-pill-dot" aria-hidden="true" />
-                  {profile.name}
-                  &nbsp;·&nbsp;
-                  <span aria-hidden="true">{GOAL_ICONS[profile.goal]}</span>{' '}
-                  {GOAL_LABELS[profile.goal] ?? profile.goal}
-                </span>
-                <button
-                  type="button"
-                  onClick={onEditProfile}
-                  className="ghost-button"
-                >
-                  Edit profile
-                </button>
-              </>
-            )}
-          </div>
-        )}
+        {/* Right side context actions */}
+        <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {!isAppRoute && isLanding && (
+            <Link
+              to="/app"
+              className="primary-button"
+              style={{ padding: '9px 22px', minHeight: 40, fontSize: 'var(--text-sm)' }}
+            >
+              Get started
+            </Link>
+          )}
+
+          {/* In-app actions */}
+          {isAppRoute && appScreen && (
+            <>
+              <AppProgress screen={appScreen} />
+              {profile && (
+                <>
+                  <span className="profile-pill">
+                    <span className="profile-pill-dot" aria-hidden="true" />
+                    {profile.name}
+                    &nbsp;·&nbsp;
+                    <span aria-hidden="true">{GOAL_ICONS[profile.goal]}</span>{' '}
+                    {GOAL_LABELS[profile.goal] ?? profile.goal}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={onEditProfile}
+                    className="ghost-button"
+                  >
+                    Edit profile
+                  </button>
+                </>
+              )}
+            </>
+          )}
+        </div>
 
       </div>
     </header>
