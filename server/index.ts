@@ -19,7 +19,7 @@ const matchSchema = z.object({
 });
 
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: true, // Dynamically allows any origin (like Vercel preview URLs)
   credentials: true,
 };
 app.use(cors(corsOptions));
