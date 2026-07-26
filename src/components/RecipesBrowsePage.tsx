@@ -48,6 +48,7 @@ const RECIPE_THEMES: Record<string, { from: string; to: string; emoji: string }>
 };
 
 const FALLBACK_THEME = { from: '#FF8A3D', to: '#8B5CF6', emoji: '🍴' };
+const FALLBACK_IMAGE_URL = '/images/cauliflower-rice-bowl.jpg';
 
 const GOAL_LABELS: Record<string, string> = {
   balanced:       'Balanced',
@@ -109,7 +110,12 @@ function RecipePhotoBanner({ id, title, imageUrl }: { id: string; title: string;
           alt=""
           className="browse-card-image"
           loading="lazy"
-          onError={(event) => { event.currentTarget.style.display = 'none'; }}
+          onError={(event) => {
+            const image = event.currentTarget;
+            if (image.dataset.fallbackApplied) return;
+            image.dataset.fallbackApplied = 'true';
+            image.src = FALLBACK_IMAGE_URL;
+          }}
         />
       )}
       {/* Decorative blobs */}
