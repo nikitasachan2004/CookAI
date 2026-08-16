@@ -35,10 +35,12 @@ const CATEGORIES: { label: string; icon: string; items: string[] }[] = [
   {
     label: 'Fruits & pantry',
     icon: '🍋',
-    items: [
-      'banana', 'apple', 'lemon', 'coconut milk', 'peanut butter', 'honey', 'soy sauce', 'garlic',
-      'ginger', 'basil', 'cumin', 'coriander', 'turmeric', 'garam masala', 'mustard seeds', 'chili powder'
-    ],
+    items: ['banana', 'apple', 'lemon', 'coconut milk', 'peanut butter', 'honey', 'soy sauce'],
+  },
+  {
+    label: 'Spices & herbs',
+    icon: '🌶️',
+    items: ['garlic', 'ginger', 'basil', 'cumin', 'coriander', 'turmeric', 'garam masala', 'mustard seeds', 'chili powder'],
   },
 ];
 
