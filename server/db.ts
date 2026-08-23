@@ -15,7 +15,7 @@ export async function connectDB() {
     await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
     console.log('MongoDB connected');
   } catch (err) {
-    console.error('Failed to connect to MongoDB Atlas:', err);
+    console.warn(`Failed to connect to MongoDB Atlas: ${(err as Error).message}`);
     console.log('Falling back to in-memory database for local development...');
     await startMemoryDB();
   }

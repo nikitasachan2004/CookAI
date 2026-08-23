@@ -222,17 +222,15 @@ export default function LandingPage({ onGetStarted }: Props) {
           <div className="hero-content">
             <div className="hero-eyebrow" aria-hidden="true">
               <span className="hero-eyebrow-dot" />
-              Smart Recipe Matching
+              Built by a frustrated home cook
             </div>
 
             <h1 className="hero-headline">
-              Cook great meals with what you <em>already have</em>
+              Stop staring at your fridge hoping a meal <em>appears</em>
             </h1>
 
             <p className="hero-subline">
-              Tell COOKAI what's in your kitchen. In seconds, you get
-              real, practical recipes matched to your exact ingredients
-              and equipment — no grocery run required.
+              I built CookAI for one simple reason: I was tired of staring at a fridge full of random ingredients and ending up ordering takeout. Tell it what you actually have in your kitchen, and it’ll instantly find a recipe you can cook right now. No grocery runs. No more food waste.
             </p>
 
             <div className="hero-actions">
@@ -339,11 +337,10 @@ export default function LandingPage({ onGetStarted }: Props) {
             <p className="section-label">How it works</p>
             <div className="section-divider section-divider--center" />
             <h2 className="section-heading" id="how-title">
-              From fridge to fork in three steps
+              How it actually works (no magic, just math)
             </h2>
             <p className="section-subheading">
-              No scrolling through irrelevant recipes. No guessing substitutions.
-              Just tell us what you have and we handle the rest.
+              I didn't want another app that gives me a recipe for a 5-course meal when all I have is pasta and cheese. Just tell the app what you have, and it handles the rest.
             </p>
           </div>
 
@@ -353,11 +350,9 @@ export default function LandingPage({ onGetStarted }: Props) {
               <div className="how-step-number" aria-hidden="true">1</div>
               <div>
                 <div className="how-step-icon" aria-hidden="true">👤</div>
-                <h3 className="how-step-title">Set your profile</h3>
+                <h3 className="how-step-title">Tell us your goal & gear</h3>
                 <p className="how-step-desc">
-                  Tell us your name, your meal goal — balanced, healthy, high
-                  protein, or weight-loss — and which kitchen equipment you own.
-                  Takes under a minute.
+                  Just want a quick high-protein meal? Only have a microwave and a pan? Let the app know so it stops suggesting 3-hour oven roasts.
                 </p>
               </div>
             </article>
@@ -366,11 +361,9 @@ export default function LandingPage({ onGetStarted }: Props) {
               <div className="how-step-number" aria-hidden="true">2</div>
               <div>
                 <div className="how-step-icon" aria-hidden="true">🥦</div>
-                <h3 className="how-step-title">Pick your ingredients</h3>
+                <h3 className="how-step-title">Dump your fridge contents</h3>
                 <p className="how-step-desc">
-                  Browse organised ingredient categories or type anything
-                  freeform. Select everything currently in your fridge, pantry,
-                  or on your counter.
+                  Just tap or type whatever you've got. Got half an onion, two eggs, and some rice? Add it all in. Don't overthink it.
                 </p>
               </div>
             </article>
@@ -379,11 +372,9 @@ export default function LandingPage({ onGetStarted }: Props) {
               <div className="how-step-number" aria-hidden="true">3</div>
               <div>
                 <div className="how-step-icon" aria-hidden="true">🍽️</div>
-                <h3 className="how-step-title">Get matched recipes</h3>
+                <h3 className="how-step-title">Get a recipe you can actually cook</h3>
                 <p className="how-step-desc">
-                  COOKAI instantly ranks recipes by match quality — exact,
-                  near, and partial matches — filtered by your equipment and
-                  aligned to your goal.
+                  The engine instantly scores recipes based on what you have. No "missing ingredient" surprises halfway through cooking.
                 </p>
               </div>
             </article>
@@ -400,15 +391,13 @@ export default function LandingPage({ onGetStarted }: Props) {
           <div className="showcase-split">
 
             <div className="showcase-content">
-              <p className="section-label">Everything in your kitchen</p>
+              <p className="section-label">Keep it simple</p>
               <div className="section-divider" />
               <h2 className="section-heading">
-                Browse by category, or just type it in
+                Don't overthink it, just tell it what's there
               </h2>
               <p className="section-subheading" style={{ marginBottom: 'var(--sp-6)' }}>
-                Proteins, grains, vegetables, dairy, fruits — ingredients are
-                organised so you can quickly check what you have. Or type
-                anything and we'll match it.
+                Pick from the list or just type whatever is sitting on your counter. Even if you just have eggs, rice, and soy sauce, there's a meal in there somewhere.
               </p>
 
               <div className="ingredient-cluster" style={{ maxWidth: 360, marginBottom: 'var(--sp-7)' }}>
@@ -460,23 +449,20 @@ export default function LandingPage({ onGetStarted }: Props) {
             </div>
 
             <div className="showcase-content">
-              <p className="section-label">Smart matching engine</p>
+              <p className="section-label">No BS matching</p>
               <div className="section-divider" />
               <h2 className="section-heading">
-                Ranked results, not a random list
+                Honest rankings, not a random list
               </h2>
               <p className="section-subheading" style={{ marginBottom: 'var(--sp-6)' }}>
-                Every recipe is scored against your exact ingredients. Exact
-                matches rise to the top. Near-matches show what's missing.
-                Low matches are clearly labeled — so you always know where
-                you stand.
+                I hated when apps said "You have a match!" but I was missing the main ingredient. This app scores every recipe honestly so you always know where you stand.
               </p>
 
               <div style={{ display: 'grid', gap: 'var(--sp-3)', maxWidth: 380 }}>
                 {[
-                  { badge: 'Exact match', desc: 'You have every ingredient. Ready to cook right now.' },
-                  { badge: 'Near match',  desc: 'Missing one or two items. Easy to adapt or grab quickly.' },
-                  { badge: 'Low match',   desc: 'Fewer ingredients overlap, but still worth browsing.' },
+                  { badge: 'Exact match', desc: 'You have every single thing. Go cook it right now.' },
+                  { badge: 'Near match',  desc: 'You\'re missing a minor ingredient. Usually easy to skip or swap out.' },
+                  { badge: 'Low match',   desc: 'You barely have the stuff for this, but hey, maybe you want to go to the store anyway.' },
                 ].map((tier) => (
                   <div
                     key={tier.badge}
@@ -522,14 +508,13 @@ export default function LandingPage({ onGetStarted }: Props) {
         <div className="container">
 
           <div className="section-header-block">
-            <p className="section-label">Why COOKAI</p>
+            <p className="section-label">Why I built this</p>
             <div className="section-divider" />
             <h2 className="section-heading" id="features-title">
-              Built for the way real kitchens work
+              Designed for real people in real kitchens
             </h2>
             <p className="section-subheading">
-              No subscription, no bloated recipe database, no ads.
-              Just a sharp, focused tool that does one thing brilliantly.
+              No $10/month subscriptions, no ads, no life story before the recipe. Just a tool that solves the "what's for dinner" problem.
             </p>
           </div>
 
@@ -539,9 +524,7 @@ export default function LandingPage({ onGetStarted }: Props) {
               <div className="feature-icon-wrap" aria-hidden="true">🎯</div>
               <h3 className="feature-title">Goal-aware matching</h3>
               <p className="feature-desc">
-                Set a meal goal and COOKAI filters results accordingly.
-                High-protein, weight-loss, healthy, or balanced —
-                every suggestion aligns with how you want to eat.
+                Trying to eat healthy? Only want high-protein? The app actually respects your diet goals instead of ignoring them.
               </p>
             </article>
 
@@ -549,9 +532,7 @@ export default function LandingPage({ onGetStarted }: Props) {
               <div className="feature-icon-wrap" aria-hidden="true">🔧</div>
               <h3 className="feature-title">Equipment-aware filtering</h3>
               <p className="feature-desc">
-                Tell us you only have a microwave and a pan. COOKAI
-                will never show you recipes that need an oven or
-                blender you don't own.
+                If you only have a stove and a single pan, the app won't tell you to use a blender. It's that simple.
               </p>
             </article>
 
@@ -559,19 +540,15 @@ export default function LandingPage({ onGetStarted }: Props) {
               <div className="feature-icon-wrap" aria-hidden="true">⚡</div>
               <h3 className="feature-title">Instant, no fluff</h3>
               <p className="feature-desc">
-                Results appear in milliseconds. No loading spinners,
-                no waiting on AI generation — just fast, reliable
-                matching from a curated recipe library.
+                I hate waiting for slow AI bots to type out a recipe. This uses a curated database and lightning-fast math to match you instantly.
               </p>
             </article>
 
             <article className="feature-card feature-card--accent">
               <div className="feature-icon-wrap" aria-hidden="true">📋</div>
-              <h3 className="feature-title">Full recipe detail</h3>
+              <h3 className="feature-title">Straight to the point</h3>
               <p className="feature-desc">
-                Each recipe includes prep instructions, a full
-                ingredient list with quantities, step-by-step cooking
-                guide, pro tips, and a serving suggestion.
+                No 5-page blogs about my grandmother's summer in Italy. Just the ingredients, the steps, and some practical tips.
               </p>
             </article>
 
@@ -591,13 +568,10 @@ export default function LandingPage({ onGetStarted }: Props) {
               <p className="section-label section-label--on-dark">Kitchen tools</p>
               <div className="section-divider" />
               <h2 className="section-heading section-heading--on-dark">
-                Works with whatever you have in your kitchen
+                Works even if your kitchen is just a microwave
               </h2>
               <p className="section-subheading section-subheading--on-dark" style={{ marginBottom: 'var(--sp-7)' }}>
-                Stove, oven, pan, pot, microwave, blender — just tell us
-                what's available. Recipes that need tools you don't have
-                are automatically excluded, so every suggestion is
-                actually cookable for you.
+                I've lived in apartments where a hot plate was my only stove. Just check off what you actually own, and the app filters out everything else so you're not left frustrated.
               </p>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)', marginBottom: 'var(--sp-8)' }}>
@@ -656,11 +630,10 @@ export default function LandingPage({ onGetStarted }: Props) {
           <div className="cta-card">
             <div className="cta-card-content">
               <h2 className="cta-headline" id="cta-title">
-                Open your fridge.<br />Start cooking.
+                Open your fridge.<br />Let's make dinner.
               </h2>
               <p className="cta-sub">
-                No sign-up. No subscription. Just tell COOKAI what you
-                have and get practical recipes in seconds.
+                No sign-ups required. Just type what you have and find out what you're eating tonight.
               </p>
               <div className="cta-actions">
                 <button
