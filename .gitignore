@@ -42,3 +42,13 @@ htmlcov/
 # Generated offline assets
 cookai-frontend/public/recipe-images/*
 !cookai-frontend/public/recipe-images/placeholder.jpg
+
+# Documentation and SRS
+DESIGN-starbucks.md
+SRS/
+
+# Build outputs (server)
+dist-server/
+
+# Environment variants
+.env.*

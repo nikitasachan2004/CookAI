@@ -1,321 +1,71 @@
-# CookAI - AI-Powered Recipe Recommendation Engine
+# 🍳 COOKAI
 
-## 📖 Overview
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white)
+![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=%2361DAFB)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
-CookAI is a full-stack web application that uses machine learning and AI to recommend recipes based on available ingredients, dietary preferences, and cooking constraints. The platform combines TF-IDF content-based filtering, user preferences, and popularity signals to deliver personalized recipe suggestions through a modern React frontend and robust Flask API.
+**COOKAI** is a smart, ingredient-based recipe recommendation engine that figures out exactly what you can cook based on the ingredients you already have in your kitchen. 
+
+Unlike basic search engines, COOKAI uses an industry-standard **TF-IDF + Cosine Similarity mathematical engine** to weigh your ingredients, factor in your health goals, and tolerate minor typos, delivering highly personalized and practical recipe matches.
+
+---
 
 ## ✨ Features
 
-- **🧠 Hybrid Recommendation Engine**: Combines content-based scoring, user preferences, and popularity metrics
-- **🔐 User Authentication**: Secure JWT-based authentication with email/password registration
-- **💬 AI Chat Assistant**: Gemini-powered chat for cooking guidance and recipe variations
-- **❤️ Favorites & Ratings**: Save favorite recipes and rate them (1-5 stars)
-- **📊 Personalized Preferences**: Store diet type, preferred cuisine, and max prep time
-- **📈 Recommendation Evaluation**: Built-in metrics for precision@k and hit rate analysis
-- **🖼️ Offline Recipe Media**: Cache recipe images locally for offline browsing
-- **📝 Offline Step-by-Step Cooking**: Parse and store recipe instructions as structured steps
+- 🧠 **Smart Recommendation Engine:** Uses Term Frequency-Inverse Document Frequency (TF-IDF) and Cosine Similarity to properly weigh rare ingredients (like saffron) higher than common ones (like onions) for highly accurate matching.
+- 🔄 **Intelligent Substitutions:** Don't have pork? The engine knows beef works too, scoring you appropriately and suggesting the swap on the recipe card.
+- 🔤 **Fuzzy Typo Tolerance:** Built-in Levenshtein distance algorithm automatically corrects typos (e.g., "spinnach" → "spinach").
+- ⏱️ **Time Budget Filtering:** Filter recipes on the fly based on how much time you have to cook (e.g., ≤15 mins, ≤30 mins).
+- 🎨 **Dynamic Gradients:** A deterministic hashing system generates beautiful, unique color gradients for recipes missing photography.
+- 🎯 **Goal-Oriented:** Tells the engine if you want meals optimized for *Weight Loss*, *High Protein*, or *Balanced* eating.
 
-## 🏗️ Project Structure
+## 🛠️ Tech Stack
 
-```
-cookai/
-├── backend/                        # Flask API
-│   ├── app.py                     # Application entry point
-│   ├── config.py                  # Configuration from environment
-│   ├── db.py                      # SQLAlchemy instance
-│   │
-│   ├── models/                    # SQLAlchemy ORM models
-│   │   ├── user.py               # User accounts
-│   │   ├── recipe.py             # Recipe data
-│   │   ├── favorite.py           # User favorites
-│   │   ├── rating.py             # Recipe ratings
-│   │   ├── ingredient.py         # Ingredient master list
-│   │   └── user_preference.py    # User preferences
-│   │
-│   ├── routes/                    # API endpoints
-│   │   ├── auth_routes.py        # Register, login, refresh tokens
-│   │   ├── recipe_routes.py      # CRUD for recipes
-│   │   ├── recommend_routes.py   # Recommendation endpoint
-│   │   ├── chat_routes.py        # AI chat endpoint
-│   │   ├── user_routes.py        # Favorites, preferences, ratings
-│   │   ├── ingredient_routes.py  # Ingredient search
-│   │   └── evaluation_routes.py  # Evaluation metrics
-│   │
-│   ├── ml/                        # Machine learning
-│   │   ├── vectorizer.py         # TF-IDF vectorizer with caching
-│   │   ├── recommender.py        # Content-based scoring
-│   │   ├── hybrid_recommender.py # Multi-signal hybrid scoring
-│   │   └── preprocess.py         # Data preprocessing
-│   │
-│   ├── services/                  # Business logic
-│   │   ├── chat_service.py       # Chat response generation
-│   │   └── prompt_builder.py     # LLM prompt construction
-│   │
-│   ├── evaluation/                # Metrics & testing
-│   │   ├── evaluator.py          # Evaluation framework
-│   │   └── metrics.py            # Precision@k, hit rate
-│   │
-│   ├── utils/                     # Utility functions
-│   │   ├── auth_utils.py         # JWT, password hashing
-│   │   ├── recipe_utils.py       # Recipe normalization
-│   │   └── logger.py             # Recommendation logging
-│   │
-│   ├── logs/                      # Runtime logs
-│   │   └── recommendations.jsonl # JSONL log of all recommendations
-│   │
-│   └── requirements.txt           # Python dependencies
-│
-├── cookai-frontend/               # React + Vite frontend
-│   ├── src/
-│   │   ├── pages/                # Page components
-│   │   │   ├── Home.jsx
-│   │   │   ├── Recommendations.jsx
-│   │   │   ├── RecipeDetail.jsx
-│   │   │   ├── AIChat.jsx
-│   │   │   ├── Login.jsx
-│   │   │   └── Signup.jsx
-│   │   │
-│   │   ├── components/           # Reusable components
-│   │   │   ├── RecipeCard.jsx
-│   │   │   ├── ChatBubble.jsx
-│   │   │   └── ... (other UI components)
-│   │   │
-│   │   ├── context/              # React context
-│   │   │   └── AuthContext.jsx   # Authentication state
-│   │   │
-│   │   ├── api/                  # API client
-│   │   │   └── apiClient.js      # Axios instance & methods
-│   │   │
-│   │   ├── utils/                # Utilities
-│   │   │   ├── helpers.js
-│   │   │   └── theme.js
-│   │   │
-│   │   └── App.jsx
-│   │
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   └── postcss.config.js
-│
-├── database/
-│   └── schema.sql                # PostgreSQL schema
-│
-├── docs/                         # Documentation
-│   ├── architecture.md           # System design
-│   └── workflow.md               # User workflows
-│
-└── README.md                     # This file
-```
+- **Frontend:** React 18, Vite, Vanilla CSS
+- **Backend:** Node.js, Express
+- **Language:** 100% TypeScript
+- **Validation:** Zod for strong runtime API typings
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
 
-- **Python 3.10+**
-- **Node.js 16+**
-- **PostgreSQL 13+**
-- **Gemini API Key** (for chat features)
+### Installation
 
-### Backend Setup
-
-1. **Create a Python virtual environment:**
+1. Clone the repository:
    ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   git clone https://github.com/yourusername/cookai.git
+   cd cookai
    ```
 
-2. **Install dependencies:**
+2. Install the dependencies for both frontend and backend:
    ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up environment variables:**
-   Create a `.env` file in the `backend/` directory:
-   ```env
-   DATABASE_URL=postgresql://user:password@localhost/cookai_db
-   SECRET_KEY=your-secret-key
-   JWT_SECRET_KEY=your-jwt-secret-key
-   GEMINI_API_KEY=your-gemini-api-key
-   GEMINI_MODEL=gemini-flash-latest
-   ```
-
-4. **Initialize the database:**
-   ```bash
-   psql -U postgres -d cookai_db -f ../database/schema.sql
-   ```
-
-5. **Run the Flask server:**
-   ```bash
-   python app.py
-   ```
-   Server runs on `http://localhost:5000`
-
-### Frontend Setup
-
-1. **Install dependencies:**
-   ```bash
-   cd cookai-frontend
    npm install
    ```
 
-2. **Start development server:**
+3. Start the development server (runs both the Vite frontend and Node backend concurrently):
    ```bash
    npm run dev
    ```
-   Frontend runs on `http://localhost:5173`
 
-## 📡 API Endpoints
+4. Open your browser and navigate to `http://localhost:5173`.
 
-### Authentication
-- `POST /api/auth/register` - Create new user account
-- `POST /api/auth/login` - Authenticate and get JWT tokens
-- `POST /api/auth/refresh` - Get new access token using refresh token
-- `GET /api/auth/me` - Get current user profile
+## 📂 Project Structure
 
-### Recipes
-- `GET /api/recipes?page=1&per_page=20` - List paginated recipes
-- `GET /api/recipes/search?q=pasta&page=1&per_page=20` - Search recipes
-- `GET /api/recipes/categories` - Get cuisine counts
-- `GET /api/recipes/<id>` - Get recipe by ID
-- `POST /api/recipes` - Create new recipe (requires auth)
-- `DELETE /api/recipes/<id>` - Delete recipe (requires auth)
+- `/src` — The React frontend (components, types, API client, CSS).
+- `/server` — The Express backend (TF-IDF matching engine, data, routing).
+- `/public` — Static assets (images, icons).
 
-### Recommendations
-- `POST /api/recommend` - Get personalized recommendations
-  ```json
-  {
-    "user_input": "tomato pasta olive oil",
-    "cuisine": "italian",
-    "prep_time": 30,
-    "difficulty": "medium",
-    "dietary": "vegetarian",
-    "max_time": 45
-  }
-  ```
+## 🔮 Future Roadmap
 
-### User Features
-- `GET /api/favorites` - Get user's favorite recipes (requires auth)
-- `POST /api/favorites/<recipe_id>` - Add to favorites (requires auth)
-- `DELETE /api/favorites/<recipe_id>` - Remove from favorites (requires auth)
-- `GET /api/user/preferences` - Get user preferences (requires auth)
-- `POST /api/user/preferences` - Update preferences (requires auth)
-- `POST /api/ratings/<recipe_id>` - Rate a recipe (requires auth)
-- `GET /api/ratings/<recipe_id>` - Get recipe average rating
+- Migrate static data (`data.ts`) to a scalable database like **MongoDB** or **PostgreSQL**.
+- Move image hosting from the local filesystem to an S3-compatible cloud bucket.
+- Implement user authentication (Clerk/Supabase) to save favorite recipes and pantry inventory across devices.
 
-### Chat
-- `POST /api/chat` - Send message to AI assistant
-  ```json
-  {
-    "message": "What can I make with chicken?",
-    "history": [...]
-  }
-  ```
+## 📄 License
 
-### Evaluation
-- `GET /api/evaluation?k=5` - Get recommendation metrics
-
-## 🤖 Recommendation Algorithm
-
-The system uses a **hybrid approach** that combines three signals:
-
-1. **Ingredient Match (50%)**: TF-IDF + direct ingredient overlap
-2. **Cuisine Match (30%)**: Cuisine awareness from query and filters
-3. **Difficulty Match (10%)**: Difficulty alignment
-4. **Popularity (10%)**: View count and community signals
-
-Score calculation:
-```
-final_score = (ingredient_match × 0.5) + (cuisine_match × 0.3) + (difficulty_match × 0.1) + (popularity × 0.1)
-```
-
-## 🗃️ Database Scripts
-
-Run these from the project root:
-
-```bash
-psql -U nishant -d cookai_db -f database/schema.sql
-python3 -m pip install google-generativeai requests Pillow
-python3 backend/scripts/seed_recipes.py
-python3 backend/scripts/download_images.py
-python3 backend/scripts/update_image_paths.py
-python3 backend/scripts/seed_steps.py
-```
-
-Script overview:
-- `python3 backend/scripts/download_recipes.py` downloads and caches MealDB recipes to `database/seed_data/recipes.json`
-- `python3 backend/scripts/seed_recipes.py` inserts/upserts recipes into PostgreSQL and refreshes the vectorizer
-- `python3 backend/scripts/download_images.py` downloads and converts recipe images to local JPG assets in `cookai-frontend/public/recipe-images`
-- `python3 backend/scripts/update_image_paths.py` updates recipe records to point at local image paths
-- `python3 backend/scripts/seed_steps.py` parses stored instructions into `recipe_steps`
-
-## 🧪 Testing
-
-Run evaluation metrics:
-```bash
-curl http://localhost:5000/api/evaluation?k=5
-```
-
-Response includes:
-- `avg_precision_at_k` - Precision of recommendations at cutoff k
-- `avg_hit_rate` - Percentage of recommendations that match user preferences
-- `num_users_evaluated` - Number of users in evaluation set
-
-## 📦 Dependencies
-
-### Backend
-- Flask & Flask-CORS - Web framework
-- Flask-SQLAlchemy - ORM
-- Flask-JWT-Extended - JWT authentication
-- Flask-Bcrypt - Password hashing
-- scikit-learn - TF-IDF vectorization
-- pandas - Data manipulation
-- python-dotenv - Environment management
-- google-generativeai - Gemini API client
-- Pillow - image conversion to JPG
-- requests - HTTP downloads for image caching
-
-### Frontend
-- React 18 - UI library
-- React Router - Navigation
-- Framer Motion - Animations
-- Tailwind CSS - Styling
-- Lucide Icons - Icon set
-- Axios - HTTP client
-- Vite - Build tool
-
-## 🔒 Security
-
-- Passwords hashed with bcrypt
-- JWT tokens with 15-minute expiration (refresh tokens: 7 days)
-- CORS configured for frontend origin
-- Rate limiting on chat endpoint (10 requests/minute)
-- Environment-based configuration (no secrets in code)
-
-## 📈 Performance
-
-- TF-IDF vectorizer caches and invalidates on recipe dataset changes
-- Database queries use indexes on frequently searched fields
-- Recommendation logs stored in JSONL format for analytics
-- Async-ready architecture for scaling
-
-## 🛣️ Development Roadmap
-
-- [ ] Deploy to cloud (AWS/GCP)
-- [ ] Add more recommendation signals (cook time, dietary labels)
-- [ ] Implement user-user collaborative filtering
-- [ ] Mobile app (React Native)
-- [ ] Real-time chat with streaming responses
-- [ ] Recipe image recognition
-
-## 📝 License
-
-MIT License - See LICENSE file for details
-
-## 🤝 Contributing
-
-Contributions welcome! Please fork, create a feature branch, and submit a pull request.
-
----
-
-**Last Updated**: April 1, 2026
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
