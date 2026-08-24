@@ -12,7 +12,7 @@ const goalSchema = z.enum(['balanced', 'healthy', 'weight-loss', 'high-protein']
 const profileSchema = z.object({ name: z.string().trim().min(1).max(40), goal: goalSchema, equipment: z.array(z.string().trim().min(1).max(30)).max(12) });
 const matchSchema = z.object({
   userId: z.string().optional(),
-  ingredients: z.array(z.string().trim().min(1).max(50)).min(1).max(30),
+  ingredients: z.array(z.string().trim().min(1).max(50)).min(1, 'Add at least one ingredient to search.').max(150, 'You can only select up to 150 ingredients.'),
   equipment: z.array(z.string().trim().min(1).max(30)).max(12).optional().default([]),
   goal: goalSchema.optional(),
   maxMinutes: z.number().int().min(5).max(240).optional(),
@@ -39,7 +39,7 @@ app.post('/api/profile', (request, response) => {
 });
 app.post('/api/ingredients/match', (request, response) => {
   const parsed = matchSchema.safeParse(request.body);
-  if (!parsed.success) return response.status(400).json({ error: 'Add at least one ingredient to search.' });
+  if (!parsed.success) return response.status(400).json({ error: parsed.error.errors[0]?.message || 'Invalid request.' });
   const saved = parsed.data.userId ? profiles.get(parsed.data.userId) : undefined;
   const result = matchRecipes({ ingredients: parsed.data.ingredients, equipment: parsed.data.equipment.length ? parsed.data.equipment : saved?.equipment ?? [], goal: parsed.data.goal ?? saved?.goal, maxMinutes: parsed.data.maxMinutes });
   return response.json(result);
