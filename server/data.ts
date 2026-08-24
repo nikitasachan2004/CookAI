@@ -8,6 +8,12 @@ export const equipment: Equipment[] = [
   { id: 'blender', name: 'Blender' },
   { id: 'pan', name: 'Pan' },
   { id: 'pot', name: 'Pot' },
+  { id: 'air-fryer', name: 'Air Fryer' },
+  { id: 'rice-cooker', name: 'Rice Cooker' },
+  { id: 'toaster', name: 'Toaster' },
+  { id: 'slow-cooker', name: 'Slow Cooker' },
+  { id: 'food-processor', name: 'Food Processor' },
+  { id: 'baking-sheet', name: 'Baking Sheet' },
 ];
 
 export const ingredients: Ingredient[] = [

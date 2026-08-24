@@ -22,6 +22,12 @@ const EQUIPMENT_ICONS: Record<string, string> = {
   blender:   '🌀',
   pan:       '🍳',
   pot:       '🫕',
+  'air-fryer': '♨️',
+  'rice-cooker': '🍚',
+  toaster:   '🍞',
+  'slow-cooker': '🍲',
+  'food-processor': '🔪',
+  'baking-sheet': '🥘',
 };
 
 export default function Onboarding({ initialProfile, onSave, onBack }: Props) {
