@@ -18,7 +18,11 @@ const matchSchema = z.object({
   maxMinutes: z.number().int().min(5).max(240).optional(),
 });
 
-app.use(cors());
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '32kb' }));
 app.get('/api/equipment', (_request, response) => response.json({ equipment }));
 app.get('/api/ingredients', (_request, response) => {
