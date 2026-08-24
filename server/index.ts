@@ -39,7 +39,7 @@ app.post('/api/profile', (request, response) => {
 });
 app.post('/api/ingredients/match', (request, response) => {
   const parsed = matchSchema.safeParse(request.body);
-  if (!parsed.success) return response.status(400).json({ error: parsed.error.errors[0]?.message || 'Invalid request.' });
+  if (!parsed.success) return response.status(400).json({ error: parsed.error.issues[0]?.message || 'Invalid request.' });
   const saved = parsed.data.userId ? profiles.get(parsed.data.userId) : undefined;
   const result = matchRecipes({ ingredients: parsed.data.ingredients, equipment: parsed.data.equipment.length ? parsed.data.equipment : saved?.equipment ?? [], goal: parsed.data.goal ?? saved?.goal, maxMinutes: parsed.data.maxMinutes });
   return response.json(result);
