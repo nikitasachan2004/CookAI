@@ -1,5 +1,33 @@
-import { describe, expect, it } from 'vitest';
-import { getRecipe, matchRecipes, normalizeIngredient } from './matching.js';
+import { beforeAll, afterAll, describe, expect, it } from 'vitest';
+import { getRecipe, matchRecipes, normalizeIngredient, initializeMatching } from './matching.js';
+import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import { RecipeModel } from './models/Recipe.js';
+import { recipes } from './data.js';
+
+let mongoServer: MongoMemoryServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri);
+
+  for (const recipe of recipes) {
+    const { id, ...rest } = recipe;
+    await RecipeModel.updateOne(
+      { _id: id },
+      { $set: rest },
+      { upsert: true }
+    );
+  }
+
+  await initializeMatching();
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+});
 
 describe('ingredient normalization', () => {
   it('maps aliases to canonical ingredient names', () => {

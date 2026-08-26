@@ -1,5 +1,6 @@
-import { detailedInstructions, ingredients, recipeImages, recipes } from './data.js';
+import { detailedInstructions, ingredients, recipeImages } from './data.js';
 import type { Goal, Recipe, RecipeDetail } from './types.js';
+import { RecipeModel } from './models/Recipe.js';
 
 // ─── Alias dictionary ──────────────────────────────────────────────────────
 const aliases = new Map<string, string>();
@@ -112,20 +113,8 @@ export function normalizeIngredient(value: string): string | null {
 //    5 ingredients matching 4 — proper proportional ranking.
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Build the IDF (Inverse Document Frequency) map once at startup.
-// IDF(t) = log( N / df(t) ) where N = total recipes, df(t) = recipes containing t
-const N = recipes.length;
-const docFrequency = new Map<string, number>(); // ingredient → # of recipes it appears in
-
-for (const recipe of recipes) {
-  const seen = new Set<string>();
-  for (const ing of recipe.ingredients) {
-    if (!seen.has(ing.name)) {
-      docFrequency.set(ing.name, (docFrequency.get(ing.name) ?? 0) + 1);
-      seen.add(ing.name);
-    }
-  }
-}
+let N = 0;
+const docFrequency = new Map<string, number>();
 
 function idf(term: string): number {
   const df = docFrequency.get(term) ?? 0;
@@ -134,10 +123,7 @@ function idf(term: string): number {
   return Math.log((N + 1) / (df + 1)) + 1;
 }
 
-// Pre-compute TF-IDF vector + cached magnitude for every recipe at startup.
-// TF here is binary (0 or 1) since ingredient lists are unordered sets.
-// This means TF-IDF reduces to just IDF — the right choice for short lists.
-type SparseVector = Map<string, number>; // ingredient → idf weight
+type SparseVector = Map<string, number>;
 
 function buildRecipeVector(recipe: Recipe): SparseVector {
   const vec: SparseVector = new Map();
@@ -163,11 +149,30 @@ function recipeCoverageScore(query: SparseVector, recipe: SparseVector, recipeMa
   return dot / (recipeMag * recipeMag);
 }
 
-// Pre-compute at server startup — O(R * I) once, then O(I) per request
-const recipeVectors: { recipe: Recipe; vec: SparseVector; mag: number }[] = recipes.map((r) => {
-  const vec = buildRecipeVector(r);
-  return { recipe: r, vec, mag: magnitude(vec) };
-});
+let recipeVectors: { recipe: Recipe; vec: SparseVector; mag: number }[] = [];
+let allRecipes: Recipe[] = [];
+
+export async function initializeMatching() {
+  const docs = await RecipeModel.find().lean();
+  allRecipes = docs.map(d => ({ ...d, id: d._id as string })) as unknown as Recipe[];
+  N = allRecipes.length;
+  docFrequency.clear();
+
+  for (const recipe of allRecipes) {
+    const seen = new Set<string>();
+    for (const ing of recipe.ingredients) {
+      if (!seen.has(ing.name)) {
+        docFrequency.set(ing.name, (docFrequency.get(ing.name) ?? 0) + 1);
+        seen.add(ing.name);
+      }
+    }
+  }
+
+  recipeVectors = allRecipes.map((r) => {
+    const vec = buildRecipeVector(r);
+    return { recipe: r, vec, mag: magnitude(vec) };
+  });
+}
 
 // ─── Build query vector from user's available ingredients ──────────────────
 // We treat the user's ingredient set as a "pseudo-document" and weight each
@@ -304,7 +309,7 @@ function scoreRecipe(
 
 // ─── All recipes listing ───────────────────────────────────────────────────
 export function getAllRecipes() {
-  return recipes.map((recipe) => ({
+  return allRecipes.map((recipe) => ({
     id: recipe.id,
     imageUrl: recipeImages[recipe.id],
     title: recipe.title,
@@ -319,7 +324,7 @@ export function getAllRecipes() {
 
 // ─── Recipe detail ─────────────────────────────────────────────────────────
 export function getRecipe(id: string): RecipeDetail | undefined {
-  const recipe = recipes.find((item) => item.id === id);
+  const recipe = allRecipes.find((item) => item.id === id);
   if (!recipe) return undefined;
   const instructions = detailedInstructions[recipe.id] ?? recipe.instructions;
   return {
