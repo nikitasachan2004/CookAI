@@ -20,6 +20,7 @@ const matchSchema = z.object({
   equipment: z.array(z.string().trim().min(1).max(30)).max(12).optional().default([]),
   goal: goalSchema.optional(),
   maxMinutes: z.number().int().min(5).max(240).optional(),
+  vegetarian: z.boolean().optional(),
 });
 
 const corsOptions = {
@@ -71,7 +72,13 @@ app.post('/api/ingredients/match', optionalAuth, (request, response) => {
   
   const reqUserId = (request as any).userId ?? parsed.data.userId;
   const saved = reqUserId ? profiles.get(reqUserId) : undefined;
-  const result = matchRecipes({ ingredients: parsed.data.ingredients, equipment: parsed.data.equipment.length ? parsed.data.equipment : saved?.equipment ?? [], goal: parsed.data.goal ?? saved?.goal, maxMinutes: parsed.data.maxMinutes });
+  const result = matchRecipes({ 
+    ingredients: parsed.data.ingredients, 
+    equipment: parsed.data.equipment.length ? parsed.data.equipment : saved?.equipment ?? [], 
+    goal: parsed.data.goal ?? saved?.goal, 
+    maxMinutes: parsed.data.maxMinutes,
+    vegetarian: parsed.data.vegetarian
+  });
   return response.json(result);
 });
 app.get('/api/recipes', (_request, response) => {

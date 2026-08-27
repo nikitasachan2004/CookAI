@@ -64,6 +64,8 @@ const SUBSTITUTIONS: Record<string, string[]> = {
   honey:           ['peanut butter'],
 };
 
+const NON_VEG_INGREDIENTS = new Set(['beef', 'pork', 'chicken', 'salmon', 'shrimp', 'tuna']);
+
 // ─── Levenshtein distance — fuzzy typo tolerance ───────────────────────────
 function levenshtein(a: string, b: string): number {
   const m = a.length, n = b.length;
@@ -192,6 +194,7 @@ export function matchRecipes(input: {
   equipment: string[];
   goal?: Goal;
   maxMinutes?: number;
+  vegetarian?: boolean;
 }) {
   const userIngredients = new Set(
     input.ingredients.map(normalizeIngredient).filter((name): name is string => Boolean(name))
@@ -209,6 +212,7 @@ export function matchRecipes(input: {
       if (!result.equipmentCompatible) return false;
       if (result.sharedIngredients === 0) return false;
       if (input.maxMinutes !== undefined && result.timeMinutes > input.maxMinutes) return false;
+      if (input.vegetarian && !result.isVegetarian) return false;
       return true;
     })
     .sort((a, b) => {
@@ -223,7 +227,7 @@ export function matchRecipes(input: {
 
   return {
     total: results.length,
-    recipes: results.map(({ equipmentCompatible: _, sharedIngredients: __, goalBonus: ___, ...result }) => ({
+    recipes: results.map(({ equipmentCompatible: _, sharedIngredients: __, goalBonus: ___, isVegetarian: ____, ...result }) => ({
       ...result,
       matchTier: getMatchTier(result.matchScore, result.missingIngredients.length),
     })),
@@ -289,6 +293,7 @@ function scoreRecipe(
   const missingPenalty = missingFrac * 0.10;
 
   const matchScore = Math.max(0, Math.min(1, baseScore + goalBonus - missingPenalty));
+  const isVegetarian = !recipe.ingredients.some((ing) => NON_VEG_INGREDIENTS.has(ing.name));
 
   return {
     id: recipe.id,
@@ -304,6 +309,7 @@ function scoreRecipe(
     equipmentCompatible,
     sharedIngredients,
     goalBonus,
+    isVegetarian,
   };
 }
 

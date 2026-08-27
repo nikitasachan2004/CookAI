@@ -41,6 +41,7 @@ export function matchRecipes(params: {
   goal?: string;
   userId?: string;
   maxMinutes?: number;
+  vegetarian?: boolean;
 }) {
   return fetchJson<{ total: number; recipes: RecipeSummary[] }>('/ingredients/match', {
     method: 'POST',

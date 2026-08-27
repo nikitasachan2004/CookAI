@@ -56,18 +56,19 @@ export default function RecipeResults({
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
   const [maxMinutes, setMaxMinutes] = useState<number | undefined>(undefined);
+  const [vegetarian, setVegetarian] = useState(false);
 
   useEffect(() => {
     setLoading(true);
     setError(null);
-    matchRecipes({ ingredients, equipment: profile.equipment, goal: profile.goal, maxMinutes })
+    matchRecipes({ ingredients, equipment: profile.equipment, goal: profile.goal, maxMinutes, vegetarian })
       .then((data) => {
         setRecipes(data.recipes);
         setTotal(data.total);
       })
       .catch((err) => setError(err instanceof Error ? err.message : 'Recipe search failed.'))
       .finally(() => setLoading(false));
-  }, [ingredients, profile.equipment, profile.goal, maxMinutes]);
+  }, [ingredients, profile.equipment, profile.goal, maxMinutes, vegetarian]);
 
   return (
     <section className="screen-stack screen-enter">
@@ -107,20 +108,33 @@ export default function RecipeResults({
         </div>
       </div>
 
-      {/* ── Time filter ──────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 4 }}>
-        <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>⏱ Time budget:</span>
-        {TIME_OPTIONS.map((opt) => (
+      {/* ── Time & Diet filter ──────────────────────────────────── */}
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center', marginBottom: 4 }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>⏱ Time budget:</span>
+          {TIME_OPTIONS.map((opt) => (
+            <button
+              key={opt.label}
+              type="button"
+              onClick={() => setMaxMinutes(opt.value)}
+              className={`chip-button${maxMinutes === opt.value ? ' is-selected' : ''}`}
+              aria-pressed={maxMinutes === opt.value}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>🌱 Diet:</span>
           <button
-            key={opt.label}
             type="button"
-            onClick={() => setMaxMinutes(opt.value)}
-            className={`chip-button${maxMinutes === opt.value ? ' is-selected' : ''}`}
-            aria-pressed={maxMinutes === opt.value}
+            onClick={() => setVegetarian(!vegetarian)}
+            className={`chip-button${vegetarian ? ' is-selected' : ''}`}
+            aria-pressed={vegetarian}
           >
-            {opt.label}
+            Vegetarian
           </button>
-        ))}
+        </div>
       </div>
 
       {/* ── Loading skeletons ────────────────────────────── */}
