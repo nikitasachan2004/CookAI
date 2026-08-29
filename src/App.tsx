@@ -1,14 +1,20 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import type { Profile } from './types';
-import LandingPage from './components/LandingPage';
-import AboutPage from './components/AboutPage';
-import RecipesBrowsePage from './components/RecipesBrowsePage';
-import Onboarding from './components/Onboarding';
-import IngredientInput from './components/IngredientInput';
-import RecipeResults from './components/RecipeResults';
-import RecipeDetail from './components/RecipeDetail';
-import { SignupEmail, VerifyOtp, SetPassword, Login } from './components/AuthScreens';
+
+const LandingPage = lazy(() => import('./components/LandingPage'));
+const AboutPage = lazy(() => import('./components/AboutPage'));
+const RecipesBrowsePage = lazy(() => import('./components/RecipesBrowsePage'));
+const Onboarding = lazy(() => import('./components/Onboarding'));
+const IngredientInput = lazy(() => import('./components/IngredientInput'));
+const RecipeResults = lazy(() => import('./components/RecipeResults'));
+const RecipeDetail = lazy(() => import('./components/RecipeDetail'));
+
+const SignupEmail = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.SignupEmail })));
+const VerifyOtp = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.VerifyOtp })));
+const SetPassword = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.SetPassword })));
+const Login = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.Login })));
+
 import { checkAuth, logout } from './api';
 
 export type AppScreen = 'onboarding' | 'ingredients' | 'results' | 'detail' | 'signup-email' | 'verify-otp' | 'set-password' | 'login';
@@ -176,23 +182,25 @@ function AppFlow({ profile: initialProfile, onProfileChange }: { profile: Profil
   return (
     <>
       <div className="main-panel">
-        {screen === 'onboarding' && (
-          <Onboarding initialProfile={profile ?? undefined} onSave={handleProfileSave} onBack={profile ? handleBack : undefined} />
-        )}
-        {screen === 'ingredients' && profile && (
-          <IngredientInput profile={profile} onSearch={list => { setIngredients(list); setScreen('results'); }} />
-        )}
-        {screen === 'results' && profile && (
-          <RecipeResults ingredients={ingredients} profile={profile} onSelectRecipe={id => { setSelectedId(id); setScreen('detail'); }} onBack={handleBack} onNewSearch={() => setScreen('ingredients')} />
-        )}
-        {screen === 'detail' && selectedRecipeId && (
-          <RecipeDetail recipeId={selectedRecipeId} onBack={handleBack} />
-        )}
-        
-        {screen === 'signup-email' && <SignupEmail onNext={(email) => { setSignupEmailState(email); setScreen('verify-otp'); }} onLoginClick={() => setScreen('login')} />}
-        {screen === 'verify-otp' && <VerifyOtp email={signupEmailState} onNext={(token) => { setSetupTokenState(token); setScreen('set-password'); }} />}
-        {screen === 'set-password' && <SetPassword email={signupEmailState} setupToken={setupTokenState} onSuccess={() => { window.location.href = '/app'; }} />}
-        {screen === 'login' && <Login onSuccess={() => { window.location.href = '/app'; }} onSignupClick={() => setScreen('signup-email')} />}
+        <Suspense fallback={<div className="loading-spinner" />}>
+          {screen === 'onboarding' && (
+            <Onboarding initialProfile={profile ?? undefined} onSave={handleProfileSave} onBack={profile ? handleBack : undefined} />
+          )}
+          {screen === 'ingredients' && profile && (
+            <IngredientInput profile={profile} onSearch={list => { setIngredients(list); setScreen('results'); }} />
+          )}
+          {screen === 'results' && profile && (
+            <RecipeResults ingredients={ingredients} profile={profile} onSelectRecipe={id => { setSelectedId(id); setScreen('detail'); }} onBack={handleBack} onNewSearch={() => setScreen('ingredients')} />
+          )}
+          {screen === 'detail' && selectedRecipeId && (
+            <RecipeDetail recipeId={selectedRecipeId} onBack={handleBack} />
+          )}
+          
+          {screen === 'signup-email' && <SignupEmail onNext={(email) => { setSignupEmailState(email); setScreen('verify-otp'); }} onLoginClick={() => setScreen('login')} />}
+          {screen === 'verify-otp' && <VerifyOtp email={signupEmailState} onNext={(token) => { setSetupTokenState(token); setScreen('set-password'); }} />}
+          {screen === 'set-password' && <SetPassword email={signupEmailState} setupToken={setupTokenState} onSuccess={() => { window.location.href = '/app'; }} />}
+          {screen === 'login' && <Login onSuccess={() => { window.location.href = '/app'; }} onSignupClick={() => setScreen('signup-email')} />}
+        </Suspense>
       </div>
       <input type="hidden" id="__app_screen" value={screen} />
     </>
@@ -239,14 +247,16 @@ export default function App() {
     <div className="app-shell">
       <GlobalHeader profile={profile} appScreen={appScreen} onEditProfile={() => navigate('/app?edit=1')} onGoHome={() => navigate(location.pathname === '/app' && !profile ? '/' : profile ? '/app' : '/')} user={authState.user} />
       <main id="main-content">
-        <Routes>
-          <Route path="/" element={<LandingPage onGetStarted={() => navigate('/app')} />} />
-          <Route path="/about" element={<AboutPage onGetStarted={() => navigate('/app')} />} />
-          <Route path="/recipes" element={<RecipesBrowsePage onGetStarted={() => navigate('/app')} />} />
-          <Route path="/recipes/:recipeId" element={<div className="main-panel"><RecipeDetail recipeId={location.pathname.split('/').pop() ?? ''} onBack={() => navigate('/recipes')} /></div>} />
-          <Route path="/app" element={<AppFlow profile={profile} onProfileChange={setProfile} />} />
-          <Route path="*" element={<LandingPage onGetStarted={() => navigate('/app')} />} />
-        </Routes>
+        <Suspense fallback={<div className="loading-spinner" />}>
+          <Routes>
+            <Route path="/" element={<LandingPage onGetStarted={() => navigate('/app')} />} />
+            <Route path="/about" element={<AboutPage onGetStarted={() => navigate('/app')} />} />
+            <Route path="/recipes" element={<RecipesBrowsePage onGetStarted={() => navigate('/app')} />} />
+            <Route path="/recipes/:recipeId" element={<div className="main-panel"><RecipeDetail recipeId={location.pathname.split('/').pop() ?? ''} onBack={() => navigate('/recipes')} /></div>} />
+            <Route path="/app" element={<AppFlow profile={profile} onProfileChange={setProfile} />} />
+            <Route path="*" element={<LandingPage onGetStarted={() => navigate('/app')} />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   );
