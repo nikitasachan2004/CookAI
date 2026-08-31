@@ -81,6 +81,7 @@ function GlobalHeader({
   onEditProfile,
   onGoHome,
   user,
+  authLoaded,
 }: {
   profile: Profile | null;
   appScreen: AppScreen | null;
