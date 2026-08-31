@@ -87,6 +87,7 @@ function GlobalHeader({
   onEditProfile: () => void;
   onGoHome: () => void;
   user: any;
+  authLoaded?: boolean;
 }) {
   const location = useLocation();
   const isAppRoute = location.pathname === '/app';
@@ -129,7 +130,9 @@ function GlobalHeader({
             </>
           )}
 
-          {user ? (
+          {!authLoaded ? (
+            <div className="ghost-button" style={{ visibility: 'hidden' }}>Log in</div>
+          ) : user ? (
             <button type="button" onClick={async () => { await logout(); window.location.reload(); }} className="ghost-button">Log out ({user.email})</button>
           ) : (
             <Link to="/app?action=login" className="ghost-button">Log in</Link>
@@ -241,11 +244,9 @@ export default function App() {
     return () => clearInterval(id);
   }, [location.pathname]);
 
-  if (!authState.loaded) return null;
-
   return (
     <div className="app-shell">
-      <GlobalHeader profile={profile} appScreen={appScreen} onEditProfile={() => navigate('/app?edit=1')} onGoHome={() => navigate(location.pathname === '/app' && !profile ? '/' : profile ? '/app' : '/')} user={authState.user} />
+      <GlobalHeader profile={profile} appScreen={appScreen} onEditProfile={() => navigate('/app?edit=1')} onGoHome={() => navigate(location.pathname === '/app' && !profile ? '/' : profile ? '/app' : '/')} user={authState.user} authLoaded={authState.loaded} />
       <main id="main-content">
         <Suspense fallback={<div className="loading-spinner" />}>
           <Routes>
