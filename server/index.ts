@@ -7,6 +7,7 @@ import { equipment, ingredients } from './data.js';
 import { getAllRecipes, getRecipe, matchRecipes, initializeMatching } from './matching.js';
 import type { Goal } from './types.js';
 import { authRouter } from './auth/routes.js';
+import { chatRouter } from './routes/chat.js';
 import jwt from 'jsonwebtoken';
 
 // Express API boundary for profile persistence, catalogs, matching, and recipe details.
@@ -53,6 +54,7 @@ const optionalAuth: express.RequestHandler = (req, res, next) => {
 };
 
 app.use('/api/auth', authRouter);
+app.use('/api/chat', chatRouter);
 app.get('/api/equipment', (_request, response) => response.json({ equipment }));
 app.get('/api/ingredients', (_request, response) => {
   response.json({
