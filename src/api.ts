@@ -84,3 +84,7 @@ export function login(email: string, password: string) {
 export function logout() {
   return fetchJson('/auth/logout', { method: 'POST' });
 }
+
+export function sendChatMessage(messages: any[]) {
+  return fetchJson<{ text: string }>('/chat', { method: 'POST', body: JSON.stringify({ messages }) });
+}
