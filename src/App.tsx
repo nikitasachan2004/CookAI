@@ -14,6 +14,7 @@ const SignupEmail = lazy(() => import('./components/AuthScreens').then(module =>
 const VerifyOtp = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.VerifyOtp })));
 const SetPassword = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.SetPassword })));
 const Login = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.Login })));
+const ChatBot = lazy(() => import('./components/ChatBot').then(module => ({ default: module.ChatBot })));
 
 import { checkAuth, logout } from './api';
 
@@ -260,6 +261,9 @@ export default function App() {
           </Routes>
         </Suspense>
       </main>
+      <Suspense fallback={null}>
+        <ChatBot />
+      </Suspense>
     </div>
   );
 }
