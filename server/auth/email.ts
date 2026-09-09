@@ -1,8 +1,8 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import 'dotenv/config';
 
 export async function sendOtpEmail(email: string, code: string) {
-  if (!process.env.SMTP_HOST) {
+  if (!process.env.RESEND_API_KEY) {
     console.log(`\n============================`);
     console.log(`[DEV EMAIL] To: ${email}`);
     console.log(`[DEV EMAIL] OTP: ${code}`);
@@ -10,20 +10,29 @@ export async function sendOtpEmail(email: string, code: string) {
     return;
   }
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    auth: process.env.SMTP_USER ? {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    } : undefined,
-  });
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
-  await transporter.sendMail({
-    from: process.env.SMTP_FROM || 'COOKAI <no-reply@cookai.app>',
-    to: email,
-    subject: 'Your CookAI Verification Code',
-    text: `Your verification code is: ${code}. It expires in 10 minutes.`,
-    html: `<p>Your verification code is: <strong>${code}</strong>. It expires in 10 minutes.</p>`,
-  });
+  try {
+    const { error } = await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'CookAI <no-reply@cookai.app>',
+      to: email,
+      subject: 'Your CookAI Verification Code',
+      text: `Your verification code is: ${code}. It expires in 10 minutes.`,
+      html: `<p>Your verification code is: <strong>${code}</strong>. It expires in 10 minutes.</p>`,
+    });
+
+    if (error) {
+      console.error('[Resend] Failed to send email:', error);
+      console.log(`\n============================`);
+      console.log(`[DEV FALLBACK] To: ${email}`);
+      console.log(`[DEV FALLBACK] OTP: ${code}`);
+      console.log(`============================\n`);
+    }
+  } catch (err) {
+    console.error('[Resend] Network/request error:', err);
+    console.log(`\n============================`);
+    console.log(`[DEV FALLBACK] To: ${email}`);
+    console.log(`[DEV FALLBACK] OTP: ${code}`);
+    console.log(`============================\n`);
+  }
 }
