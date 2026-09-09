@@ -11,6 +11,7 @@
     "seed:recipes": "tsx server/scripts/seedRecipes.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.19.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
@@ -20,10 +21,10 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^1.33.0",
     "mongoose": "^9.9.4",
-    "nodemailer": "^9.0.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.18.2",
+    "resend": "^6.27.0",
     "zod": "^4.0.5"
   },
   "devDependencies": {
@@ -32,7 +33,6 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.2.0",
-    "@types/nodemailer": "^8.0.1",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
     "@types/react-router-dom": "^5.3.3",
