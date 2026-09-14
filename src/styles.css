@@ -2999,3 +2999,121 @@ img    { display: block; max-width: 100%; }
 .dropdown-btn.text-danger:hover {
   background-color: #fef2f2;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE UTILITIES & MOBILE MENU
+═══════════════════════════════════════════════════════════════ */
+.mobile-only {
+  display: none !important;
+}
+.desktop-only {
+  display: flex !important;
+}
+
+@media (max-width: 767px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: flex !important;
+  }
+  
+  /* Fix header gap */
+  .header-left {
+    gap: var(--sp-3) !important;
+  }
+  .header-actions {
+    gap: var(--sp-2) !important;
+  }
+  
+  .mobile-menu-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    padding: 8px;
+    margin-right: -8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 200;
+  }
+  
+  .mobile-menu-overlay {
+    position: absolute;
+    top: 58px; /* header height */
+    left: 0;
+    width: 100%;
+    background: var(--bg-color);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: var(--sp-4) var(--sp-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all var(--dur-std) var(--ease-std);
+    z-index: 150;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .mobile-menu-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  
+  .mobile-nav-link {
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--color-text);
+    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+  }
+  
+  .mobile-nav-link:hover, .mobile-nav-link:active {
+    background: var(--warm-200);
+  }
+  
+  .mobile-nav-divider {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: var(--sp-2) 0;
+  }
+  
+  .mobile-nav-user {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+    padding: 8px 16px;
+    word-break: break-all;
+  }
+  
+  /* Auth Screens */
+  .auth-card {
+    padding: var(--sp-6) var(--sp-5);
+  }
+  
+  /* About Page */
+  .about-hero-inner {
+    grid-template-columns: 1fr;
+    gap: var(--sp-6);
+  }
+  
+  .about-stats-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on mobile instead of 5 */
+  }
+}
+

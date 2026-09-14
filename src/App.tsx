@@ -94,15 +94,21 @@ function GlobalHeader({
   const location = useLocation();
   const isAppRoute = location.pathname === '/app';
   const isLanding  = location.pathname === '/';
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   return (
     <header className={`app-header${isAppRoute ? ' app-header--app' : ''}`}>
       <div className="header-inner">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+        <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
           <button type="button" onClick={onGoHome} className="brand-button" aria-label="COOKAI — go to home">
             <span className="brand-mark" aria-hidden="true"><BrandMark /></span>COOKAI
           </button>
-          <nav className="header-nav" aria-label="Site navigation">
+          <nav className="header-nav desktop-only" aria-label="Site navigation">
             <Link to="/" className={`nav-link${location.pathname === '/' ? ' nav-link--active' : ''}`}>Home</Link>
             <Link to="/recipes" className={`nav-link${location.pathname === '/recipes' ? ' nav-link--active' : ''}`}>Recipes</Link>
             <Link to="/about" className={`nav-link${location.pathname === '/about' ? ' nav-link--active' : ''}`}>About</Link>
@@ -133,9 +139,9 @@ function GlobalHeader({
           )}
 
           {!authLoaded ? (
-            <div className="ghost-button" style={{ visibility: 'hidden' }}>Log in</div>
+            <div className="ghost-button desktop-only" style={{ visibility: 'hidden' }}>Log in</div>
           ) : user ? (
-            <div className="user-menu">
+            <div className="user-menu desktop-only">
               <button type="button" className="avatar-btn" aria-label="User menu">
                 {user.email[0].toUpperCase()}
               </button>
@@ -145,9 +151,42 @@ function GlobalHeader({
               </div>
             </div>
           ) : (
-            <Link to="/app?action=login" className="ghost-button">Log in</Link>
+            <Link to="/app?action=login" className="ghost-button desktop-only">Log in</Link>
           )}
+
+          <button 
+            type="button" 
+            className="mobile-menu-btn mobile-only" 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {mobileMenuOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'is-open' : ''}`}>
+        <nav className="mobile-nav">
+          <Link to="/" className="mobile-nav-link">Home</Link>
+          <Link to="/recipes" className="mobile-nav-link">Recipes</Link>
+          <Link to="/about" className="mobile-nav-link">About</Link>
+          <hr className="mobile-nav-divider" />
+          {!authLoaded ? null : user ? (
+            <>
+              <div className="mobile-nav-user">{user.email}</div>
+              <button type="button" onClick={async () => { await logout(); window.location.reload(); }} className="mobile-nav-link text-danger" style={{ textAlign: 'left' }}>Log out</button>
+            </>
+          ) : (
+            <Link to="/app?action=login" className="mobile-nav-link">Log in</Link>
+          )}
+        </nav>
       </div>
     </header>
   );
