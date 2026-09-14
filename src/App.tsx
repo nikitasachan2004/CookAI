@@ -135,7 +135,15 @@ function GlobalHeader({
           {!authLoaded ? (
             <div className="ghost-button" style={{ visibility: 'hidden' }}>Log in</div>
           ) : user ? (
-            <button type="button" onClick={async () => { await logout(); window.location.reload(); }} className="ghost-button">Log out ({user.email})</button>
+            <div className="user-menu">
+              <button type="button" className="avatar-btn" aria-label="User menu">
+                {user.email[0].toUpperCase()}
+              </button>
+              <div className="dropdown-menu">
+                <div className="dropdown-email">{user.email}</div>
+                <button type="button" onClick={async () => { await logout(); window.location.reload(); }} className="dropdown-btn text-danger">Log out</button>
+              </div>
+            </div>
           ) : (
             <Link to="/app?action=login" className="ghost-button">Log in</Link>
           )}
