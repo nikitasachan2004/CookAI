@@ -173,7 +173,12 @@ authRouter.post('/set-password', async (req, res) => {
   await PendingSignupModel.deleteOne({ email });
 
   const token = jwt.sign({ userId: account._id, email }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '7d' });
-  res.cookie('jwt', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 3600000 });
+  res.cookie('jwt', token, { 
+    httpOnly: true, 
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 3600000 
+  });
   
   res.status(200).json({ userId: account._id, email });
 });
@@ -192,7 +197,12 @@ authRouter.post('/login', async (req, res) => {
   if (!match) return res.status(401).json({ error: 'Invalid email or password.' });
 
   const token = jwt.sign({ userId: account._id, email }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '7d' });
-  res.cookie('jwt', token, { httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 3600000 });
+  res.cookie('jwt', token, { 
+    httpOnly: true, 
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 3600000 
+  });
   
   res.status(200).json({ userId: account._id, email });
 });
