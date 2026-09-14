@@ -3047,7 +3047,9 @@ img    { display: block; max-width: 100%; }
     top: 58px; /* header height */
     left: 0;
     width: 100%;
-    background: var(--bg-color);
+    background: rgba(255, 248, 238, 0.98);
+    backdrop-filter: blur(24px) saturate(1.6);
+    -webkit-backdrop-filter: blur(24px) saturate(1.6);
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     padding: var(--sp-4) var(--sp-5);
     display: flex;
