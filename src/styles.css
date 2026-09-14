@@ -3009,6 +3009,9 @@ img    { display: block; max-width: 100%; }
 .desktop-only {
   display: flex !important;
 }
+.mobile-menu-overlay {
+  display: none;
+}
 
 @media (max-width: 767px) {
   .desktop-only {
