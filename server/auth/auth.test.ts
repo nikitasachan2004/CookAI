@@ -1,4 +1,4 @@
-import { beforeAll, afterAll, describe, expect, it } from 'vitest';
+import { beforeAll, afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import express from 'express';
 import { authRouter } from './routes.js';
 import mongoose from 'mongoose';
@@ -7,6 +7,13 @@ import supertest from 'supertest';
 import { PendingSignupModel } from '../models/PendingSignup.js';
 import { AccountModel } from '../models/Account.js';
 import bcrypt from 'bcryptjs';
+
+// Mock the email module so tests never hit the real Resend API
+vi.mock('./email.js', () => ({
+  sendOtpEmail: vi.fn().mockResolvedValue(undefined),
+}));
+import { sendOtpEmail } from './email.js';
+const mockSendOtpEmail = vi.mocked(sendOtpEmail);
 
 let mongoServer: MongoMemoryServer;
 const app = express();
@@ -135,5 +142,43 @@ describe('Auth flows', () => {
   it('/api/auth/me returns 401 if not logged in', async () => {
     const res = await supertest(app).get('/api/auth/me');
     expect(res.status).toBe(401);
+  });
+});
+
+describe('sendOtpEmail integration', () => {
+  const freshEmail = 'otp-integration@test.com';
+
+  beforeEach(() => {
+    mockSendOtpEmail.mockClear();
+  });
+
+  it('signup succeeds when sendOtpEmail resolves', async () => {
+    mockSendOtpEmail.mockResolvedValueOnce(undefined);
+
+    const res = await supertest(app)
+      .post('/api/auth/signup')
+      .send({ email: freshEmail });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(mockSendOtpEmail).toHaveBeenCalledOnce();
+    expect(mockSendOtpEmail.mock.calls[0][0]).toBe(freshEmail);
+
+    // Cleanup for next test
+    await PendingSignupModel.deleteOne({ email: freshEmail });
+  });
+
+  it('signup returns 500 when sendOtpEmail rejects', async () => {
+    mockSendOtpEmail.mockRejectedValueOnce(new Error('Failed to send OTP email: test error'));
+
+    const res = await supertest(app)
+      .post('/api/auth/signup')
+      .send({ email: freshEmail });
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe('Failed to send verification email, please try again');
+
+    // Cleanup
+    await PendingSignupModel.deleteOne({ email: freshEmail });
   });
 });
