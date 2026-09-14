@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, User, X, Send } from 'lucide-react';
+import { Bot, User, X, Send, Sparkles } from 'lucide-react';
 import { sendChatMessage } from '../api';
 import './ChatBot.css';
 
@@ -138,10 +138,11 @@ export const ChatBot: React.FC = () => {
       </AnimatePresence>
 
       <button
-        onClick={() => setIsOpen(!isOpen)}
         className="chatbot-toggle-btn"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle chat"
       >
-        {isOpen ? <X size={24} /> : <Bot size={24} />}
+        {isOpen ? <X size={24} /> : <Sparkles size={28} />}
       </button>
     </div>
   );
