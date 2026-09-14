@@ -79,7 +79,12 @@ authRouter.post('/signup', async (req, res) => {
     });
   }
 
-  await sendOtpEmail(email, code);
+  try {
+    await sendOtpEmail(email, code);
+  } catch (err) {
+    console.error('Signup email send error:', err);
+    return res.status(500).json({ error: 'Failed to send verification email, please try again' });
+  }
   res.status(200).json({ success: true });
 });
 
@@ -107,7 +112,12 @@ authRouter.post('/resend-otp', async (req, res) => {
   pending.lastSentAt = now;
   await pending.save();
 
-  await sendOtpEmail(email, code);
+  try {
+    await sendOtpEmail(email, code);
+  } catch (err) {
+    console.error('Resend-otp email send error:', err);
+    return res.status(500).json({ error: 'Failed to send verification email, please try again' });
+  }
   res.status(200).json({ success: true });
 });
 
