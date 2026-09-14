@@ -39,53 +39,34 @@ const loginSchema = z.object({
   password: z.string()
 });
 
+const directSignupSchema = z.object({
+  email: z.string().email().toLowerCase(),
+  password: z.string().min(8)
+});
+
 authRouter.post('/signup', async (req, res) => {
-  const parsed = emailSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: 'Invalid email.' });
-  const { email } = parsed.data;
+  const parsed = directSignupSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: 'Invalid email or password (min 8 chars).' });
+  const { email, password } = parsed.data;
 
   if (!checkRateLimit(email)) return res.status(429).json({ error: 'Too many requests. Please wait a minute.' });
 
   const existingAccount = await AccountModel.findOne({ email });
   if (existingAccount) return res.status(409).json({ error: 'Account already exists for this email.' });
 
-  let pending = await PendingSignupModel.findOne({ email });
-  const now = new Date();
+  const passwordHash = await bcrypt.hash(password, 10);
+  const account = await AccountModel.create({ email, passwordHash });
+
+  // Issue login cookie immediately
+  const token = jwt.sign({ userId: account._id, email }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '7d' });
+  res.cookie('jwt', token, { 
+    httpOnly: true, 
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 7 * 24 * 3600000 
+  });
   
-  if (pending && now.getTime() - pending.lastSentAt.getTime() < 60000) {
-    return res.status(429).json({ error: 'Please wait 60 seconds before requesting another code.' });
-  }
-
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const otpHash = await bcrypt.hash(code, 10);
-  const otpExpiresAt = new Date(now.getTime() + 10 * 60000);
-
-  if (pending) {
-    pending.otpHash = otpHash;
-    pending.otpExpiresAt = otpExpiresAt;
-    pending.attempts = 0;
-    pending.lastSentAt = now;
-    pending.verified = false;
-    pending.setupToken = undefined;
-    pending.setupTokenExpiresAt = undefined;
-    await pending.save();
-  } else {
-    await PendingSignupModel.create({
-      email,
-      otpHash,
-      otpExpiresAt,
-      lastSentAt: now,
-      verified: false
-    });
-  }
-
-  try {
-    await sendOtpEmail(email, code);
-  } catch (err) {
-    console.error('Signup email send error:', err);
-    return res.status(500).json({ error: 'Failed to send verification email, please try again' });
-  }
-  res.status(200).json({ success: true });
+  res.status(200).json({ userId: account._id, email });
 });
 
 authRouter.post('/resend-otp', async (req, res) => {

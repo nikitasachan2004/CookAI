@@ -201,7 +201,7 @@ function AppFlow({ profile: initialProfile, onProfileChange }: { profile: Profil
             <RecipeDetail recipeId={selectedRecipeId} onBack={handleBack} />
           )}
           
-          {screen === 'signup-email' && <SignupEmail onNext={(email) => { setSignupEmailState(email); setScreen('verify-otp'); }} onLoginClick={() => setScreen('login')} />}
+          {screen === 'signup-email' && <SignupEmail onSuccess={() => { window.location.href = '/app'; }} onLoginClick={() => setScreen('login')} />}
           {screen === 'verify-otp' && <VerifyOtp email={signupEmailState} onNext={(token) => { setSetupTokenState(token); setScreen('set-password'); }} />}
           {screen === 'set-password' && <SetPassword email={signupEmailState} setupToken={setupTokenState} onSuccess={() => { window.location.href = '/app'; }} />}
           {screen === 'login' && <Login onSuccess={() => { window.location.href = '/app'; }} onSignupClick={() => setScreen('signup-email')} />}

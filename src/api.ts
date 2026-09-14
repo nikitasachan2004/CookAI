@@ -61,8 +61,8 @@ export function checkAuth() {
   return fetchJson<{ userId: string; email: string }>('/auth/me');
 }
 
-export function signup(email: string) {
-  return fetchJson('/auth/signup', { method: 'POST', body: JSON.stringify({ email }) });
+export function signup(email: string, password: string) {
+  return fetchJson<{ userId: string; email: string }>('/auth/signup', { method: 'POST', body: JSON.stringify({ email, password }) });
 }
 
 export function resendOtp(email: string) {

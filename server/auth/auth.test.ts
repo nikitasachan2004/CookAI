@@ -48,60 +48,16 @@ describe('Auth flows', () => {
   const testEmail = 'test@example.com';
   const testPassword = 'password123';
 
-  it('signup creates a pending record', async () => {
+  it('signup creates a finalized account and logs in directly', async () => {
     const res = await supertest(app)
       .post('/api/auth/signup')
-      .send({ email: testEmail });
-    expect(res.status).toBe(200);
-
-    const pending = await PendingSignupModel.findOne({ email: testEmail });
-    expect(pending).toBeDefined();
-    expect(pending?.verified).toBe(false);
-  });
-
-  it('wrong OTP increments attempts and fails', async () => {
-    const res = await supertest(app)
-      .post('/api/auth/verify-otp')
-      .send({ email: testEmail, code: '000000' });
-    expect(res.status).toBe(400);
-
-    const pending = await PendingSignupModel.findOne({ email: testEmail });
-    expect(pending?.attempts).toBe(1);
-  });
-
-  it('correct OTP issues a setup token', async () => {
-    // We need to bypass the email code or manually check the DB hash.
-    // For test purposes, let's just override the hash in DB to match '123456'.
-    const hash = await bcrypt.hash('123456', 10);
-    await PendingSignupModel.updateOne({ email: testEmail }, { otpHash: hash });
-
-    const res = await supertest(app)
-      .post('/api/auth/verify-otp')
-      .send({ email: testEmail, code: '123456' });
-    
-    expect(res.status).toBe(200);
-    expect(res.body.setupToken).toBeDefined();
-    setupToken = res.body.setupToken;
-
-    const pending = await PendingSignupModel.findOne({ email: testEmail });
-    expect(pending?.verified).toBe(true);
-  });
-
-  it('set-password creates a finalized account', async () => {
-    const res = await supertest(app)
-      .post('/api/auth/set-password')
-      .send({ email: testEmail, setupToken, password: testPassword });
-    
+      .send({ email: testEmail, password: testPassword });
     expect(res.status).toBe(200);
     expect(res.body.userId).toBeDefined();
-    
+
     // Cookie is set
     expect(res.headers['set-cookie']).toBeDefined();
     jwtCookie = res.headers['set-cookie'][0];
-
-    // Pending record is gone
-    const pending = await PendingSignupModel.findOne({ email: testEmail });
-    expect(pending).toBeNull();
 
     // Account exists
     const account = await AccountModel.findOne({ email: testEmail });
@@ -111,7 +67,7 @@ describe('Auth flows', () => {
   it('duplicate signup for a registered email is rejected', async () => {
     const res = await supertest(app)
       .post('/api/auth/signup')
-      .send({ email: testEmail });
+      .send({ email: testEmail, password: 'anotherpassword123' });
     expect(res.status).toBe(409);
   });
 
@@ -142,43 +98,5 @@ describe('Auth flows', () => {
   it('/api/auth/me returns 401 if not logged in', async () => {
     const res = await supertest(app).get('/api/auth/me');
     expect(res.status).toBe(401);
-  });
-});
-
-describe('sendOtpEmail integration', () => {
-  const freshEmail = 'otp-integration@test.com';
-
-  beforeEach(() => {
-    mockSendOtpEmail.mockClear();
-  });
-
-  it('signup succeeds when sendOtpEmail resolves', async () => {
-    mockSendOtpEmail.mockResolvedValueOnce(undefined);
-
-    const res = await supertest(app)
-      .post('/api/auth/signup')
-      .send({ email: freshEmail });
-
-    expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(mockSendOtpEmail).toHaveBeenCalledOnce();
-    expect(mockSendOtpEmail.mock.calls[0][0]).toBe(freshEmail);
-
-    // Cleanup for next test
-    await PendingSignupModel.deleteOne({ email: freshEmail });
-  });
-
-  it('signup returns 500 when sendOtpEmail rejects', async () => {
-    mockSendOtpEmail.mockRejectedValueOnce(new Error('Failed to send OTP email: test error'));
-
-    const res = await supertest(app)
-      .post('/api/auth/signup')
-      .send({ email: freshEmail });
-
-    expect(res.status).toBe(500);
-    expect(res.body.error).toBe('Failed to send verification email, please try again');
-
-    // Cleanup
-    await PendingSignupModel.deleteOne({ email: freshEmail });
   });
 });

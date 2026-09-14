@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { signup, verifyOtp, setPassword, login, resendOtp } from '../api';
 
-export function SignupEmail({ onNext, onLoginClick }: { onNext: (email: string) => void, onLoginClick: () => void }) {
+export function SignupEmail({ onSuccess, onLoginClick }: { onSuccess: () => void, onLoginClick: () => void }) {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -11,8 +12,8 @@ export function SignupEmail({ onNext, onLoginClick }: { onNext: (email: string) 
     setLoading(true);
     setError('');
     try {
-      await signup(email);
-      onNext(email);
+      await signup(email, password);
+      onSuccess();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -28,6 +29,9 @@ export function SignupEmail({ onNext, onLoginClick }: { onNext: (email: string) 
           <p>Save your profile and recipes across devices.</p>
         </div>
         {error && <div className="error-message">{error}</div>}
+        <div className="alert-box" style={{ background: 'rgba(255,165,0,0.1)', color: '#d97706', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', marginTop: '16px' }}>
+          <strong>🚧 Under Construction:</strong> Email verification (OTP) is currently being built. For now, you can sign up directly with a password!
+        </div>
         <form onSubmit={handleSubmit} className="form-stack" style={{ marginTop: 24 }}>
           <div className="field">
             <label>Email address</label>
@@ -40,7 +44,19 @@ export function SignupEmail({ onNext, onLoginClick }: { onNext: (email: string) 
               required 
             />
           </div>
-          <button type="submit" className="primary-button full-button" disabled={loading}>
+          <div className="field">
+            <label>Password</label>
+            <input 
+              type="password" 
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
+              placeholder="••••••••" 
+              className="text-input"
+              minLength={8}
+              required 
+            />
+          </div>
+          <button type="submit" className="primary-button full-button" style={{ marginTop: 8 }} disabled={loading}>
             {loading ? 'Sending...' : 'Continue'}
           </button>
         </form>
