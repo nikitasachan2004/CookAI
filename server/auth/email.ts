@@ -1,38 +1,27 @@
 import { Resend } from 'resend';
-import 'dotenv/config';
 
-export async function sendOtpEmail(email: string, code: string) {
-  if (!process.env.RESEND_API_KEY) {
-    console.log(`\n============================`);
-    console.log(`[DEV EMAIL] To: ${email}`);
-    console.log(`[DEV EMAIL] OTP: ${code}`);
-    console.log(`============================\n`);
+const apiKey = process.env.RESEND_API_KEY;
+const from = process.env.EMAIL_FROM ?? 'onboarding@resend.dev';
+
+const resend = apiKey ? new Resend(apiKey) : null;
+
+export async function sendOtpEmail(email: string, code: string): Promise<void> {
+  if (!resend) {
+    console.log(`[dev] OTP for ${email}: ${code}`);
     return;
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const { data, error } = await resend.emails.send({
+    from,
+    to: email,
+    subject: 'Your COOKAI verification code',
+    html: `<p>Your COOKAI verification code is <strong>${code}</strong>. It expires in 10 minutes.</p>`,
+  });
 
-  try {
-    const { error } = await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'CookAI <no-reply@cookai.app>',
-      to: email,
-      subject: 'Your CookAI Verification Code',
-      text: `Your verification code is: ${code}. It expires in 10 minutes.`,
-      html: `<p>Your verification code is: <strong>${code}</strong>. It expires in 10 minutes.</p>`,
-    });
-
-    if (error) {
-      console.error('[Resend] Failed to send email:', error);
-      console.log(`\n============================`);
-      console.log(`[DEV FALLBACK] To: ${email}`);
-      console.log(`[DEV FALLBACK] OTP: ${code}`);
-      console.log(`============================\n`);
-    }
-  } catch (err) {
-    console.error('[Resend] Network/request error:', err);
-    console.log(`\n============================`);
-    console.log(`[DEV FALLBACK] To: ${email}`);
-    console.log(`[DEV FALLBACK] OTP: ${code}`);
-    console.log(`============================\n`);
+  if (error) {
+    console.error('Resend send failed:', error);
+    throw new Error(`Failed to send OTP email: ${error.message ?? 'unknown error'}`);
   }
+
+  console.log('OTP email sent:', data?.id);
 }
