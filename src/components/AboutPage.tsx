@@ -6,7 +6,8 @@ type Props = {
 
 /* ─── Image URLs for about page visuals ── */
 const ABOUT_IMAGES = {
-  mission: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&q=80&auto=format',
+  hero: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&q=80&auto=format',
+  mission: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80&auto=format',
   values: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80&auto=format',
 };
 
@@ -76,7 +77,7 @@ export default function AboutPage({ onGetStarted }: Props) {
             </div>
           </div>
           <div className="about-hero-visual" aria-hidden="true">
-            <ImageCard src={ABOUT_IMAGES.mission} alt="Fresh food ingredients" />
+            <ImageCard src={ABOUT_IMAGES.hero} alt="Fresh food ingredients" />
           </div>
         </div>
       </section>
@@ -242,44 +243,7 @@ export default function AboutPage({ onGetStarted }: Props) {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
-          TEAM
-      ══════════════════════════════════════════ */}
-      <section className="landing-section landing-section--dark" aria-labelledby="team-title">
-        <div className="dark-band-decor" aria-hidden="true" />
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="section-header-block section-header-block--center">
-            <p className="section-label section-label--on-dark">The team</p>
-            <div className="section-divider section-divider--center" />
-            <h2 className="section-heading section-heading--on-dark" id="team-title">
-              Built by people who cook
-            </h2>
-            <p className="section-subheading section-subheading--on-dark" style={{ maxWidth: '46ch', margin: '0 auto var(--sp-10)' }}>
-              We're not a massive startup. We're a small crew who got tired of
-              food waste and wanted a smarter kitchen tool.
-            </p>
-          </div>
 
-          <div className="about-team-grid">
-            {[
-              { name: 'Alex Chen',     role: 'Matching Engine',  emoji: '🧮', bio: 'Built the ingredient scoring system and equipment filter. Makes fried rice at midnight.', accent: '#00754A' },
-              { name: 'Priya Mehta',   role: 'Recipe Curator',   emoji: '👩‍🍳', bio: 'Wrote and tested every recipe. Specialises in pantry cooking and high-protein meals.', accent: '#FFB84D' },
-              { name: 'Jordan Park',   role: 'Product Design',   emoji: '🎨', bio: 'Designed the UI from scratch. Believes cooking apps should feel like a game, not a chore.', accent: '#34D399' },
-            ].map((member) => (
-              <article key={member.name} className="about-team-card">
-                <div className="about-team-avatar" style={{ background: `linear-gradient(145deg, ${member.accent}, ${member.accent}99)` }}>
-                  <span aria-hidden="true">{member.emoji}</span>
-                </div>
-                <h3 className="about-team-name">{member.name}</h3>
-                <span className="about-team-role" style={{ color: member.accent }}>{member.role}</span>
-                <p className="about-team-bio">{member.bio}</p>
-              </article>
-            ))}
-          </div>
-
-
-        </div>
-      </section>
 
       {/* ══════════════════════════════════════════
           CTA
