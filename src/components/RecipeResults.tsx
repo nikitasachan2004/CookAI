@@ -216,10 +216,35 @@ export default function RecipeResults({
 
                 {/* Missing ingredients */}
                 {recipe.missingIngredients.length > 0 && (
-                  <p className="missing-text">
+                  <p className="missing-text" onClick={(e) => e.stopPropagation()}>
                     <span aria-hidden="true">⚠</span>
-                    <span>
-                      <strong>Missing:</strong> {recipe.missingIngredients.join(', ')}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
+                      <strong>Missing:</strong>
+                      {recipe.missingIngredients.map((ing) => (
+                        <a
+                          key={ing}
+                          href={`https://blinkit.com/s/?q=${encodeURIComponent(ing)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            backgroundColor: '#fcd34d',
+                            color: '#451a03',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            fontSize: '0.85em',
+                            fontWeight: 600,
+                            textDecoration: 'none',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                          }}
+                          title={`Order ${ing} on Blinkit`}
+                        >
+                          {ing}
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                        </a>
+                      ))}
                     </span>
                   </p>
                 )}

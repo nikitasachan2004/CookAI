@@ -250,6 +250,44 @@
   gap: 5px;
   padding: 6px 4px;
 }
+
+/* Recipe Buttons in Chat */
+.chatbot-recipe-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #065F46;
+  padding: 8px 16px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 6px 0;
+  border: 1px solid rgba(6, 95, 70, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.model .chatbot-recipe-btn {
+  background: white;
+  color: #065F46;
+}
+
+.chatbot-recipe-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(6, 95, 70, 0.15);
+  background: #f0fdf4;
+}
+
+.chatbot-recipe-arrow {
+  font-size: 1.1em;
+  transition: transform 0.2s;
+}
+
+.chatbot-recipe-btn:hover .chatbot-recipe-arrow {
+  transform: translateX(4px);
+}
 .chatbot-typing-dot {
   width: 6px;
   height: 6px;

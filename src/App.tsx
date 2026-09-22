@@ -139,7 +139,7 @@ function GlobalHeader({
           )}
 
           {!authLoaded ? (
-            <div className="ghost-button desktop-only" style={{ visibility: 'hidden' }}>Log in</div>
+            <Link to="/app?action=login" className="ghost-button desktop-only">Log in</Link>
           ) : user ? (
             <div className="user-menu desktop-only">
               <button type="button" className="avatar-btn" aria-label="User menu">
@@ -199,7 +199,12 @@ function AppFlow({ profile: initialProfile, onProfileChange }: { profile: Profil
   const [screen, setScreen]               = useState<AppScreen>('onboarding');
   const [profile, setProfile]             = useState<Profile | null>(initialProfile);
   const [selectedRecipeId, setSelectedId] = useState<string | null>(null);
-  const [ingredients, setIngredients]     = useState<string[]>([]);
+  const [ingredients, setIngredients]     = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('cookai_ingredients');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   
   const [signupEmailState, setSignupEmailState] = useState('');
   const [setupTokenState, setSetupTokenState] = useState('');
@@ -239,7 +244,7 @@ function AppFlow({ profile: initialProfile, onProfileChange }: { profile: Profil
             <Onboarding initialProfile={profile ?? undefined} onSave={handleProfileSave} onBack={profile ? handleBack : undefined} />
           )}
           {screen === 'ingredients' && profile && (
-            <IngredientInput profile={profile} onSearch={list => { setIngredients(list); setScreen('results'); }} />
+            <IngredientInput profile={profile} initialIngredients={ingredients} onSearch={list => { setIngredients(list); setScreen('results'); }} />
           )}
           {screen === 'results' && profile && (
             <RecipeResults ingredients={ingredients} profile={profile} onSelectRecipe={id => { setSelectedId(id); setScreen('detail'); }} onBack={handleBack} onNewSearch={() => setScreen('ingredients')} />

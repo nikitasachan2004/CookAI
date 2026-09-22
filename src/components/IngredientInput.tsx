@@ -4,6 +4,7 @@ import type { IngredientOption, Profile } from '../types';
 
 type Props = {
   profile: Profile;
+  initialIngredients?: string[];
   onSearch: (ingredients: string[]) => void;
 };
 
@@ -51,9 +52,9 @@ const GOAL_LABELS: Record<string, string> = {
   'high-protein': 'High protein',
 };
 
-export default function IngredientInput({ profile, onSearch }: Props) {
+export default function IngredientInput({ profile, initialIngredients = [], onSearch }: Props) {
   const [ingredientOptions, setIngredientOptions] = useState<IngredientOption[]>([]);
-  const [selected,          setSelected]          = useState<string[]>([]);
+  const [selected,          setSelected]          = useState<string[]>(initialIngredients);
   const [draft,             setDraft]             = useState('');
   const [error,             setError]             = useState<string | null>(null);
 
@@ -74,13 +75,21 @@ export default function IngredientInput({ profile, onSearch }: Props) {
   const addIngredient = (value: string) => {
     const cleaned = value.trim().toLowerCase().replace(/\s+/g, ' ');
     if (!cleaned) return;
-    setSelected((prev) => (prev.includes(cleaned) ? prev : [...prev, cleaned]));
+    setSelected((prev) => {
+      const next = prev.includes(cleaned) ? prev : [...prev, cleaned];
+      localStorage.setItem('cookai_ingredients', JSON.stringify(next));
+      return next;
+    });
     setDraft('');
     setError(null);
   };
 
   const removeIngredient = (value: string) => {
-    setSelected((prev) => prev.filter((i) => i !== value));
+    setSelected((prev) => {
+      const next = prev.filter((i) => i !== value);
+      localStorage.setItem('cookai_ingredients', JSON.stringify(next));
+      return next;
+    });
   };
 
   const submitSearch = () => {

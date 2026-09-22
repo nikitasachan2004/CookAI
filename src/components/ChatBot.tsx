@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, User, X, Send, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { sendChatMessage } from '../api';
 import './ChatBot.css';
 
@@ -23,7 +24,9 @@ export const ChatBot: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isOpen) scrollToBottom();
+    if (isOpen) {
+      scrollToBottom();
+    }
   }, [messages, isOpen]);
 
   const handleSend = async (e?: React.FormEvent) => {
@@ -48,6 +51,37 @@ export const ChatBot: React.FC = () => {
     }
   };
 
+  const renderMessageText = (text: string) => {
+    const recipeRegex = /\[RECIPE:([^|]+)\|([^\]]+)\]/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = recipeRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      parts.push(
+        <Link 
+          key={match.index} 
+          to={`/recipes/${match[1]}`} 
+          className="chatbot-recipe-btn"
+          onClick={() => setIsOpen(false)}
+        >
+          {match[2]}
+          <span className="chatbot-recipe-arrow">→</span>
+        </Link>
+      );
+      lastIndex = recipeRegex.lastIndex;
+    }
+    
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+    
+    return parts.length > 0 ? parts : text;
+  };
+
   return (
     <div className="chatbot-wrapper">
       <AnimatePresence>
@@ -56,13 +90,14 @@ export const ChatBot: React.FC = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
             className="chatbot-window"
           >
             {/* Header */}
             <div className="chatbot-header">
               <div className="chatbot-header-info">
                 <div className="chatbot-avatar-bg">
-                  <Bot size={20} />
+                  <Sparkles size={20} />
                 </div>
                 <div>
                   <h3 className="chatbot-title">Zesty</h3>
@@ -72,6 +107,7 @@ export const ChatBot: React.FC = () => {
               <button
                 onClick={() => setIsOpen(false)}
                 className="chatbot-close-btn"
+                aria-label="Close chat"
               >
                 <X size={20} />
               </button>
@@ -86,10 +122,10 @@ export const ChatBot: React.FC = () => {
                 >
                   <div className="chatbot-bubble-wrap">
                     <div className={`chatbot-icon ${msg.role}`}>
-                      {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
+                      {msg.role === 'user' ? <User size={16} /> : <Sparkles size={16} />}
                     </div>
                     <div className={`chatbot-bubble ${msg.role}`}>
-                      {msg.parts[0].text}
+                      {renderMessageText(msg.parts[0].text)}
                     </div>
                   </div>
                 </div>
@@ -98,14 +134,12 @@ export const ChatBot: React.FC = () => {
                 <div className="chatbot-msg-row model">
                   <div className="chatbot-bubble-wrap">
                     <div className="chatbot-icon model">
-                      <Bot size={16} />
+                      <Sparkles size={16} />
                     </div>
-                    <div className="chatbot-bubble model">
-                      <div className="chatbot-typing">
-                        <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="chatbot-typing-dot" />
-                        <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="chatbot-typing-dot" />
-                        <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="chatbot-typing-dot" />
-                      </div>
+                    <div className="chatbot-bubble model chatbot-typing">
+                      <div className="chatbot-typing-dot" style={{ animation: 'bounce 1.4s infinite ease-in-out both' }} />
+                      <div className="chatbot-typing-dot" style={{ animation: 'bounce 1.4s infinite ease-in-out both', animationDelay: '0.2s' }} />
+                      <div className="chatbot-typing-dot" style={{ animation: 'bounce 1.4s infinite ease-in-out both', animationDelay: '0.4s' }} />
                     </div>
                   </div>
                 </div>
@@ -128,6 +162,7 @@ export const ChatBot: React.FC = () => {
                   type="submit"
                   disabled={!input.trim() || isLoading}
                   className="chatbot-send-btn"
+                  aria-label="Send message"
                 >
                   <Send size={16} />
                 </button>
