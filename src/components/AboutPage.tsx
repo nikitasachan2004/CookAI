@@ -86,9 +86,9 @@ export default function AboutPage({ onGetStarted }: Props) {
       <section className="about-stats-bar" aria-label="Key stats">
         <div className="container">
           <div className="about-stats-grid">
-            <StatCard number="30+"  label="Curated recipes"      emoji="🍽️" />
+            <StatCard number="100"  label="Curated recipes"      emoji="🍽️" />
             <StatCard number="4"    label="Dietary goals"        emoji="🎯" />
-            <StatCard number="6"    label="Equipment types"      emoji="🍳" />
+            <StatCard number="12"   label="Equipment types"      emoji="🍳" />
             <StatCard number="0"    label="Sign-ups required"    emoji="🔓" />
             <StatCard number="∞"    label="Ingredient combos"    emoji="🧪" />
           </div>
