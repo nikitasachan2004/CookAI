@@ -57,15 +57,13 @@ export default function AboutPage({ onGetStarted }: Props) {
           <div className="about-hero-content">
             <div className="hero-eyebrow" style={{ marginBottom: 'var(--sp-5)' }}>
               <span className="hero-eyebrow-dot" />
-              Our Story
+              The Story
             </div>
             <h1 className="about-hero-headline">
-              We believe great meals shouldn't require a trip to the store
+              I built COOKAI because I was tired of staring at a full fridge and having "nothing to eat".
             </h1>
             <p className="about-hero-sub">
-              COOKAI started from a simple frustration: too many recipe apps assume
-              you already have the perfect pantry. We built something different — a
-              tool that works backwards from what you <em>actually</em> have.
+              Hi, I'm Nikita. Like a lot of people, I hate wasting food, but I also hate running to the grocery store at 7 PM. Every recipe app I tried assumed I had a perfectly stocked pantry. I wanted an app that worked backwards: tell it what you actually have, and it tells you what you can make right now.
             </p>
             <div className="hero-actions" style={{ marginTop: 'var(--sp-7)' }}>
               <button type="button" className="primary-button primary-button--lg" onClick={onGetStarted}>
@@ -107,18 +105,13 @@ export default function AboutPage({ onGetStarted }: Props) {
               <p className="section-label">Our mission</p>
               <div className="section-divider" />
               <h2 className="section-heading" id="mission-title">
-                Less food waste. More good food.
+                Cooking shouldn't feel like an impossible puzzle.
               </h2>
               <p className="section-subheading" style={{ marginBottom: 'var(--sp-6)' }}>
-                The average household throws away nearly a third of the food they buy.
-                Most of that waste happens because people don't know what to cook with
-                what's already in front of them.
+                We've all been there: you have chicken, rice, and a random bell pepper. You search online, find a great recipe, and then realize it requires oyster sauce, fresh ginger, and sesame oil. You don't have them. So you order takeout. Again.
               </p>
               <p className="section-subheading" style={{ marginBottom: 'var(--sp-7)' }}>
-                COOKAI's matching engine flips the script. You tell us what you have,
-                we rank every recipe by how closely it fits — exact matches first,
-                near matches next, so nothing gets wasted and nothing feels like a
-                compromise.
+                That cycle is exactly why I built the matching engine for COOKAI. It doesn't just give you vague ideas; it strictly scores every recipe against your actual kitchen inventory. Exact matches always come first, so you never have to guess or compromise.
               </p>
               <div className="about-pill-row">
                 {['Zero grocery runs', 'No food waste', 'Instant results', 'Any kitchen'].map((pill) => (
@@ -142,12 +135,10 @@ export default function AboutPage({ onGetStarted }: Props) {
             <p className="section-label">Under the hood</p>
             <div className="section-divider section-divider--center" />
             <h2 className="section-heading" id="built-title">
-              Smart matching, built by hand
+              No AI hallucinations. Just smart logic.
             </h2>
             <p className="section-subheading" style={{ maxWidth: '52ch', margin: '0 auto' }}>
-              No AI hallucinations. No generated nonsense. Every recipe was crafted
-              by a real cook, and every match is scored by a deterministic engine
-              that respects your actual constraints.
+              As a developer, I didn't want to build another chatbot that spits out hallucinatory recipes that taste terrible. I built a deterministic, math-based scoring engine that respects your actual real-world cooking constraints.
             </p>
           </div>
 
@@ -176,8 +167,8 @@ export default function AboutPage({ onGetStarted }: Props) {
               },
               {
                 icon: '⚡',
-                title: 'Zero latency matching',
-                desc: 'The matching runs server-side in a single fast pass. No AI generation time, no streaming, just instant ranked results.',
+                title: 'Fast & Deterministic',
+                desc: 'The matching runs instantly in a single fast pass. There is no waiting for a slow AI text-generator to finish typing out a recipe.',
                 accent: 'var(--blue-50)',
                 border: 'var(--blue-500)',
               },
@@ -209,24 +200,24 @@ export default function AboutPage({ onGetStarted }: Props) {
               <p className="section-label">What we stand for</p>
               <div className="section-divider" />
               <h2 className="section-heading">
-                Three things we'll never compromise on
+                Things I'll never compromise on
               </h2>
               <div className="about-values-list">
                 {[
                   {
                     num: '01',
                     title: 'Honest results',
-                    body: 'We never show you a recipe you can\'t cook. If you\'re missing ingredients, we tell you clearly — we don\'t hide it behind a "close enough".',
+                    body: 'I will never show you a recipe you can\'t cook and pretend you can. If you\'re missing ingredients, the app tells you clearly instead of hiding it behind a "close enough" tag.',
                   },
                   {
                     num: '02',
                     title: 'No noise',
-                    body: 'No ads, no affiliate links, no sponsored recipes. Just a focused tool that does one thing well.',
+                    body: 'No annoying pop-up ads, no 10-page life stories before the recipe, and no affiliate links. Just a clean, focused tool that gets you cooking.',
                   },
                   {
                     num: '03',
-                    title: 'Real recipes',
-                    body: 'Every recipe was written and tested by a human. Practical quantities, clear steps, and cooking tips that actually help.',
+                    title: 'Real food',
+                    body: 'I\'m focusing on real, practical meals. Food that real people can actually make on a busy Tuesday night without needing a culinary degree.',
                   },
                 ].map((v) => (
                   <div key={v.num} className="about-value-item">
