@@ -4,136 +4,31 @@ type Props = {
   onGetStarted: () => void;
 };
 
-/* ─── Inline SVG illustrations ──────────────────────────────── */
+/* ─── Image URLs for about page visuals ── */
+const ABOUT_IMAGES = {
+  mission: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&q=80&auto=format',
+  values: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800&q=80&auto=format',
+};
 
-function IllustrationMission() {
+function ImageCard({ src, alt, style }: { src: string; alt: string; style?: React.CSSProperties }) {
   return (
-    <svg width="100%" viewBox="0 0 480 360" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      {/* Warm background card */}
-      <rect x="20" y="20" width="440" height="320" rx="28" fill="#FFF2DD" />
-
-      {/* Big pot centrepiece */}
-      <g transform="translate(160, 60)">
-        {/* Steam wisps */}
-        <path d="M40 0 Q38 -14 42 -26" stroke="#FFB84D" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6" />
-        <path d="M60 0 Q58 -18 62 -32" stroke="#FF8A3D" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.5" />
-        <path d="M80 0 Q82 -14 78 -26" stroke="#FFB84D" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.6" />
-        {/* Pot body */}
-        <rect x="10" y="0" width="140" height="110" rx="14" fill="#5a5a6a" />
-        <ellipse cx="80" cy="0" rx="70" ry="16" fill="#6a6a7a" />
-        <ellipse cx="80" cy="0" rx="56" ry="11" fill="#7a7a8a" />
-        {/* Lid */}
-        <ellipse cx="80" cy="-6" rx="70" ry="16" fill="#7a7a8a" />
-        <ellipse cx="80" cy="-8" rx="56" ry="11" fill="#8a8a9a" />
-        <ellipse cx="80" cy="-14" rx="16" ry="7" fill="#9a9aaa" />
-        {/* Handles */}
-        <rect x="-18" y="40" width="28" height="14" rx="7" fill="#4a4a5a" />
-        <rect x="150" y="40" width="28" height="14" rx="7" fill="#4a4a5a" />
-        {/* Decorative band */}
-        <rect x="10" y="60" width="140" height="4" rx="2" fill="#4a4a5a" opacity="0.4" />
-      </g>
-
-      {/* Ingredient orbits */}
-      {/* Tomato */}
-      <circle cx="110" cy="155" r="26" fill="#EF4444" />
-      <ellipse cx="110" cy="130" rx="7" ry="5" fill="#34D399" />
-      <ellipse cx="103" cy="149" rx="5" ry="6" fill="#DC2626" opacity="0.35" />
-
-      {/* Lemon */}
-      <ellipse cx="370" cy="145" rx="22" ry="18" fill="#FFB84D" />
-      <ellipse cx="370" cy="145" rx="15" ry="12" fill="#FFC96B" />
-
-      {/* Broccoli */}
-      <circle cx="100" cy="260" r="15" fill="#34D399" />
-      <circle cx="115" cy="254" r="13" fill="#6EE7B7" />
-      <circle cx="107" cy="246" r="11" fill="#34D399" />
-      <rect x="106" y="266" width="5" height="18" rx="2.5" fill="#059669" />
-
-      {/* Pasta nest */}
-      <g transform="translate(360, 230)">
-        <ellipse cx="0" cy="0" rx="22" ry="28" fill="none" stroke="#FFB84D" strokeWidth="3" />
-        <ellipse cx="0" cy="0" rx="13" ry="18" fill="none" stroke="#FFB84D" strokeWidth="2.5" />
-        <ellipse cx="0" cy="0" rx="5" ry="8" fill="none" stroke="#FFB84D" strokeWidth="2" />
-      </g>
-
-      {/* Garlic */}
-      <ellipse cx="245" cy="298" rx="20" ry="17" fill="#FFF7EA" stroke="#EBDDC7" strokeWidth="1.5" />
-      <rect x="243" y="280" width="4" height="9" rx="2" fill="#A3C77E" />
-
-      {/* Sparkle dots */}
-      <circle cx="60" cy="90" r="5" fill="#FF8A3D" opacity="0.45" />
-      <circle cx="420" cy="80" r="4" fill="#8B5CF6" opacity="0.40" />
-      <circle cx="410" cy="300" r="6" fill="#FFB84D" opacity="0.50" />
-      <circle cx="55" cy="310" r="4" fill="#FF5FA2" opacity="0.40" />
-    </svg>
-  );
-}
-
-function IllustrationTeam() {
-  return (
-    <svg width="100%" viewBox="0 0 480 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      {/* Background */}
-      <rect x="20" y="20" width="440" height="260" rx="28" fill="#F5F3FF" />
-
-      {/* Three avatar cards */}
-      {[
-        { x: 60,  gradient: ['#FF8A3D','#FF5FA2'], letter: 'A', role: 'Chef Logic' },
-        { x: 185, gradient: ['#8B5CF6','#60A5FA'], letter: 'B', role: 'Taste Engine' },
-        { x: 310, gradient: ['#34D399','#60A5FA'], letter: 'C', role: 'Kitchen AI' },
-      ].map((av) => (
-        <g key={av.letter} transform={`translate(${av.x}, 50)`}>
-          {/* Card */}
-          <rect x="0" y="0" width="110" height="140" rx="20" fill="white" />
-          <rect x="0" y="0" width="110" height="140" rx="20" stroke="#EBDDC7" strokeWidth="1.5" />
-          {/* Avatar circle */}
-          <defs>
-            <linearGradient id={`grad-${av.letter}`} x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor={av.gradient[0]} />
-              <stop offset="100%" stopColor={av.gradient[1]} />
-            </linearGradient>
-          </defs>
-          <circle cx="55" cy="52" r="30" fill={`url(#grad-${av.letter})`} />
-          <text x="55" y="59" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="20" fontWeight="800" fill="white">{av.letter}</text>
-          {/* Role badge */}
-          <rect x="10" y="96" width="90" height="22" rx="11" fill="#FFF2DD" />
-          <text x="55" y="111" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" fill="#FF8A3D">{av.role}</text>
-        </g>
-      ))}
-
-      {/* Connecting dots */}
-      <circle cx="175" cy="120" r="5" fill="#EBDDC7" />
-      <circle cx="300" cy="120" r="5" fill="#EBDDC7" />
-
-      {/* Bottom caption */}
-      <rect x="150" y="215" width="180" height="26" rx="13" fill="#FFF2DD" />
-      <text x="240" y="232" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="10" fontWeight="700" fill="#FF8A3D">Built with ❤️ for home cooks</text>
-    </svg>
-  );
-}
-
-function IllustrationValues() {
-  return (
-    <svg width="100%" viewBox="0 0 480 280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect x="20" y="20" width="440" height="240" rx="28" fill="#ECFDF5" />
-
-      {/* Three value icons in a row */}
-      {[
-        { x: 80,  icon: '🎯', label: 'Zero Waste',     sub: 'Use what you have',    bg: '#FFF2DD', border: '#EBDDC7' },
-        { x: 200, icon: '⚡', label: 'Instant Matches', sub: 'Results in seconds',  bg: '#F5F3FF', border: '#C4B5FD' },
-        { x: 320, icon: '🌿', label: 'Goal Aware',      sub: 'Eats your way',       bg: '#ECFDF5', border: '#6EE7B7' },
-      ].map((v) => (
-        <g key={v.label} transform={`translate(${v.x}, 50)`}>
-          <rect x="0" y="0" width="120" height="140" rx="20" fill={v.bg} />
-          <rect x="0" y="0" width="120" height="140" rx="20" stroke={v.border} strokeWidth="1.5" />
-          {/* Icon circle */}
-          <rect x="35" y="16" width="50" height="50" rx="14" fill="white" />
-          <text x="60" y="49" textAnchor="middle" fontSize="24">{v.icon}</text>
-          {/* Label */}
-          <text x="60" y="88" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="10" fontWeight="800" fill="#1F172A">{v.label}</text>
-          <text x="60" y="104" textAnchor="middle" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="500" fill="#5B5563">{v.sub}</text>
-        </g>
-      ))}
-    </svg>
+    <div
+      style={{
+        borderRadius: 20,
+        overflow: 'hidden',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        position: 'relative',
+        ...style,
+      }}
+    >
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+    </div>
   );
 }
 
@@ -181,7 +76,7 @@ export default function AboutPage({ onGetStarted }: Props) {
             </div>
           </div>
           <div className="about-hero-visual" aria-hidden="true">
-            <IllustrationMission />
+            <ImageCard src={ABOUT_IMAGES.mission} alt="Fresh food ingredients" />
           </div>
         </div>
       </section>
@@ -231,7 +126,7 @@ export default function AboutPage({ onGetStarted }: Props) {
               </div>
             </div>
             <div className="showcase-visual" aria-hidden="true">
-              <IllustrationMission />
+              <ImageCard src={ABOUT_IMAGES.mission} alt="Fresh ingredients on cutting board" />
             </div>
           </div>
         </div>
@@ -307,7 +202,7 @@ export default function AboutPage({ onGetStarted }: Props) {
         <div className="container">
           <div className="showcase-split showcase-split--reverse">
             <div className="showcase-visual" aria-hidden="true">
-              <IllustrationValues />
+              <ImageCard src={ABOUT_IMAGES.values} alt="Chef cooking in kitchen" />
             </div>
             <div className="showcase-content">
               <p className="section-label">What we stand for</p>
@@ -367,8 +262,8 @@ export default function AboutPage({ onGetStarted }: Props) {
 
           <div className="about-team-grid">
             {[
-              { name: 'Alex Chen',     role: 'Matching Engine',  emoji: '🧮', bio: 'Built the ingredient scoring system and equipment filter. Makes fried rice at midnight.', accent: '#FF8A3D' },
-              { name: 'Priya Mehta',   role: 'Recipe Curator',   emoji: '👩‍🍳', bio: 'Wrote and tested every recipe. Specialises in pantry cooking and high-protein meals.', accent: '#8B5CF6' },
+              { name: 'Alex Chen',     role: 'Matching Engine',  emoji: '🧮', bio: 'Built the ingredient scoring system and equipment filter. Makes fried rice at midnight.', accent: '#00754A' },
+              { name: 'Priya Mehta',   role: 'Recipe Curator',   emoji: '👩‍🍳', bio: 'Wrote and tested every recipe. Specialises in pantry cooking and high-protein meals.', accent: '#FFB84D' },
               { name: 'Jordan Park',   role: 'Product Design',   emoji: '🎨', bio: 'Designed the UI from scratch. Believes cooking apps should feel like a game, not a chore.', accent: '#34D399' },
             ].map((member) => (
               <article key={member.name} className="about-team-card">
@@ -382,9 +277,7 @@ export default function AboutPage({ onGetStarted }: Props) {
             ))}
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 'var(--sp-8)' }} aria-hidden="true">
-            <IllustrationTeam />
-          </div>
+
         </div>
       </section>
 
