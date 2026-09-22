@@ -22,188 +22,32 @@ function IconArrow() {
   );
 }
 
-function IllustrationIngredients() {
+/* ─── Image URLs for landing page visuals ── */
+const IMAGES = {
+  ingredients: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800&q=80&auto=format',
+  recipe: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&q=80&auto=format',
+  kitchen: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&auto=format',
+};
+
+function ImageCard({ src, alt, style }: { src: string; alt: string; style?: React.CSSProperties }) {
   return (
-    <svg width="100%" viewBox="0 0 440 340" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      {/* Background blob — warm cream */}
-      <ellipse cx="220" cy="190" rx="180" ry="130" fill="#FFF2DD" />
-
-      {/* Cutting board */}
-      <rect x="80" y="170" width="280" height="100" rx="14" fill="#E8D5B8" />
-      <rect x="86" y="176" width="268" height="88" rx="10" fill="#F0E4CE" />
-      {/* Board grain lines */}
-      <line x1="120" y1="176" x2="120" y2="264" stroke="#D4C09A" strokeWidth="1.5" strokeDasharray="4 6" />
-      <line x1="160" y1="176" x2="160" y2="264" stroke="#D4C09A" strokeWidth="1.5" strokeDasharray="4 6" />
-      <line x1="200" y1="176" x2="200" y2="264" stroke="#D4C09A" strokeWidth="1.5" strokeDasharray="4 6" />
-      <line x1="240" y1="176" x2="240" y2="264" stroke="#D4C09A" strokeWidth="1.5" strokeDasharray="4 6" />
-      <line x1="280" y1="176" x2="280" y2="264" stroke="#D4C09A" strokeWidth="1.5" strokeDasharray="4 6" />
-      <line x1="320" y1="176" x2="320" y2="264" stroke="#D4C09A" strokeWidth="1.5" strokeDasharray="4 6" />
-
-      {/* Knife */}
-      <g transform="translate(330, 130) rotate(30)">
-        <rect x="0" y="0" width="8" height="70" rx="2" fill="#C8BFB8" />
-        <rect x="0" y="0" width="8" height="46" rx="1" fill="#A09890" />
-        <rect x="2" y="46" width="4" height="24" rx="2" fill="#6B5F58" />
-      </g>
-
-      {/* Tomato */}
-      <circle cx="155" cy="215" r="28" fill="#EF4444" />
-      <ellipse cx="155" cy="188" rx="8" ry="5" fill="#34D399" />
-      <path d="M150 188 C148 180 155 175 162 180" stroke="#34D399" strokeWidth="2" fill="none" />
-      <ellipse cx="147" cy="210" rx="5" ry="7" fill="#DC2626" opacity="0.4" />
-
-      {/* Garlic bulb */}
-      <ellipse cx="220" cy="220" rx="22" ry="20" fill="#FFF7EA" stroke="#EBDDC7" strokeWidth="1.5" />
-      <path d="M210 210 Q220 200 230 210" stroke="#EBDDC7" strokeWidth="1.2" fill="none" />
-      <path d="M213 215 Q220 206 227 215" stroke="#EBDDC7" strokeWidth="1.2" fill="none" />
-      <rect x="218" y="198" width="4" height="10" rx="2" fill="#A3C77E" />
-
-      {/* Lemon */}
-      <ellipse cx="285" cy="218" rx="24" ry="20" fill="#FFB84D" />
-      <ellipse cx="285" cy="218" rx="18" ry="14" fill="#FFC96B" />
-      <circle cx="285" cy="198" r="4" fill="#D97706" />
-
-      {/* Broccoli */}
-      <circle cx="148" cy="156" r="16" fill="#34D399" />
-      <circle cx="166" cy="150" r="14" fill="#6EE7B7" />
-      <circle cx="154" cy="144" r="12" fill="#34D399" />
-      <rect x="154" y="168" width="6" height="20" rx="3" fill="#059669" />
-
-      {/* Pasta */}
-      <g transform="translate(330, 185)">
-        <ellipse cx="0" cy="0" rx="20" ry="28" fill="none" stroke="#FFB84D" strokeWidth="3" />
-        <ellipse cx="0" cy="0" rx="12" ry="18" fill="none" stroke="#FFB84D" strokeWidth="2.5" />
-        <ellipse cx="0" cy="0" rx="4" ry="8" fill="none" stroke="#FFB84D" strokeWidth="2" />
-      </g>
-
-      {/* Egg */}
-      <ellipse cx="110" cy="220" rx="16" ry="20" fill="#FFFDF8" stroke="#EBDDC7" strokeWidth="1.5" />
-      <ellipse cx="110" cy="224" rx="8" ry="8" fill="#FFB84D" />
-
-      {/* Decorative dots — orange + purple + gold */}
-      <circle cx="85" cy="155" r="4" fill="#FF8A3D" opacity="0.5" />
-      <circle cx="370" cy="155" r="6" fill="#8B5CF6" opacity="0.35" />
-      <circle cx="360" cy="260" r="5" fill="#FFB84D" opacity="0.55" />
-      <circle cx="90" cy="260" r="4" fill="#FF5FA2" opacity="0.4" />
-    </svg>
-  );
-}
-
-function IllustrationRecipeCard() {
-  return (
-    <svg width="100%" viewBox="0 0 360 280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      {/* Card shadow */}
-      <rect x="24" y="28" width="312" height="224" rx="22" fill="rgba(31,23,42,0.07)" />
-      {/* Card base */}
-      <rect x="20" y="20" width="312" height="224" rx="22" fill="#FFFDF8" />
-      <rect x="20" y="20" width="312" height="224" rx="22" stroke="#EBDDC7" strokeWidth="1.5" />
-
-      {/* Orange accent left strip */}
-      <rect x="20" y="20" width="4" height="224" rx="2" fill="#FF8A3D" />
-
-      {/* Header band — warm cream */}
-      <rect x="24" y="20" width="308" height="64" rx="20" fill="#FFF2DD" />
-      <rect x="24" y="52" width="308" height="32" fill="#FFF2DD" />
-
-      {/* Match badge — green success */}
-      <rect x="36" y="34" width="90" height="22" rx="11" fill="#D1FAE5" />
-      <text x="46" y="49" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" fill="#065F46" letterSpacing="0.06em">✓ EXACT MATCH</text>
-
-      {/* Score */}
-      <text x="296" y="49" fontFamily="Inter, sans-serif" fontSize="13" fontWeight="700" fill="#A09AAC" textAnchor="end">96%</text>
-
-      {/* Recipe title */}
-      <text x="36" y="90" fontFamily="Inter, sans-serif" fontSize="17" fontWeight="800" fill="#1F172A" letterSpacing="-0.02em">Garlic Tomato Pasta</text>
-
-      {/* Description */}
-      <text x="36" y="110" fontFamily="Inter, sans-serif" fontSize="11" fill="#5B5563">A simple, flavourful pasta ready in 20 minutes.</text>
-
-      {/* Meta tags */}
-      <rect x="36" y="124" width="66" height="20" rx="10" fill="#DBEAFE" />
-      <text x="46" y="137" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" fill="#1D4ED8">⏱ 20 MIN</text>
-
-      <rect x="108" y="124" width="66" height="20" rx="10" fill="#EDE9FE" />
-      <text x="118" y="137" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" fill="#7C3AED">BALANCED</text>
-
-      <rect x="180" y="124" width="44" height="20" rx="10" fill="#FFF2DD" />
-      <text x="190" y="137" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" fill="#5B5563">EASY</text>
-
-      {/* Divider */}
-      <line x1="36" y1="156" x2="316" y2="156" stroke="#EBDDC7" strokeWidth="1" />
-
-      {/* Ingredients section label */}
-      <text x="36" y="174" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="800" fill="#A09AAC" letterSpacing="0.09em">INGREDIENTS</text>
-
-      {/* Ingredient chips */}
-      {[
-        { x: 36,  label: 'Pasta' },
-        { x: 96,  label: 'Tomato' },
-        { x: 166, label: 'Garlic' },
-        { x: 228, label: 'Olive oil' },
-      ].map((ing) => (
-        <g key={ing.label}>
-          <rect x={ing.x} y="182" width={ing.label.length * 7 + 20} height="20" rx="10" fill="#FFF2DD" stroke="#EBDDC7" strokeWidth="1" />
-          <text x={ing.x + 10} y="195" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="600" fill="#5B5563">{ing.label}</text>
-        </g>
-      ))}
-
-      {/* View button — orange CTA */}
-      <rect x="36" y="214" width="118" height="24" rx="12" fill="#FF8A3D" />
-      <text x="95" y="230" fontFamily="Inter, sans-serif" fontSize="10" fontWeight="700" fill="white" textAnchor="middle">View Recipe →</text>
-    </svg>
-  );
-}
-
-function IllustrationEquipment() {
-  return (
-    <svg width="100%" viewBox="0 0 380 260" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      {/* Background wash — warm cream */}
-      <rect x="20" y="20" width="340" height="220" rx="24" fill="#FFF2DD" />
-
-      {/* Pan */}
-      <g transform="translate(50, 60)">
-        <ellipse cx="70" cy="90" rx="55" ry="18" fill="#B8A98C" opacity="0.3" />
-        <rect x="20" y="55" width="100" height="34" rx="6" fill="#3a3a4a" />
-        <ellipse cx="70" cy="55" rx="50" ry="10" fill="#4a4a5a" />
-        <ellipse cx="70" cy="55" rx="38" ry="7" fill="#2a2a38" />
-        {/* Handle */}
-        <rect x="120" y="64" width="52" height="12" rx="6" fill="#5a5050" />
-        <rect x="168" y="66" width="14" height="8" rx="4" fill="#4a4040" />
-      </g>
-
-      {/* Pot */}
-      <g transform="translate(220, 50)">
-        <ellipse cx="60" cy="110" rx="50" ry="16" fill="#B8A98C" opacity="0.3" />
-        <rect x="12" y="55" width="96" height="52" rx="8" fill="#5a5a6a" />
-        <ellipse cx="60" cy="55" rx="48" ry="10" fill="#6a6a7a" />
-        <ellipse cx="60" cy="55" rx="36" ry="7" fill="#7a7a8a" />
-        {/* Lid */}
-        <ellipse cx="60" cy="48" rx="48" ry="10" fill="#7a7a8a" />
-        <ellipse cx="60" cy="46" rx="36" ry="7" fill="#8a8a9a" />
-        <ellipse cx="60" cy="40" rx="10" ry="5" fill="#9a9aaa" />
-        {/* Handles */}
-        <rect x="-6" y="70" width="18" height="10" rx="5" fill="#4a4a5a" />
-        <rect x="110" y="70" width="18" height="10" rx="5" fill="#4a4a5a" />
-      </g>
-
-      {/* Stove burner glow — orange */}
-      <ellipse cx="120" cy="190" rx="40" ry="12" fill="#FF8A3D" opacity="0.22" />
-      <ellipse cx="120" cy="190" rx="24" ry="7" fill="#FF8A3D" opacity="0.32" />
-
-      {/* Decorative check badges — warm green */}
-      <g transform="translate(54, 28)">
-        <rect x="0" y="0" width="64" height="22" rx="11" fill="#D1FAE5" />
-        <text x="10" y="15" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" fill="#065F46">✓ Stove</text>
-      </g>
-      <g transform="translate(234, 22)">
-        <rect x="0" y="0" width="52" height="22" rx="11" fill="#D1FAE5" />
-        <text x="10" y="15" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" fill="#065F46">✓ Pot</text>
-      </g>
-      <g transform="translate(144, 200)">
-        <rect x="0" y="0" width="56" height="22" rx="11" fill="#D1FAE5" />
-        <text x="10" y="15" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" fill="#065F46">✓ Pan</text>
-      </g>
-    </svg>
+    <div
+      style={{
+        borderRadius: 20,
+        overflow: 'hidden',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(255,255,255,0.2)',
+        position: 'relative',
+        ...style,
+      }}
+    >
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+    </div>
   );
 }
 
@@ -430,7 +274,7 @@ export default function LandingPage({ onGetStarted }: Props) {
             </div>
 
             <div className="showcase-visual" aria-hidden="true">
-              <IllustrationIngredients />
+              <ImageCard src={IMAGES.ingredients} alt="Fresh cooking ingredients" />
             </div>
 
           </div>
@@ -445,7 +289,7 @@ export default function LandingPage({ onGetStarted }: Props) {
           <div className="showcase-split showcase-split--reverse">
 
             <div className="showcase-visual" aria-hidden="true">
-              <IllustrationRecipeCard />
+              <ImageCard src={IMAGES.recipe} alt="Delicious pasta recipe" />
             </div>
 
             <div className="showcase-content">
@@ -615,7 +459,11 @@ export default function LandingPage({ onGetStarted }: Props) {
             </div>
 
             <div className="showcase-visual" aria-hidden="true">
-              <IllustrationEquipment />
+              <ImageCard
+                src={IMAGES.kitchen}
+                alt="Modern kitchen equipment"
+                style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.15)' }}
+              />
             </div>
 
           </div>
