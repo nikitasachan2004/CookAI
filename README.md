@@ -1,6 +1,6 @@
-# 🍪 Cookie AI
+# 🍳 CookAI
 
-Cookie AI (CookAI) is a full-stack, ingredient-first recipe matching platform and culinary assistant that solves the "empty fridge dilemma" by calculating what you can cook right now using the exact ingredients and equipment already in your kitchen.
+CookAI is a full-stack, ingredient-first recipe matching platform and culinary assistant that solves the "empty fridge dilemma" by calculating what you can cook right now using the exact ingredients and equipment already in your kitchen.
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.1-61DAFB.svg?logo=react)](https://react.dev/)
@@ -26,7 +26,7 @@ Cookie AI (CookAI) is a full-stack, ingredient-first recipe matching platform an
 
 ## 🧠 How It Works
 
-Rather than standard string queries, Cookie AI uses an information retrieval vector-space model calibrated for cooking:
+Rather than standard string queries, CookAI uses an information retrieval vector-space model calibrated for cooking:
 
 1. **Vocabulary Space & IDF Precomputation**: On server startup, the system indexes all catalog recipes ($N = 110$) and computes smoothed Inverse Document Frequency for every unique ingredient:
    $$\text{IDF}(t) = \ln\left(\frac{N + 1}{\text{df}(t) + 1}\right) + 1$$
@@ -136,7 +136,7 @@ flowchart TD
 ## 📁 Project Structure
 
 ```text
-cookai/
+CookAI/
 ├── public/                  # Static assets & 110+ curated recipe images
 │   ├── images/              # Optimized recipe imagery
 │   └── ui/                  # UI assets and hero video
@@ -214,8 +214,8 @@ npm run build    # Type-check and produce optimized production bundle
 ## 🖥️ Screenshots
 
 <div align="center">
-  <img src="public/logo.png" alt="Cookie AI Logo" width="120" />
-  <p><i>Cookie AI — Smart Kitchen Inventory & Recipe Matching Engine</i></p>
+  <img src="public/logo.png" alt="CookAI Logo" width="120" />
+  <p><i>CookAI — Smart Kitchen Inventory & Recipe Matching Engine</i></p>
 </div>
 
 - **Cinematic Hero**: Full-bleed background video hero with frosted liquid-glass navigation.
