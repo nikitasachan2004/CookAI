@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import type { Profile } from './types';
+import { GlassFilter } from '@/components/ui/liquid-glass-button';
 
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const AboutPage = lazy(() => import('./components/AboutPage'));
@@ -112,77 +113,82 @@ function GlobalHeader({
 
   return (
     <header className={`app-header${isAppRoute ? ' app-header--app' : ''}`}>
-      <div className="header-inner">
-        <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <button type="button" onClick={onGoHome} className="brand-button" aria-label="COOKAI — go to home">
-            <span className="brand-mark" aria-hidden="true"><BrandMark /></span>COOKAI
-          </button>
-          <nav className="header-nav desktop-only" aria-label="Site navigation">
-            <Link to="/" className={`nav-link${location.pathname === '/' ? ' nav-link--active' : ''}`}>Home</Link>
-            <Link to="/recipes" className={`nav-link${location.pathname === '/recipes' ? ' nav-link--active' : ''}`}>Recipes</Link>
-            <Link to="/about" className={`nav-link${location.pathname === '/about' ? ' nav-link--active' : ''}`}>About</Link>
-            <button type="button" onClick={onOpenManual} className="nav-link nav-link--button">Manual</button>
-          </nav>
-        </div>
+      <div className="header-liquid-pill">
+        <div className="header-liquid-glass" style={{ backdropFilter: 'url("#container-glass")' }} />
+        <div className="header-inner">
+          <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <button type="button" onClick={onGoHome} className="brand-button" aria-label="COOKAI — go to home">
+              <span className="brand-mark" aria-hidden="true"><BrandMark /></span>COOKAI
+            </button>
+            <nav className="header-nav desktop-only" aria-label="Site navigation">
+              <Link to="/" className={`nav-link${location.pathname === '/' ? ' nav-link--active' : ''}`}>Home</Link>
+              <Link to="/recipes" className={`nav-link${location.pathname === '/recipes' ? ' nav-link--active' : ''}`}>Recipes</Link>
+              <Link to="/about" className={`nav-link${location.pathname === '/about' ? ' nav-link--active' : ''}`}>About</Link>
+              <button type="button" onClick={onOpenManual} className="nav-link nav-link--button">Manual</button>
+            </nav>
+          </div>
 
-        <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {!isAppRoute && isLanding && (
-            <Link to="/app" className="primary-button" style={{ padding: '9px 22px', minHeight: 40, fontSize: 'var(--text-sm)' }}>
-              Get started
-            </Link>
-          )}
+          <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {!isAppRoute && isLanding && (
+              <Link to="/app" className="primary-button" style={{ padding: '9px 22px', minHeight: 40, fontSize: 'var(--text-sm)' }}>
+                Get started
+              </Link>
+            )}
 
-          {isAppRoute && appScreen && (
-            <>
-              <AppProgress screen={appScreen} />
-              {profile && (
-                <>
-                  <span className="profile-pill">
-                    <span className="profile-pill-dot" aria-hidden="true" />
-                    {profile.name} &nbsp;·&nbsp;
-                    {(() => {
-                      const Icon = GOAL_ICONS[profile.goal] || Target;
-                      return <span aria-hidden="true"><Icon size={16} /></span>;
-                    })()} {GOAL_LABELS[profile.goal] ?? profile.goal}
-                  </span>
-                  <button type="button" onClick={onEditProfile} className="ghost-button">Edit profile</button>
-                </>
-              )}
-            </>
-          )}
+            {isAppRoute && appScreen && (
+              <>
+                <AppProgress screen={appScreen} />
+                {profile && (
+                  <>
+                    <span className="profile-pill">
+                      <span className="profile-pill-dot" aria-hidden="true" />
+                      {profile.name} &nbsp;·&nbsp;
+                      {(() => {
+                        const Icon = GOAL_ICONS[profile.goal] || Target;
+                        return <span aria-hidden="true"><Icon size={16} /></span>;
+                      })()} {GOAL_LABELS[profile.goal] ?? profile.goal}
+                    </span>
+                    <button type="button" onClick={onEditProfile} className="ghost-button">Edit profile</button>
+                  </>
+                )}
+              </>
+            )}
 
-          {!authLoaded ? (
-            <Link to="/app?action=login" className="ghost-button desktop-only">Log in</Link>
-          ) : user ? (
-            <div className="user-menu desktop-only">
-              <button type="button" className="avatar-btn" aria-label="User menu">
-                {user.email[0].toUpperCase()}
-              </button>
-              <div className="dropdown-menu">
-                <div className="dropdown-email">{user.email}</div>
-                <button type="button" onClick={async () => { await logout(); window.location.reload(); }} className="dropdown-btn text-danger">Log out</button>
+            {!authLoaded ? (
+              <Link to="/app?action=login" className="ghost-button desktop-only">Log in</Link>
+            ) : user ? (
+              <div className="user-menu desktop-only">
+                <button type="button" className="avatar-btn" aria-label="User menu">
+                  {user.email[0].toUpperCase()}
+                </button>
+                <div className="dropdown-menu">
+                  <div className="dropdown-email">{user.email}</div>
+                  <button type="button" onClick={async () => { await logout(); window.location.reload(); }} className="dropdown-btn text-danger">Log out</button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <Link to="/app?action=login" className="ghost-button desktop-only">Log in</Link>
-          )}
+            ) : (
+              <Link to="/app?action=login" className="ghost-button desktop-only">Log in</Link>
+            )}
 
-          <button 
-            type="button" 
-            className="mobile-menu-btn mobile-only" 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              {mobileMenuOpen ? (
-                <path d="M18 6L6 18M6 6l12 12" />
-              ) : (
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+            <button 
+              type="button" 
+              className="mobile-menu-btn mobile-only" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {mobileMenuOpen ? (
+                  <path d="M18 6L6 18M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
+
+      <GlassFilter />
 
       {/* Mobile Menu Overlay */}
       <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'is-open' : ''}`}>
