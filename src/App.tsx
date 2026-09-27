@@ -36,14 +36,19 @@ const GOAL_LABELS: Record<string, string> = {
   'high-protein': 'High protein',
 };
 
-/* ─── Brand mark SVG ────────────────────────────────────────── */
+/* ─── Brand mark ────────────────────────────────────────────── */
 function BrandMark() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-      <path d="M9 2C9 2 13.5 5 13.5 9C13.5 11.5 11.5 13.5 9 13.5C6.5 13.5 4.5 11.5 4.5 9C4.5 5 9 2 9 2Z" fill="white" fillOpacity="0.95" />
-      <path d="M9 13.5L9 16" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeOpacity="0.6" />
-      <circle cx="9" cy="9" r="2.2" fill="white" fillOpacity="0.35" />
-    </svg>
+    <img
+      src="/logo.png"
+      alt="CookAI Logo"
+      style={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+        display: 'block',
+      }}
+    />
   );
 }
 

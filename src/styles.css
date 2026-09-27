@@ -314,19 +314,23 @@ img    { display: block; max-width: 100%; }
 .brand-button:hover { opacity: 0.75; }
 
 .brand-mark {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-md);
-  background: linear-gradient(145deg, var(--orange-500), #005a3a);
-  display: grid;
-  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #fdf8f0;
+  border: 1px solid rgba(6, 95, 70, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2px;
   flex-shrink: 0;
-  box-shadow: 0 2px 12px rgba(0, 117, 74, 0.35);
+  box-shadow: 0 2px 8px rgba(6, 95, 70, 0.15);
   transition: box-shadow var(--dur-base) var(--ease-std), transform var(--dur-fast) var(--ease-spring);
 }
 .brand-button:hover .brand-mark {
-  box-shadow: 0 4px 20px rgba(0, 117, 74, 0.45);
-  transform: rotate(-4deg) scale(1.08);
+  box-shadow: 0 4px 16px rgba(6, 95, 70, 0.25);
+  transform: scale(1.08);
 }
 
 .header-actions {
