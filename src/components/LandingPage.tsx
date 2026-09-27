@@ -24,7 +24,7 @@ function IconArrow() {
 
 /* ─── Image URLs for landing page visuals ── */
 const IMAGES = {
-  ingredients: 'https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=800&q=80&auto=format',
+  ingredients: 'https://images.unsplash.com/photo-1466637574441-749b8f19452f?w=800&q=80&auto=format',
   recipe: 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&q=80&auto=format',
   kitchen: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&auto=format',
 };
