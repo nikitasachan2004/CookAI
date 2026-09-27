@@ -1,4 +1,44 @@
+import { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Egg, Utensils, Wheat, Circle, Leaf, Droplet, User, LeafyGreen, UtensilsCrossed, Drumstick, Cookie, Milk, Target, Wrench, Zap, ClipboardList, Flame, ChefHat, Microwave, RefreshCw, CookingPot
+} from 'lucide-react';
+
+function AutoVideo({ src, cutoff = 0.15 }: { src: string; cutoff?: number }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+
+    // Seek back `cutoff` seconds before the end to prevent black-frame gap on loop
+    const handleTimeUpdate = () => {
+      if (v.duration && v.currentTime >= v.duration - cutoff) {
+        v.currentTime = 0;
+        v.play().catch(() => {});
+      }
+    };
+    v.addEventListener('timeupdate', handleTimeUpdate);
+    return () => v.removeEventListener('timeupdate', handleTimeUpdate);
+  }, [cutoff]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      controls={false}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none' }}
+    />
+  );
+}
+
+
 
 type Props = {
   onGetStarted: () => void;
@@ -121,7 +161,7 @@ export default function LandingPage({ onGetStarted }: Props) {
 
               {/* Floating top badge */}
               <div className="hero-float-badge hero-float-badge--top">
-                <span className="hero-float-badge-icon">🥚</span>
+                <span className="hero-float-badge-icon"><Egg size={18} /></span>
                 <div className="hero-float-badge-text">
                   <span className="hero-float-badge-label">Eggs</span>
                   <span className="hero-float-badge-sub">Ingredient matched</span>
@@ -140,9 +180,12 @@ export default function LandingPage({ onGetStarted }: Props) {
                 </p>
 
                 <div className="hero-ingredients-row">
-                  {['🍝 Pasta', '🍅 Tomato', '🧄 Garlic', '🫒 Olive oil', '🌿 Basil'].map((ing) => (
-                    <span key={ing} className="hero-ingredient-chip">{ing}</span>
-                  ))}
+                  {[{ name: 'Pasta', icon: Wheat }, { name: 'Tomato', icon: Circle }, { name: 'Garlic', icon: Leaf }, { name: 'Olive oil', icon: Droplet }, { name: 'Basil', icon: Leaf }].map((ing) => {
+                    const Icon = ing.icon;
+                    return (
+                      <span key={ing.name} className="hero-ingredient-chip"><Icon size={14} style={{ opacity: 0.7 }} /> {ing.name}</span>
+                    );
+                  })}
                 </div>
 
                 <div className="hero-recipe-meta">
@@ -158,7 +201,7 @@ export default function LandingPage({ onGetStarted }: Props) {
 
               {/* Floating bottom badge */}
               <div className="hero-float-badge hero-float-badge--bottom">
-                <span className="hero-float-badge-icon">🍳</span>
+                <span className="hero-float-badge-icon"><Utensils size={18} /></span>
                 <div className="hero-float-badge-text">
                   <span className="hero-float-badge-label">Pan required</span>
                   <span className="hero-float-badge-sub">Equipment verified</span>
@@ -178,10 +221,8 @@ export default function LandingPage({ onGetStarted }: Props) {
         <div className="container">
 
           <div className="section-header-block section-header-block--center">
-            <p className="section-label">How it works</p>
-            <div className="section-divider section-divider--center" />
-            <h2 className="section-heading" id="how-title">
-              How it actually works (no magic, just math)
+            <h2 className="section-heading" id="how-title" style={{ color: 'var(--color-brand)' }}>
+              How it actually works
             </h2>
             <p className="section-subheading">
               I didn't want another app that gives me a recipe for a 5-course meal when all I have is pasta and cheese. Just tell the app what you have, and it handles the rest.
@@ -193,7 +234,7 @@ export default function LandingPage({ onGetStarted }: Props) {
             <article className="how-step">
               <div className="how-step-number" aria-hidden="true">1</div>
               <div>
-                <div className="how-step-icon" aria-hidden="true">👤</div>
+                <div className="how-step-icon" aria-hidden="true"><User size={24} /></div>
                 <h3 className="how-step-title">Tell us your goal & gear</h3>
                 <p className="how-step-desc">
                   Just want a quick high-protein meal? Only have a microwave and a pan? Let the app know so it stops suggesting 3-hour oven roasts.
@@ -204,7 +245,7 @@ export default function LandingPage({ onGetStarted }: Props) {
             <article className="how-step">
               <div className="how-step-number" aria-hidden="true">2</div>
               <div>
-                <div className="how-step-icon" aria-hidden="true">🥦</div>
+                <div className="how-step-icon" aria-hidden="true"><LeafyGreen size={24} /></div>
                 <h3 className="how-step-title">Dump your fridge contents</h3>
                 <p className="how-step-desc">
                   Just tap or type whatever you've got. Got half an onion, two eggs, and some rice? Add it all in. Don't overthink it.
@@ -215,7 +256,7 @@ export default function LandingPage({ onGetStarted }: Props) {
             <article className="how-step">
               <div className="how-step-number" aria-hidden="true">3</div>
               <div>
-                <div className="how-step-icon" aria-hidden="true">🍽️</div>
+                <div className="how-step-icon" aria-hidden="true"><UtensilsCrossed size={24} /></div>
                 <h3 className="how-step-title">Get a recipe you can actually cook</h3>
                 <p className="how-step-desc">
                   The engine instantly scores recipes based on what you have. No "missing ingredient" surprises halfway through cooking.
@@ -274,7 +315,19 @@ export default function LandingPage({ onGetStarted }: Props) {
             </div>
 
             <div className="showcase-visual" aria-hidden="true">
-              <ImageCard src={IMAGES.ingredients} alt="Fresh cooking ingredients" />
+              <div
+                style={{
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  position: 'relative',
+                  width: '100%',
+                  aspectRatio: '3/4',
+                }}
+              >
+                <AutoVideo src="/ui/vi.mp4" />
+              </div>
             </div>
 
           </div>
@@ -289,7 +342,19 @@ export default function LandingPage({ onGetStarted }: Props) {
           <div className="showcase-split showcase-split--reverse">
 
             <div className="showcase-visual" aria-hidden="true">
-              <ImageCard src={IMAGES.recipe} alt="Delicious pasta recipe" />
+              <div
+                style={{
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  position: 'relative',
+                  width: '100%',
+                  aspectRatio: '3/4',
+                }}
+              >
+                <AutoVideo src="/ui/From%20Klickpin.com-%20Refresh%20these%20fresh%20fresh%20manicure%20ideas%20everyone%20will%20ask%20you%20about%20with%20aesthetic%20touches%20that%20photograph%20beautifully%20save%20th.mp4" cutoff={3} />
+              </div>
             </div>
 
             <div className="showcase-content">
@@ -365,7 +430,7 @@ export default function LandingPage({ onGetStarted }: Props) {
           <div className="feature-grid">
 
             <article className="feature-card feature-card--accent">
-              <div className="feature-icon-wrap" aria-hidden="true">🎯</div>
+              <div className="feature-icon-wrap" aria-hidden="true"><Target size={24} /></div>
               <h3 className="feature-title">Goal-aware matching</h3>
               <p className="feature-desc">
                 Trying to eat healthy? Only want high-protein? The app actually respects your diet goals instead of ignoring them.
@@ -373,7 +438,7 @@ export default function LandingPage({ onGetStarted }: Props) {
             </article>
 
             <article className="feature-card">
-              <div className="feature-icon-wrap" aria-hidden="true">🔧</div>
+              <div className="feature-icon-wrap" aria-hidden="true"><Wrench size={24} /></div>
               <h3 className="feature-title">Equipment-aware filtering</h3>
               <p className="feature-desc">
                 If you only have a stove and a single pan, the app won't tell you to use a blender. It's that simple.
@@ -381,7 +446,7 @@ export default function LandingPage({ onGetStarted }: Props) {
             </article>
 
             <article className="feature-card">
-              <div className="feature-icon-wrap" aria-hidden="true">⚡</div>
+              <div className="feature-icon-wrap" aria-hidden="true"><Zap size={24} /></div>
               <h3 className="feature-title">Instant, no fluff</h3>
               <p className="feature-desc">
                 I hate waiting for slow AI bots to type out a recipe. This uses a curated database and lightning-fast math to match you instantly.
@@ -389,7 +454,7 @@ export default function LandingPage({ onGetStarted }: Props) {
             </article>
 
             <article className="feature-card feature-card--accent">
-              <div className="feature-icon-wrap" aria-hidden="true">📋</div>
+              <div className="feature-icon-wrap" aria-hidden="true"><ClipboardList size={24} /></div>
               <h3 className="feature-title">Straight to the point</h3>
               <p className="feature-desc">
                 No 5-page blogs about my grandmother's summer in Italy. Just the ingredients, the steps, and some practical tips.
@@ -420,13 +485,15 @@ export default function LandingPage({ onGetStarted }: Props) {
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--sp-2)', marginBottom: 'var(--sp-8)' }}>
                 {[
-                  { icon: '🔥', name: 'Stove' },
-                  { icon: '🥧', name: 'Oven' },
-                  { icon: '📡', name: 'Microwave' },
-                  { icon: '🌀', name: 'Blender' },
-                  { icon: '🍳', name: 'Pan' },
-                  { icon: '🫕', name: 'Pot' },
-                ].map((eq) => (
+                  { icon: Flame, name: 'Stove' },
+                  { icon: ChefHat, name: 'Oven' },
+                  { icon: Microwave, name: 'Microwave' },
+                  { icon: RefreshCw, name: 'Blender' },
+                  { icon: Utensils, name: 'Pan' },
+                  { icon: CookingPot, name: 'Pot' },
+                ].map((eq) => {
+                  const Icon = eq.icon;
+                  return (
                   <span
                     key={eq.name}
                     style={{
@@ -442,10 +509,11 @@ export default function LandingPage({ onGetStarted }: Props) {
                       color: 'rgba(255,255,255,0.80)',
                     }}
                   >
-                    <span aria-hidden="true">{eq.icon}</span>
+                    <span aria-hidden="true"><Icon size={16} /></span>
                     {eq.name}
                   </span>
-                ))}
+                  );
+                })}
               </div>
 
               <button

@@ -1,4 +1,7 @@
 import { Link } from 'react-router-dom';
+import { Utensils, Target, CookingPot, Unlock, FlaskConical, Calculator, Wrench, Zap } from 'lucide-react';
+
+
 
 type Props = {
   onGetStarted: () => void;
@@ -34,10 +37,10 @@ function ImageCard({ src, alt, style }: { src: string; alt: string; style?: Reac
 }
 
 /* ─── Stat counter card ─────────────────────────────────────── */
-function StatCard({ number, label, emoji }: { number: string; label: string; emoji: string }) {
+function StatCard({ number, label, Icon }: { number: string; label: string; Icon: any }) {
   return (
     <div className="about-stat-card">
-      <span className="about-stat-emoji" aria-hidden="true">{emoji}</span>
+      <span className="about-stat-emoji" aria-hidden="true"><Icon size={24} /></span>
       <span className="about-stat-number">{number}</span>
       <span className="about-stat-label">{label}</span>
     </div>
@@ -86,11 +89,11 @@ export default function AboutPage({ onGetStarted }: Props) {
       <section className="about-stats-bar" aria-label="Key stats">
         <div className="container">
           <div className="about-stats-grid">
-            <StatCard number="100"  label="Curated recipes"      emoji="🍽️" />
-            <StatCard number="4"    label="Dietary goals"        emoji="🎯" />
-            <StatCard number="12"   label="Equipment types"      emoji="🍳" />
-            <StatCard number="0"    label="Sign-ups required"    emoji="🔓" />
-            <StatCard number="∞"    label="Ingredient combos"    emoji="🧪" />
+            <StatCard number="100"  label="Curated recipes"      Icon={Utensils} />
+            <StatCard number="4"    label="Dietary goals"        Icon={Target} />
+            <StatCard number="12"   label="Equipment types"      Icon={CookingPot} />
+            <StatCard number="0"    label="Sign-ups required"    Icon={Unlock} />
+            <StatCard number="∞"    label="Ingredient combos"    Icon={FlaskConical} />
           </div>
         </div>
       </section>
@@ -145,28 +148,28 @@ export default function AboutPage({ onGetStarted }: Props) {
           <div className="about-tech-grid">
             {[
               {
-                icon: '🧮',
+                icon: Calculator,
                 title: 'Weighted match scoring',
                 desc: 'Recipes are scored by ingredient overlap percentage. Exact matches (100%) surface first. Near matches show exactly what you\'re missing.',
                 accent: 'var(--orange-100)',
                 border: 'var(--orange-400)',
               },
               {
-                icon: '🔧',
+                icon: Wrench,
                 title: 'Equipment-aware filter',
                 desc: 'A recipe that needs an oven you don\'t have is never shown. Equipment constraints are applied before scoring, not after.',
                 accent: 'var(--purple-50)',
                 border: 'var(--purple-500)',
               },
               {
-                icon: '🎯',
+                icon: Target,
                 title: 'Goal alignment',
                 desc: 'Choose balanced, healthy, weight-loss, or high-protein. Every result is filtered to recipes tagged with your goal.',
                 accent: 'var(--green-50)',
                 border: 'var(--green-500)',
               },
               {
-                icon: '⚡',
+                icon: Zap,
                 title: 'Fast & Deterministic',
                 desc: 'The matching runs instantly in a single fast pass. There is no waiting for a slow AI text-generator to finish typing out a recipe.',
                 accent: 'var(--blue-50)',
@@ -178,7 +181,12 @@ export default function AboutPage({ onGetStarted }: Props) {
                 className="about-tech-card"
                 style={{ background: card.accent, borderColor: card.border }}
               >
-                <div className="about-tech-icon" aria-hidden="true">{card.icon}</div>
+                <div className="about-tech-icon" aria-hidden="true">
+                  {(() => {
+                    const Icon = card.icon;
+                    return <Icon size={28} />;
+                  })()}
+                </div>
                 <h3 className="about-tech-title">{card.title}</h3>
                 <p className="about-tech-desc">{card.desc}</p>
               </article>
