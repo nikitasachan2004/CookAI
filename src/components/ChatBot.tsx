@@ -117,7 +117,7 @@ export const ChatBot: React.FC = () => {
             <div className="chatbot-messages">
               {messages.map((msg, i) => (
                 <div
-                  key={i}
+                  key={`msg-${i}-${msg.role}`}
                   className={`chatbot-msg-row ${msg.role}`}
                 >
                   <div className="chatbot-bubble-wrap">

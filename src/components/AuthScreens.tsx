@@ -34,8 +34,9 @@ export function SignupEmail({ onSuccess, onLoginClick }: { onSuccess: () => void
         </div>
         <form onSubmit={handleSubmit} className="form-stack" style={{ marginTop: 24 }}>
           <div className="field">
-            <label>Email address</label>
+            <label htmlFor="signup-email">Email address</label>
             <input 
+              id="signup-email"
               type="email" 
               value={email} 
               onChange={e => setEmail(e.target.value)} 
@@ -45,8 +46,9 @@ export function SignupEmail({ onSuccess, onLoginClick }: { onSuccess: () => void
             />
           </div>
           <div className="field">
-            <label>Password</label>
+            <label htmlFor="signup-password">Password</label>
             <input 
+              id="signup-password"
               type="password" 
               value={password} 
               onChange={e => setPassword(e.target.value)} 
@@ -117,8 +119,9 @@ export function VerifyOtp({ email, onNext }: { email: string, onNext: (setupToke
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit} className="form-stack" style={{ marginTop: 24 }}>
           <div className="field">
-            <label>Verification Code</label>
+            <label htmlFor="verify-code">Verification Code</label>
             <input 
+              id="verify-code"
               type="text" 
               value={code} 
               onChange={e => setCode(e.target.value)} 
@@ -170,8 +173,9 @@ export function SetPassword({ email, setupToken, onSuccess }: { email: string, s
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit} className="form-stack" style={{ marginTop: 24 }}>
           <div className="field">
-            <label>Password (min 8 characters)</label>
+            <label htmlFor="set-password-input">Password (min 8 characters)</label>
             <input 
+              id="set-password-input"
               type="password" 
               value={password} 
               onChange={e => setPassword(e.target.value)} 
@@ -223,8 +227,9 @@ export function Login({ onSuccess, onSignupClick }: { onSuccess: () => void, onS
         {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit} className="form-stack" style={{ marginTop: 24 }}>
           <div className="field">
-            <label>Email address</label>
+            <label htmlFor="login-email">Email address</label>
             <input 
+              id="login-email"
               type="email" 
               value={email} 
               onChange={e => setEmail(e.target.value)} 
@@ -234,8 +239,9 @@ export function Login({ onSuccess, onSignupClick }: { onSuccess: () => void, onS
             />
           </div>
           <div className="field">
-            <label>Password</label>
+            <label htmlFor="login-password">Password</label>
             <input 
+              id="login-password"
               type="password" 
               value={password} 
               onChange={e => setPasswordState(e.target.value)} 

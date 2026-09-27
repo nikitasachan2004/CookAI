@@ -170,12 +170,18 @@ export default function RecipeResults({
           {recipes.map((recipe) => {
             const tier = TIER_META[recipe.matchTier] ?? TIER_META.low;
             return (
-              <button
-                type="button"
+              <div
                 key={recipe.id}
-                role="listitem"
+                role="button"
+                tabIndex={0}
                 className={`recipe-card tier-${recipe.matchTier}`}
                 onClick={() => onSelectRecipe(recipe.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectRecipe(recipe.id);
+                  }
+                }}
                 aria-label={`${recipe.title} — ${tier.label}, ${Math.round(recipe.matchScore * 100)}% match`}
               >
                 {/* Top line: badge + score */}
@@ -249,7 +255,7 @@ export default function RecipeResults({
                     </span>
                   </p>
                 )}
-              </button>
+              </div>
             );
           })}
         </div>

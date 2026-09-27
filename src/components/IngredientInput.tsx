@@ -153,8 +153,8 @@ export default function IngredientInput({ profile, initialIngredients = [], onSe
             const CatIcon = cat.icon;
             return (
               <div key={cat.label}>
-                <p className="ingredient-category-label" aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <CatIcon size={14} /> {cat.label}
+                <p className="ingredient-category-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CatIcon size={14} aria-hidden="true" /> {cat.label}
                 </p>
                 <div className="chip-row" role="group" aria-label={`${cat.label} ingredients`}>
                 {cat.items.map((name) => {
