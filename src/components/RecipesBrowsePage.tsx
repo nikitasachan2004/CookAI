@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Flame, ChefHat, Microwave, RefreshCw, Utensils, CookingPot, Wrench, Search, UtensilsCrossed } from 'lucide-react';
+
+
 import { getAllRecipes } from '../api';
 import type { RecipeListItem } from '../types';
 
@@ -9,45 +12,45 @@ type Props = {
 
 /* ─── Per-recipe colour themes based on tags / id ──────────── */
 const RECIPE_THEMES: Record<string, { from: string; to: string; emoji: string }> = {
-  'egg-fried-rice':         { from: '#FFB84D', to: '#FF8A3D', emoji: '🍳' },
-  'chicken-rice-bowl':      { from: '#60A5FA', to: '#3B82F6', emoji: '🍗' },
-  'tomato-pasta':           { from: '#EF4444', to: '#DC2626', emoji: '🍝' },
-  'bean-toast':             { from: '#FF8A3D', to: '#EA6D0F', emoji: '🫘' },
-  'banana-oat-smoothie':    { from: '#FFB84D', to: '#F59E0B', emoji: '🍌' },
-  'spinach-omelet':         { from: '#34D399', to: '#059669', emoji: '🥬' },
-  'microwave-egg-rice':     { from: '#8B5CF6', to: '#7C3AED', emoji: '📡' },
-  'lentil-tomato-soup':     { from: '#EF4444', to: '#B91C1C', emoji: '🥣' },
-  'chickpea-spinach-pan':   { from: '#34D399', to: '#047857', emoji: '🌱' },
-  'tuna-rice-bowl':         { from: '#60A5FA', to: '#1D4ED8', emoji: '🐟' },
-  'potato-egg-hash':        { from: '#FFB84D', to: '#D97706', emoji: '🥔' },
-  'banana-peanut-oats':     { from: '#FF8A3D', to: '#C2410C', emoji: '🥜' },
-  'microwave-potato-beans': { from: '#8B5CF6', to: '#5B21B6', emoji: '🎃' },
-  'tofu-broccoli-rice':     { from: '#34D399', to: '#065F46', emoji: '🥦' },
-  'vegetable-omelet-wrap':  { from: '#FF5FA2', to: '#DB2777', emoji: '🫔' },
-  'avocado-egg-toast':      { from: '#34D399', to: '#059669', emoji: '🥑' },
-  'chicken-spinach-pasta':  { from: '#60A5FA', to: '#1D4ED8', emoji: '🍃' },
-  'tomato-egg-drop-soup':   { from: '#EF4444', to: '#991B1B', emoji: '🍅' },
-  'broccoli-cheese-rice':   { from: '#34D399', to: '#047857', emoji: '🧀' },
-  'chickpea-cucumber-salad':{ from: '#FFB84D', to: '#92400E', emoji: '🥗' },
-  'paneer-pepper-pan':      { from: '#FF8A3D', to: '#9A3412', emoji: '🫑' },
-  'mushroom-spinach-toast': { from: '#8B5CF6', to: '#4C1D95', emoji: '🍄' },
-  'corn-pea-rice':          { from: '#FFB84D', to: '#B45309', emoji: '🌽' },
-  'chicken-lettuce-wraps':  { from: '#60A5FA', to: '#1E40AF', emoji: '🥬' },
-  'apple-yogurt-oats':      { from: '#FF5FA2', to: '#BE185D', emoji: '🍎' },
-  'bean-cheese-wrap':       { from: '#FF8A3D', to: '#7C2D12', emoji: '🧆' },
-  'cabbage-egg-stir-fry':   { from: '#34D399', to: '#064E3B', emoji: '🥬' },
-  'oven-potato-chicken':    { from: '#FFB84D', to: '#78350F', emoji: '🥧' },
-  'blender-tomato-soup':    { from: '#EF4444', to: '#7F1D1D', emoji: '🌀' },
-  'tofu-cabbage-wrap':      { from: '#8B5CF6', to: '#3730A3', emoji: '🌯' },
-  'carrot-pea-pasta':       { from: '#FF8A3D', to: '#EA580C', emoji: '🥕' },
-  'chicken-corn-soup':      { from: '#FFB84D', to: '#A16207', emoji: '🌽' },
-  'peanut-banana-smoothie': { from: '#FF8A3D', to: '#B45309', emoji: '🥤' },
-  'tomato-paneer-rice':     { from: '#EF4444', to: '#FF8A3D', emoji: '🫙' },
-  'mushroom-egg-rice':      { from: '#8B5CF6', to: '#6D28D9', emoji: '🍄' },
-  'coconut-lentil-rice':    { from: '#34D399', to: '#065F46', emoji: '🥥' },
+  'egg-fried-rice':         { from: '#FFB84D', to: '#FF8A3D' },
+  'chicken-rice-bowl':      { from: '#60A5FA', to: '#3B82F6' },
+  'tomato-pasta':           { from: '#EF4444', to: '#DC2626' },
+  'bean-toast':             { from: '#FF8A3D', to: '#EA6D0F' },
+  'banana-oat-smoothie':    { from: '#FFB84D', to: '#F59E0B' },
+  'spinach-omelet':         { from: '#34D399', to: '#059669' },
+  'microwave-egg-rice':     { from: '#8B5CF6', to: '#7C3AED' },
+  'lentil-tomato-soup':     { from: '#EF4444', to: '#B91C1C' },
+  'chickpea-spinach-pan':   { from: '#34D399', to: '#047857' },
+  'tuna-rice-bowl':         { from: '#60A5FA', to: '#1D4ED8' },
+  'potato-egg-hash':        { from: '#FFB84D', to: '#D97706' },
+  'banana-peanut-oats':     { from: '#FF8A3D', to: '#C2410C' },
+  'microwave-potato-beans': { from: '#8B5CF6', to: '#5B21B6' },
+  'tofu-broccoli-rice':     { from: '#34D399', to: '#065F46' },
+  'vegetable-omelet-wrap':  { from: '#FF5FA2', to: '#DB2777' },
+  'avocado-egg-toast':      { from: '#34D399', to: '#059669' },
+  'chicken-spinach-pasta':  { from: '#60A5FA', to: '#1D4ED8' },
+  'tomato-egg-drop-soup':   { from: '#EF4444', to: '#991B1B' },
+  'broccoli-cheese-rice':   { from: '#34D399', to: '#047857' },
+  'chickpea-cucumber-salad':{ from: '#FFB84D', to: '#92400E' },
+  'paneer-pepper-pan':      { from: '#FF8A3D', to: '#9A3412' },
+  'mushroom-spinach-toast': { from: '#8B5CF6', to: '#4C1D95' },
+  'corn-pea-rice':          { from: '#FFB84D', to: '#B45309' },
+  'chicken-lettuce-wraps':  { from: '#60A5FA', to: '#1E40AF' },
+  'apple-yogurt-oats':      { from: '#FF5FA2', to: '#BE185D' },
+  'bean-cheese-wrap':       { from: '#FF8A3D', to: '#7C2D12' },
+  'cabbage-egg-stir-fry':   { from: '#34D399', to: '#064E3B' },
+  'oven-potato-chicken':    { from: '#FFB84D', to: '#78350F' },
+  'blender-tomato-soup':    { from: '#EF4444', to: '#7F1D1D' },
+  'tofu-cabbage-wrap':      { from: '#8B5CF6', to: '#3730A3' },
+  'carrot-pea-pasta':       { from: '#FF8A3D', to: '#EA580C' },
+  'chicken-corn-soup':      { from: '#FFB84D', to: '#A16207' },
+  'peanut-banana-smoothie': { from: '#FF8A3D', to: '#B45309' },
+  'tomato-paneer-rice':     { from: '#EF4444', to: '#FF8A3D' },
+  'mushroom-egg-rice':      { from: '#8B5CF6', to: '#6D28D9' },
+  'coconut-lentil-rice':    { from: '#34D399', to: '#065F46' },
 };
 
-const FALLBACK_THEME = { from: '#FF8A3D', to: '#8B5CF6', emoji: '🍴' };
+const FALLBACK_THEME = { from: '#FF8A3D', to: '#8B5CF6' };
 const FALLBACK_IMAGE_URL = '/images/cauliflower-rice-bowl.jpg';
 
 const GOAL_LABELS: Record<string, string> = {
@@ -68,22 +71,22 @@ const GOAL_COLORS: Record<string, { bg: string; color: string }> = {
   quick:          { bg: '#FEF3C7', color: '#D97706' },
 };
 
-const EQUIP_ICONS: Record<string, string> = {
-  stove:     '🔥',
-  oven:      '🥧',
-  microwave: '📡',
-  blender:   '🌀',
-  pan:       '🍳',
-  pot:       '🫕',
+const EQUIP_ICONS: Record<string, any> = {
+  stove:     Flame,
+  oven:      ChefHat,
+  microwave: Microwave,
+  blender:   RefreshCw,
+  pan:       Utensils,
+  pot:       CookingPot,
 };
 
 const ALL_GOALS = ['balanced', 'healthy', 'weight-loss', 'high-protein'] as const;
 type GoalFilter = typeof ALL_GOALS[number] | 'all' | 'viral' | 'quick';
 
 const FILTER_CHIPS: { id: GoalFilter; label: string }[] = [
-  { id: 'all', label: '✨ All' },
-  { id: 'viral', label: '🔥 Viral & Trending' },
-  { id: 'quick', label: '⚡ Under 15 Mins' },
+  { id: 'all', label: 'All' },
+  { id: 'viral', label: 'Viral & Trending' },
+  { id: 'quick', label: 'Under 15 Mins' },
   { id: 'high-protein', label: 'High protein' },
   { id: 'healthy', label: 'Healthy' },
   { id: 'balanced', label: 'Balanced' },
@@ -106,7 +109,7 @@ function getTheme(id: string) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash);
   }
   const color = COLORS[Math.abs(hash) % COLORS.length];
-  return { ...color, emoji: '🍴' };
+  return { ...color };
 }
 
 /* ─── Recipe photo banner ───────────────────────────────────── */
@@ -197,7 +200,10 @@ function RecipeCard({ recipe, onSelect }: { recipe: RecipeListItem; onSelect: (i
           <div className="browse-card-equipment">
             {recipe.equipment.map((eq) => (
               <span key={eq} className="browse-equip-chip">
-                <span aria-hidden="true">{EQUIP_ICONS[eq] ?? '🔧'}</span>
+                {(() => {
+                  const EqIcon = EQUIP_ICONS[eq] || Wrench;
+                  return <span aria-hidden="true"><EqIcon size={14} /></span>;
+                })()}
                 {eq}
               </span>
             ))}
@@ -272,7 +278,7 @@ export default function RecipesBrowsePage({ onGetStarted }: Props) {
           {/* Search + filter bar */}
           <div className="browse-controls">
             <div className="browse-search-wrap">
-              <span className="browse-search-icon" aria-hidden="true">🔍</span>
+              <span className="browse-search-icon" aria-hidden="true"><Search size={18} /></span>
               <input
                 type="search"
                 placeholder="Search recipes…"
@@ -330,7 +336,7 @@ export default function RecipesBrowsePage({ onGetStarted }: Props) {
           {/* Empty filtered state */}
           {!loading && !error && filtered.length === 0 && (
             <div className="empty-state">
-              <span className="empty-icon" aria-hidden="true">🍽️</span>
+              <span className="empty-icon" aria-hidden="true"><UtensilsCrossed size={48} /></span>
               <h2>No recipes match that filter</h2>
               <p>Try a different goal or clear the search.</p>
               <button

@@ -65,7 +65,7 @@ export default function RecipeDetail({ recipeId, onBack }: Props) {
           {/* Header */}
           <div className="screen-heading">
             <p className="eyebrow">
-              <span aria-hidden="true">🍴</span>
+              <span aria-hidden="true"></span>
               {recipe.tags.map((t) => GOAL_LABELS[t] ?? t).join(' · ')}
             </p>
             <h1>{recipe.title}</h1>
@@ -76,7 +76,7 @@ export default function RecipeDetail({ recipeId, onBack }: Props) {
               <span className="meta-tag">{recipe.ingredients.length} ingredients</span>
               {recipe.equipment.length > 0 && (
                 <span className="meta-tag">
-                  <span aria-hidden="true">🔧</span>
+                  <span aria-hidden="true"></span>
                   {recipe.equipment.join(', ')}
                 </span>
               )}

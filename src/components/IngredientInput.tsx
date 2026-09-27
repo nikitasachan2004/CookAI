@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getIngredients } from '../api';
 import type { IngredientOption, Profile } from '../types';
+import { Beef, Wheat, LeafyGreen, Cookie, Circle, Flame, Sparkles, X, Plus, Target } from 'lucide-react';
 
 type Props = {
   profile: Profile;
@@ -11,17 +12,17 @@ type Props = {
 const CATEGORIES: { label: string; icon: string; items: string[] }[] = [
   {
     label: 'Proteins',
-    icon: '🥩',
+    icon: Beef,
     items: ['egg', 'chicken', 'beef', 'pork', 'tuna', 'salmon', 'shrimp', 'tofu', 'paneer', 'beans', 'chickpeas', 'lentils'],
   },
   {
     label: 'Grains & carbs',
-    icon: '🌾',
+    icon: Wheat,
     items: ['rice', 'pasta', 'bread', 'oats', 'flour', 'tortilla', 'potato', 'sweet potato'],
   },
   {
     label: 'Vegetables',
-    icon: '🥦',
+    icon: LeafyGreen,
     items: [
       'onion', 'tomato', 'spinach', 'bell pepper', 'broccoli', 'mushroom',
       'carrot', 'cabbage', 'peas', 'corn', 'lettuce', 'cucumber', 'avocado',
@@ -30,17 +31,17 @@ const CATEGORIES: { label: string; icon: string; items: string[] }[] = [
   },
   {
     label: 'Dairy',
-    icon: '🧀',
+    icon: Cookie,
     items: ['cheese', 'mozzarella', 'yogurt', 'milk', 'soy milk', 'butter', 'cream'],
   },
   {
     label: 'Fruits & pantry',
-    icon: '🍋',
+    icon: Circle,
     items: ['banana', 'apple', 'lemon', 'coconut milk', 'peanut butter', 'honey', 'soy sauce'],
   },
   {
     label: 'Spices & herbs',
-    icon: '🌶️',
+    icon: Flame,
     items: ['garlic', 'ginger', 'basil', 'cumin', 'coriander', 'turmeric', 'garam masala', 'mustard seeds', 'chili powder'],
   },
 ];
@@ -106,7 +107,7 @@ export default function IngredientInput({ profile, initialIngredients = [], onSe
       {/* ── Heading ─────────────────────────────────────── */}
       <div className="screen-heading">
         <p className="eyebrow">
-          <span aria-hidden="true">🎯</span>
+          <span aria-hidden="true"></span>
           {GOAL_LABELS[profile.goal] ?? profile.goal}
         </p>
         <h1>What's in your kitchen?</h1>

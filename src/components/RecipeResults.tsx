@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { matchRecipes } from '../api';
 import type { Profile, RecipeSummary } from '../types';
+import { UtensilsCrossed, Leaf, RefreshCw } from 'lucide-react';
 
 type Props = {
   ingredients: string[];
@@ -86,7 +87,7 @@ export default function RecipeResults({
       {/* ── Heading ─────────────────────────────────────── */}
       <div className="screen-heading">
         <p className="eyebrow">
-          <span aria-hidden="true">🍽️</span>
+          <span aria-hidden="true"><UtensilsCrossed size={16} /></span>
           Recipe matches
         </p>
         <h1>
@@ -125,7 +126,7 @@ export default function RecipeResults({
           ))}
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>🌱 Diet:</span>
+          <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}><Leaf size={16} /> Diet:</span>
           <button
             type="button"
             onClick={() => setVegetarian(!vegetarian)}
@@ -154,7 +155,7 @@ export default function RecipeResults({
       {/* ── Empty state ──────────────────────────────────── */}
       {!loading && !error && recipes.length === 0 && (
         <div className="empty-state">
-          <span className="empty-icon" aria-hidden="true">🍽️</span>
+          <span className="empty-icon" aria-hidden="true"><UtensilsCrossed size={16} /></span>
           <h2>No equipment-compatible matches</h2>
           <p>
             Try adding a few more ingredients, adjusting your time budget, or update your equipment
@@ -207,7 +208,7 @@ export default function RecipeResults({
                 {/* Substitution hints */}
                 {recipe.substitutions && recipe.substitutions.length > 0 && (
                   <p className="missing-text" style={{ color: 'var(--color-warning, #b45309)' }}>
-                    <span aria-hidden="true">🔄</span>
+                    <span aria-hidden="true"><RefreshCw size={16} /></span>
                     <span>
                       <strong>Swap:</strong> {recipe.substitutions.join(' · ')}
                     </span>
