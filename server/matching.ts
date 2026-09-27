@@ -1,4 +1,4 @@
-import { detailedInstructions, ingredients, recipeImages } from './data.js';
+import { detailedInstructions, ingredients, recipeImages, recipes as fallbackRecipes } from './data.js';
 import type { Goal, Recipe, RecipeDetail } from './types.js';
 import { RecipeModel } from './models/Recipe.js';
 
@@ -155,8 +155,25 @@ let recipeVectors: { recipe: Recipe; vec: SparseVector; mag: number }[] = [];
 let allRecipes: Recipe[] = [];
 
 export async function initializeMatching() {
+  try {
+    for (const recipe of fallbackRecipes) {
+      const { id, ...rest } = recipe;
+      await RecipeModel.updateOne(
+        { _id: id },
+        { $set: rest },
+        { upsert: true }
+      );
+    }
+  } catch (err) {
+    console.warn('Could not sync recipes to DB, using local data:', err);
+  }
+
   const docs = await RecipeModel.find().lean();
-  allRecipes = docs.map(d => ({ ...d, id: d._id as string })) as unknown as Recipe[];
+  if (docs && docs.length > 0) {
+    allRecipes = docs.map(d => ({ ...d, id: d._id as string })) as unknown as Recipe[];
+  } else {
+    allRecipes = fallbackRecipes;
+  }
   N = allRecipes.length;
   docFrequency.clear();
 

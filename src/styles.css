@@ -1050,8 +1050,13 @@ button.nav-link {
   opacity: 1;
 }
 .recipe-card:hover {
-  box-shadow: 0 12px 32px rgba(0, 117, 74, 0.10), 0 4px 12px rgba(0,0,0,0.06);
-  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 117, 74, 0.16), 0 6px 16px rgba(0,0,0,0.08);
+  transform: translateY(-5px) scale(1.015);
+  border-color: rgba(0, 117, 74, 0.35);
+}
+.recipe-card:hover > p {
+  color: #111827;
+  font-weight: 500;
 }
 .recipe-card:active { transform: scale(0.99); }
 .recipe-card:focus-visible {
@@ -2735,12 +2740,15 @@ button.nav-link {
   display: flex;
   flex-direction: column;
   transition:
-    box-shadow var(--dur-base) var(--ease-std),
-    transform  var(--dur-fast) var(--ease-spring);
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform  0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.35s ease;
+  cursor: pointer;
 }
 .browse-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-5px);
+  box-shadow: 0 20px 48px rgba(6, 95, 70, 0.16), 0 8px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-8px) scale(1.025);
+  border-color: rgba(6, 95, 70, 0.4);
 }
 
 /* Photo banner */
@@ -2761,6 +2769,10 @@ button.nav-link {
   height: 100%;
   object-fit: cover;
   z-index: 0;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.browse-card:hover .browse-card-image {
+  transform: scale(1.08);
 }
 
 .browse-card-photo::after {
@@ -2853,6 +2865,11 @@ button.nav-link {
   color: var(--text-600);
   line-height: 1.65;
   flex: 1;
+  transition: color 0.25s ease;
+}
+.browse-card:hover .browse-card-desc {
+  color: #111827;
+  font-weight: 500;
 }
 .browse-card-meta {
   display: flex;
