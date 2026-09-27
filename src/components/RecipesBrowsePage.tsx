@@ -55,6 +55,8 @@ const GOAL_LABELS: Record<string, string> = {
   healthy:        'Healthy',
   'weight-loss':  'Weight loss',
   'high-protein': 'High protein',
+  viral:          'Viral & Trending',
+  quick:          'Under 15 Mins',
 };
 
 const GOAL_COLORS: Record<string, { bg: string; color: string }> = {
@@ -62,6 +64,8 @@ const GOAL_COLORS: Record<string, { bg: string; color: string }> = {
   healthy:        { bg: '#D1FAE5', color: '#065F46' },
   'weight-loss':  { bg: '#DBEAFE', color: '#1D4ED8' },
   'high-protein': { bg: '#FFF2DD', color: '#C2410C' },
+  viral:          { bg: '#FEE2E2', color: '#DC2626' },
+  quick:          { bg: '#FEF3C7', color: '#D97706' },
 };
 
 const EQUIP_ICONS: Record<string, string> = {
@@ -74,7 +78,17 @@ const EQUIP_ICONS: Record<string, string> = {
 };
 
 const ALL_GOALS = ['balanced', 'healthy', 'weight-loss', 'high-protein'] as const;
-type GoalFilter = typeof ALL_GOALS[number] | 'all';
+type GoalFilter = typeof ALL_GOALS[number] | 'all' | 'viral' | 'quick';
+
+const FILTER_CHIPS: { id: GoalFilter; label: string }[] = [
+  { id: 'all', label: '✨ All' },
+  { id: 'viral', label: '🔥 Viral & Trending' },
+  { id: 'quick', label: '⚡ Under 15 Mins' },
+  { id: 'high-protein', label: 'High protein' },
+  { id: 'healthy', label: 'Healthy' },
+  { id: 'balanced', label: 'Balanced' },
+  { id: 'weight-loss', label: 'Weight loss' },
+];
 
 const COLORS = [
   { from: '#FFB84D', to: '#FF8A3D' },
@@ -212,7 +226,19 @@ export default function RecipesBrowsePage({ onGetStarted }: Props) {
   }, []);
 
   const filtered = recipes.filter((r) => {
-    const matchesGoal   = filter === 'all' || r.tags.includes(filter as typeof ALL_GOALS[number]);
+    let matchesGoal = true;
+    if (filter === 'all') {
+      matchesGoal = true;
+    } else if (filter === 'viral') {
+      matchesGoal = r.tags.includes('viral' as any) ||
+        r.title.toLowerCase().includes('viral') ||
+        ['feta-pasta', 'marry-me', 'chili-crisp', 'ramen', 'smash', 'quesadilla', 'fajita', 'burrito', 'pizza', 'toast', 'smoothie', 'wrap'].some(k => r.id.includes(k));
+    } else if (filter === 'quick') {
+      matchesGoal = r.timeMinutes <= 15 || r.tags.includes('quick' as any);
+    } else {
+      matchesGoal = r.tags.includes(filter as any);
+    }
+
     const matchesSearch = search.trim() === '' ||
       r.title.toLowerCase().includes(search.toLowerCase()) ||
       r.description.toLowerCase().includes(search.toLowerCase());
@@ -257,15 +283,15 @@ export default function RecipesBrowsePage({ onGetStarted }: Props) {
               />
             </div>
 
-            <div className="browse-filter-row" role="group" aria-label="Filter by goal">
-              {(['all', ...ALL_GOALS] as GoalFilter[]).map((g) => (
+            <div className="browse-filter-row" role="group" aria-label="Filter recipes">
+              {FILTER_CHIPS.map((chip) => (
                 <button
-                  key={g}
+                  key={chip.id}
                   type="button"
-                  onClick={() => setFilter(g)}
-                  className={`browse-filter-chip${filter === g ? ' is-active' : ''}`}
+                  onClick={() => setFilter(chip.id)}
+                  className={`browse-filter-chip${filter === chip.id ? ' is-active' : ''}`}
                 >
-                  {g === 'all' ? '✨ All' : GOAL_LABELS[g]}
+                  {chip.label}
                 </button>
               ))}
             </div>
