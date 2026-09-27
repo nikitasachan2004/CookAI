@@ -30,7 +30,7 @@ export function SignupEmail({ onSuccess, onLoginClick }: { onSuccess: () => void
         </div>
         {error && <div className="error-message">{error}</div>}
         <div className="alert-box" style={{ background: 'rgba(255,165,0,0.1)', color: '#d97706', padding: '12px', borderRadius: '8px', fontSize: '0.9rem', marginTop: '16px' }}>
-          <strong>🚧 Under Construction:</strong> Email verification (OTP) is currently being built. For now, you can sign up directly with a password!
+          <strong> Under Construction:</strong> Email verification (OTP) is currently being built. For now, you can sign up directly with a password!
         </div>
         <form onSubmit={handleSubmit} className="form-stack" style={{ marginTop: 24 }}>
           <div className="field">

@@ -45,7 +45,7 @@ export const ChatBot: React.FC = () => {
       setMessages(prev => [...prev, { role: 'model', parts: [{ text: res.text }] }]);
     } catch (error) {
       console.error('Chat error:', error);
-      setMessages(prev => [...prev, { role: 'model', parts: [{ text: "fr fr the devs are broke and using a free API key 💀 so we hit a limit. Try again in a bit bro!" }] }]);
+      setMessages(prev => [...prev, { role: 'model', parts: [{ text: "fr fr the devs are broke and using a free API key  so we hit a limit. Try again in a bit bro!" }] }]);
     } finally {
       setIsLoading(false);
     }

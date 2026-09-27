@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { Goal, Profile } from '../types';
 import { getEquipment, saveProfile } from '../api';
+import {
+  Scale, Leaf, Target, BicepsFlexed,
+  Flame, ChefHat, Microwave, RefreshCw, Utensils, CookingPot,
+  Egg, Soup, UtensilsCrossed, ArrowRight, Check
+} from 'lucide-react';
 
 type Props = {
   initialProfile?: Profile;
@@ -9,25 +14,25 @@ type Props = {
 };
 
 const GOALS: { value: Goal; icon: string; label: string; helper: string }[] = [
-  { value: 'balanced',     icon: '⚖️',  label: 'Balanced',     helper: 'Flexible everyday meals' },
-  { value: 'healthy',      icon: '🥗',  label: 'Healthy',      helper: 'Lighter, ingredient-forward' },
-  { value: 'weight-loss',  icon: '🎯',  label: 'Weight loss',  helper: 'Simple, lighter portions' },
-  { value: 'high-protein', icon: '💪',  label: 'High protein', helper: 'Protein-rich staples' },
+  { value: 'balanced',     icon: Scale,  label: 'Balanced',     helper: 'Flexible everyday meals' },
+  { value: 'healthy',      icon: Leaf,  label: 'Healthy',      helper: 'Lighter, ingredient-forward' },
+  { value: 'weight-loss',  icon: Target,  label: 'Weight loss',  helper: 'Simple, lighter portions' },
+  { value: 'high-protein', icon: BicepsFlexed,  label: 'High protein', helper: 'Protein-rich staples' },
 ];
 
-const EQUIPMENT_ICONS: Record<string, string> = {
-  stove:     '🔥',
-  oven:      '🥧',
-  microwave: '📡',
-  blender:   '🌀',
-  pan:       '🍳',
-  pot:       '🫕',
-  'air-fryer': '♨️',
-  'rice-cooker': '🍚',
-  toaster:   '🍞',
-  'slow-cooker': '🍲',
-  'food-processor': '🔪',
-  'baking-sheet': '🥘',
+const EQUIPMENT_ICONS: Record<string, any> = {
+  stove:     Flame,
+  oven:      ChefHat,
+  microwave: Microwave,
+  blender:   RefreshCw,
+  pan:       Utensils,
+  pot:       CookingPot,
+  'air-fryer': Flame,
+  'rice-cooker': Egg,
+  toaster:   CookingPot,
+  'slow-cooker': Soup,
+  'food-processor': UtensilsCrossed,
+  'baking-sheet': CookingPot,
 };
 
 export default function Onboarding({ initialProfile, onSave, onBack }: Props) {
@@ -158,7 +163,7 @@ export default function Onboarding({ initialProfile, onSave, onBack }: Props) {
             <div className="chip-row" role="group" aria-labelledby="equipment-label">
               {equipmentList.map((item) => {
                 const active = selectedEquipment.has(item.id);
-                const icon   = EQUIPMENT_ICONS[item.id] ?? '🔧';
+                const icon   = EQUIPMENT_ICONS[item.id] ?? Wrench;
                 return (
                   <button
                     key={item.id}

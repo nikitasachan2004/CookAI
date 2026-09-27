@@ -17,14 +17,15 @@ const Login = lazy(() => import('./components/AuthScreens').then(module => ({ de
 const ChatBot = lazy(() => import('./components/ChatBot').then(module => ({ default: module.ChatBot })));
 
 import { checkAuth, logout } from './api';
+import { Scale, Leaf, Target, BicepsFlexed } from 'lucide-react';
 
 export type AppScreen = 'onboarding' | 'ingredients' | 'results' | 'detail' | 'signup-email' | 'verify-otp' | 'set-password' | 'login';
 
-const GOAL_ICONS: Record<string, string> = {
-  balanced:       '⚖️',
-  healthy:        '🥗',
-  'weight-loss':  '🎯',
-  'high-protein': '💪',
+const GOAL_ICONS: Record<string, any> = {
+  balanced:       Scale,
+  healthy:        Leaf,
+  'weight-loss':  Target,
+  'high-protein': BicepsFlexed,
 };
 
 const GOAL_LABELS: Record<string, string> = {
@@ -130,7 +131,10 @@ function GlobalHeader({
                   <span className="profile-pill">
                     <span className="profile-pill-dot" aria-hidden="true" />
                     {profile.name} &nbsp;·&nbsp;
-                    <span aria-hidden="true">{GOAL_ICONS[profile.goal]}</span> {GOAL_LABELS[profile.goal] ?? profile.goal}
+                    {(() => {
+                      const Icon = GOAL_ICONS[profile.goal] || Target;
+                      return <span aria-hidden="true"><Icon size={16} /></span>;
+                    })()} {GOAL_LABELS[profile.goal] ?? profile.goal}
                   </span>
                   <button type="button" onClick={onEditProfile} className="ghost-button">Edit profile</button>
                 </>
