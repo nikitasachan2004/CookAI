@@ -38,8 +38,6 @@ function AutoVideo({ src, cutoff = 0.15 }: { src: string; cutoff?: number }) {
   );
 }
 
-
-
 type Props = {
   onGetStarted: () => void;
 };
@@ -93,127 +91,92 @@ function ImageCard({ src, alt, style }: { src: string; alt: string; style?: Reac
 
 /* ─── Component ─────────────────────────────────────────────── */
 export default function LandingPage({ onGetStarted }: Props) {
+  const heroVidRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = heroVidRef.current;
+    if (!v) return;
+    v.muted = true;
+    v.play().catch(() => {});
+  }, []);
+
   return (
     <div className="screen-enter">
 
       {/* ══════════════════════════════════════════
-          HERO
+          HERO — Full-viewport cinematic video
       ══════════════════════════════════════════ */}
       <section className="landing-hero" aria-label="Hero">
-        <div className="hero-inner">
+        {/* Video background layer */}
+        <div className="hero-vid-wrap" aria-hidden="true">
+          <video
+            ref={heroVidRef}
+            className="hero-vid"
+            src="/ui/vid.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+          />
+          <div className="hero-vid-scrim" />
+        </div>
 
-          {/* Left: copy */}
-          <div className="hero-content">
-            <div className="hero-eyebrow" aria-hidden="true">
-              <span className="hero-eyebrow-dot" />
-              Built by a frustrated home cook
-            </div>
-
-            <h1 className="hero-headline">
-              Stop staring at your fridge hoping a meal <em>appears</em>
-            </h1>
-
-            <p className="hero-subline">
-              I built CookAI for one simple reason: I was tired of staring at a fridge full of random ingredients and ending up ordering takeout. Tell it what you actually have in your kitchen, and it’ll instantly find a recipe you can cook right now. No grocery runs. No more food waste.
-            </p>
-
-            <div className="hero-actions">
-              <button
-                type="button"
-                className="primary-button primary-button--lg"
-                onClick={onGetStarted}
-              >
-                Start cooking free
-                <IconArrow />
-              </button>
-              <Link to="/recipes" className="secondary-button secondary-button--lg">
-                Browse recipes
-              </Link>
-            </div>
-
-            <div className="hero-trust" aria-label="Product highlights">
-              <span className="trust-item">
-                <span className="trust-check" aria-hidden="true">
-                  <IconCheck />
-                </span>
-                No account needed
-              </span>
-              <span className="trust-divider" aria-hidden="true" />
-              <span className="trust-item">
-                <span className="trust-check" aria-hidden="true">
-                  <IconCheck />
-                </span>
-                Works with any kitchen
-              </span>
-              <span className="trust-divider" aria-hidden="true" />
-              <span className="trust-item">
-                <span className="trust-check" aria-hidden="true">
-                  <IconCheck />
-                </span>
-                Instant results
-              </span>
-            </div>
+        {/* Centered content on top of video */}
+        <div className="hero-center">
+          <div className="hero-eyebrow">
+            <span className="hero-eyebrow-dot" />
+            Built by a frustrated home cook
           </div>
 
-          {/* Right: visual */}
-          <div className="hero-visual" aria-hidden="true">
-            <div className="hero-card-cluster">
+          <h1 className="hero-headline">
+            Stop staring at your fridge<br />
+            hoping a meal <em>appears</em>
+          </h1>
 
-              {/* Floating top badge */}
-              <div className="hero-float-badge hero-float-badge--top">
-                <span className="hero-float-badge-icon"><Egg size={18} /></span>
-                <div className="hero-float-badge-text">
-                  <span className="hero-float-badge-label">Eggs</span>
-                  <span className="hero-float-badge-sub">Ingredient matched</span>
-                </div>
-              </div>
+          <p className="hero-subline">
+            Tell CookAI what's actually in your kitchen and it'll instantly find
+            a recipe you can cook right now. No grocery runs. No more food waste.
+          </p>
 
-              {/* Main recipe card mockup */}
-              <div className="hero-recipe-card">
-                <div className="hero-recipe-card-tag">
-                  <span>✓</span>
-                  Exact match · 96%
-                </div>
-                <h2 className="hero-recipe-card-title">Garlic Tomato Pasta</h2>
-                <p className="hero-recipe-card-desc">
-                  A quick, flavourful weeknight dinner using pantry staples.
-                </p>
-
-                <div className="hero-ingredients-row">
-                  {[{ name: 'Pasta', icon: Wheat }, { name: 'Tomato', icon: Circle }, { name: 'Garlic', icon: Leaf }, { name: 'Olive oil', icon: Droplet }, { name: 'Basil', icon: Leaf }].map((ing) => {
-                    const Icon = ing.icon;
-                    return (
-                      <span key={ing.name} className="hero-ingredient-chip"><Icon size={14} style={{ opacity: 0.7 }} /> {ing.name}</span>
-                    );
-                  })}
-                </div>
-
-                <div className="hero-recipe-meta">
-                  <div className="hero-recipe-meta-left">
-                    <span className="meta-tag time">⏱ 20 min</span>
-                    <span className="meta-tag">Easy</span>
-                  </div>
-                  <span className="hero-match-pill">
-                    ✓ All ingredients matched
-                  </span>
-                </div>
-              </div>
-
-              {/* Floating bottom badge */}
-              <div className="hero-float-badge hero-float-badge--bottom">
-                <span className="hero-float-badge-icon"><Utensils size={18} /></span>
-                <div className="hero-float-badge-text">
-                  <span className="hero-float-badge-label">Pan required</span>
-                  <span className="hero-float-badge-sub">Equipment verified</span>
-                </div>
-              </div>
-
-            </div>
+          <div className="hero-actions">
+            <button
+              type="button"
+              className="primary-button primary-button--lg"
+              onClick={onGetStarted}
+            >
+              Start cooking free
+              <IconArrow />
+            </button>
+            <Link to="/recipes" className="secondary-button secondary-button--lg hero-btn-ghost">
+              Browse recipes
+            </Link>
           </div>
 
+          <div className="hero-trust" aria-label="Product highlights">
+            <span className="trust-item">
+              <span className="trust-check" aria-hidden="true">
+                <IconCheck />
+              </span>
+              No account needed
+            </span>
+            <span className="trust-divider" aria-hidden="true" />
+            <span className="trust-item">
+              <span className="trust-check" aria-hidden="true">
+                <IconCheck />
+              </span>
+              Works with any kitchen
+            </span>
+            <span className="trust-divider" aria-hidden="true" />
+            <span className="trust-item">
+              <span className="trust-check" aria-hidden="true">
+                <IconCheck />
+              </span>
+              Instant results
+            </span>
+          </div>
         </div>
       </section>
-
 
       {/* ══════════════════════════════════════════
           INGREDIENT VISUAL + COPY SPLIT

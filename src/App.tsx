@@ -112,7 +112,7 @@ function GlobalHeader({
   }, [location.pathname]);
 
   return (
-    <header className={`app-header${isAppRoute ? ' app-header--app' : ''}`}>
+    <header className={`app-header${isAppRoute ? ' app-header--app' : ''}${isLanding ? ' app-header--landing' : ''}`}>
       <div className="header-liquid-pill">
         <div className="header-liquid-glass" style={{ backdropFilter: 'url("#container-glass")' }} />
         <div className="header-inner">
