@@ -356,6 +356,14 @@ img    { display: block; max-width: 100%; }
   color: var(--color-text);
   background: var(--warm-200);
 }
+button.nav-link {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  line-height: inherit;
+}
 
 /* Profile pill */
 .profile-pill {

@@ -214,59 +214,6 @@ export default function LandingPage({ onGetStarted }: Props) {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════
-          HOW IT WORKS
-      ══════════════════════════════════════════ */}
-      <section className="landing-section landing-section--alt" id="how-it-works" aria-labelledby="how-title">
-        <div className="container">
-
-          <div className="section-header-block section-header-block--center">
-            <h2 className="section-heading" id="how-title" style={{ color: 'var(--color-brand)' }}>
-              How it actually works
-            </h2>
-            <p className="section-subheading">
-              I didn't want another app that gives me a recipe for a 5-course meal when all I have is pasta and cheese. Just tell the app what you have, and it handles the rest.
-            </p>
-          </div>
-
-          <div className="how-steps">
-
-            <article className="how-step">
-              <div className="how-step-number" aria-hidden="true">1</div>
-              <div>
-                <div className="how-step-icon" aria-hidden="true"><User size={24} /></div>
-                <h3 className="how-step-title">Tell us your goal & gear</h3>
-                <p className="how-step-desc">
-                  Just want a quick high-protein meal? Only have a microwave and a pan? Let the app know so it stops suggesting 3-hour oven roasts.
-                </p>
-              </div>
-            </article>
-
-            <article className="how-step">
-              <div className="how-step-number" aria-hidden="true">2</div>
-              <div>
-                <div className="how-step-icon" aria-hidden="true"><LeafyGreen size={24} /></div>
-                <h3 className="how-step-title">Dump your fridge contents</h3>
-                <p className="how-step-desc">
-                  Just tap or type whatever you've got. Got half an onion, two eggs, and some rice? Add it all in. Don't overthink it.
-                </p>
-              </div>
-            </article>
-
-            <article className="how-step">
-              <div className="how-step-number" aria-hidden="true">3</div>
-              <div>
-                <div className="how-step-icon" aria-hidden="true"><UtensilsCrossed size={24} /></div>
-                <h3 className="how-step-title">Get a recipe you can actually cook</h3>
-                <p className="how-step-desc">
-                  The engine instantly scores recipes based on what you have. No "missing ingredient" surprises halfway through cooking.
-                </p>
-              </div>
-            </article>
-
-          </div>
-        </div>
-      </section>
 
       {/* ══════════════════════════════════════════
           INGREDIENT VISUAL + COPY SPLIT

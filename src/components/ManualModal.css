@@ -1,0 +1,220 @@
+/* Backdrop with Apple-style blur overlay */
+.manual-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Glassmorphism Card Window */
+.manual-modal-card {
+  width: 100%;
+  max-width: 560px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  
+  /* Apple Glassmorphism effect matching ChatBot */
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  color: #1d1d1f;
+}
+
+/* Header */
+.manual-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.45);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.manual-modal-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.manual-modal-badge {
+  background: rgba(6, 95, 70, 0.12);
+  color: #065F46;
+  padding: 10px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.manual-modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #065F46;
+  letter-spacing: -0.01em;
+}
+
+.manual-modal-subtitle {
+  margin: 2px 0 0 0;
+  font-size: 0.85rem;
+  color: #6e6e73;
+  font-weight: 500;
+}
+
+.manual-modal-close-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border: none;
+  color: #6e6e73;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.manual-modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1d1d1f;
+  transform: scale(1.05);
+}
+
+/* Body */
+.manual-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.manual-intro-quote {
+  background: rgba(255, 255, 255, 0.5);
+  border-left: 3px solid #065F46;
+  border-radius: 0 12px 12px 0;
+  padding: 12px 16px;
+  font-style: italic;
+  color: #424245;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.manual-intro-quote p {
+  margin: 0;
+}
+
+.manual-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.manual-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.manual-step-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(6, 95, 70, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.manual-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #065F46, #047857);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(6, 95, 70, 0.3);
+}
+
+.manual-step-icon-box {
+  color: #065F46;
+  background: rgba(6, 95, 70, 0.08);
+  padding: 8px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.manual-step-content {
+  flex: 1;
+}
+
+.manual-step-title {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1d1d1f;
+}
+
+.manual-step-desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #515154;
+  line-height: 1.5;
+}
+
+/* Footer */
+.manual-modal-footer {
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.45);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.manual-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #065F46;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(6, 95, 70, 0.25);
+}
+
+.manual-action-btn:hover {
+  background: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(6, 95, 70, 0.35);
+}
+
+.manual-action-btn:active {
+  transform: translateY(0);
+}

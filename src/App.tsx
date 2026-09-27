@@ -15,6 +15,7 @@ const VerifyOtp = lazy(() => import('./components/AuthScreens').then(module => (
 const SetPassword = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.SetPassword })));
 const Login = lazy(() => import('./components/AuthScreens').then(module => ({ default: module.Login })));
 const ChatBot = lazy(() => import('./components/ChatBot').then(module => ({ default: module.ChatBot })));
+import { ManualModal } from './components/ManualModal';
 
 import { checkAuth, logout } from './api';
 import { Scale, Leaf, Target, BicepsFlexed } from 'lucide-react';
@@ -84,6 +85,7 @@ function GlobalHeader({
   onGoHome,
   user,
   authLoaded,
+  onOpenManual,
 }: {
   profile: Profile | null;
   appScreen: AppScreen | null;
@@ -91,6 +93,7 @@ function GlobalHeader({
   onGoHome: () => void;
   user: any;
   authLoaded?: boolean;
+  onOpenManual: () => void;
 }) {
   const location = useLocation();
   const isAppRoute = location.pathname === '/app';
@@ -113,6 +116,7 @@ function GlobalHeader({
             <Link to="/" className={`nav-link${location.pathname === '/' ? ' nav-link--active' : ''}`}>Home</Link>
             <Link to="/recipes" className={`nav-link${location.pathname === '/recipes' ? ' nav-link--active' : ''}`}>Recipes</Link>
             <Link to="/about" className={`nav-link${location.pathname === '/about' ? ' nav-link--active' : ''}`}>About</Link>
+            <button type="button" onClick={onOpenManual} className="nav-link nav-link--button">Manual</button>
           </nav>
         </div>
 
@@ -181,6 +185,7 @@ function GlobalHeader({
           <Link to="/" className="mobile-nav-link">Home</Link>
           <Link to="/recipes" className="mobile-nav-link">Recipes</Link>
           <Link to="/about" className="mobile-nav-link">About</Link>
+          <button type="button" onClick={() => { onOpenManual(); setMobileMenuOpen(false); }} className="mobile-nav-link" style={{ background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', font: 'inherit' }}>Manual</button>
           <hr className="mobile-nav-divider" />
           {!authLoaded ? null : user ? (
             <>
@@ -282,6 +287,7 @@ export default function App() {
 
   const [appScreen, setAppScreen] = useState<AppScreen | null>(null);
   const [authState, setAuthState] = useState<{ loaded: boolean, user: any }>({ loaded: false, user: null });
+  const [isManualOpen, setIsManualOpen] = useState(false);
 
   useEffect(() => {
     checkAuth().then(res => {
@@ -304,7 +310,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <GlobalHeader profile={profile} appScreen={appScreen} onEditProfile={() => navigate('/app?edit=1')} onGoHome={() => navigate(location.pathname === '/app' && !profile ? '/' : profile ? '/app' : '/')} user={authState.user} authLoaded={authState.loaded} />
+      <GlobalHeader profile={profile} appScreen={appScreen} onEditProfile={() => navigate('/app?edit=1')} onGoHome={() => navigate(location.pathname === '/app' && !profile ? '/' : profile ? '/app' : '/')} user={authState.user} authLoaded={authState.loaded} onOpenManual={() => setIsManualOpen(true)} />
       <main id="main-content">
         <Suspense fallback={<div className="loading-spinner" />}>
           <Routes>
@@ -317,9 +323,11 @@ export default function App() {
           </Routes>
         </Suspense>
       </main>
+      <ManualModal isOpen={isManualOpen} onClose={() => setIsManualOpen(false)} />
       <Suspense fallback={null}>
         <ChatBot />
       </Suspense>
     </div>
   );
 }
+
