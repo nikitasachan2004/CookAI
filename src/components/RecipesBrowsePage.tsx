@@ -11,7 +11,7 @@ type Props = {
 };
 
 /* ─── Per-recipe colour themes based on tags / id ──────────── */
-const RECIPE_THEMES: Record<string, { from: string; to: string; emoji: string }> = {
+const RECIPE_THEMES: Record<string, { from: string; to: string }> = {
   'egg-fried-rice':         { from: '#FFB84D', to: '#FF8A3D' },
   'chicken-rice-bowl':      { from: '#60A5FA', to: '#3B82F6' },
   'tomato-pasta':           { from: '#EF4444', to: '#DC2626' },

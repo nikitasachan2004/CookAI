@@ -4,7 +4,7 @@ import { getEquipment, saveProfile } from '../api';
 import {
   Scale, Leaf, Target, BicepsFlexed,
   Flame, ChefHat, Microwave, RefreshCw, Utensils, CookingPot,
-  Egg, Soup, UtensilsCrossed, ArrowRight, Check
+  Egg, Soup, UtensilsCrossed, ArrowRight, Check, Wrench
 } from 'lucide-react';
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
   onBack?: () => void;
 };
 
-const GOALS: { value: Goal; icon: string; label: string; helper: string }[] = [
+const GOALS: { value: Goal; icon: any; label: string; helper: string }[] = [
   { value: 'balanced',     icon: Scale,  label: 'Balanced',     helper: 'Flexible everyday meals' },
   { value: 'healthy',      icon: Leaf,  label: 'Healthy',      helper: 'Lighter, ingredient-forward' },
   { value: 'weight-loss',  icon: Target,  label: 'Weight loss',  helper: 'Simple, lighter portions' },
@@ -130,20 +130,25 @@ export default function Onboarding({ initialProfile, onSave, onBack }: Props) {
         <div className="field">
           <label id="goal-label">Meal goal</label>
           <div className="option-grid" role="radiogroup" aria-labelledby="goal-label">
-            {GOALS.map((g) => (
-              <button
-                key={g.value}
-                type="button"
-                role="radio"
-                aria-checked={goal === g.value}
-                onClick={() => setGoal(g.value)}
-                className={`choice-card${goal === g.value ? ' is-selected' : ''}`}
-              >
-                <span className="choice-card-icon" aria-hidden="true">{g.icon}</span>
-                <span>{g.label}</span>
-                <small>{g.helper}</small>
-              </button>
-            ))}
+            {GOALS.map((g) => {
+              const GoalIcon = g.icon;
+              return (
+                <button
+                  key={g.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={goal === g.value}
+                  onClick={() => setGoal(g.value)}
+                  className={`choice-card${goal === g.value ? ' is-selected' : ''}`}
+                >
+                  <span className="choice-card-icon" aria-hidden="true">
+                    <GoalIcon size={24} />
+                  </span>
+                  <span>{g.label}</span>
+                  <small>{g.helper}</small>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -163,7 +168,7 @@ export default function Onboarding({ initialProfile, onSave, onBack }: Props) {
             <div className="chip-row" role="group" aria-labelledby="equipment-label">
               {equipmentList.map((item) => {
                 const active = selectedEquipment.has(item.id);
-                const icon   = EQUIPMENT_ICONS[item.id] ?? Wrench;
+                const EqIcon = EQUIPMENT_ICONS[item.id] ?? Wrench;
                 return (
                   <button
                     key={item.id}
@@ -172,7 +177,9 @@ export default function Onboarding({ initialProfile, onSave, onBack }: Props) {
                     onClick={() => toggleEquipment(item.id)}
                     className={`chip-button${active ? ' is-selected' : ''}`}
                   >
-                    <span aria-hidden="true">{icon}</span>
+                    <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <EqIcon size={14} />
+                    </span>
                     {item.name}
                   </button>
                 );

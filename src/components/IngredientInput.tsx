@@ -9,7 +9,7 @@ type Props = {
   onSearch: (ingredients: string[]) => void;
 };
 
-const CATEGORIES: { label: string; icon: string; items: string[] }[] = [
+const CATEGORIES: { label: string; icon: any; items: string[] }[] = [
   {
     label: 'Proteins',
     icon: Beef,
@@ -149,12 +149,14 @@ export default function IngredientInput({ profile, initialIngredients = [], onSe
 
         {/* ── Categorised chips ────────────────────────── */}
         <div className="ingredient-categories">
-          {CATEGORIES.map((cat) => (
-            <div key={cat.label}>
-              <p className="ingredient-category-label" aria-hidden="true">
-                {cat.icon} {cat.label}
-              </p>
-              <div className="chip-row" role="group" aria-label={`${cat.label} ingredients`}>
+          {CATEGORIES.map((cat) => {
+            const CatIcon = cat.icon;
+            return (
+              <div key={cat.label}>
+                <p className="ingredient-category-label" aria-hidden="true" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CatIcon size={14} /> {cat.label}
+                </p>
+                <div className="chip-row" role="group" aria-label={`${cat.label} ingredients`}>
                 {cat.items.map((name) => {
                   const display    = displayNames.get(name) ?? name.charAt(0).toUpperCase() + name.slice(1);
                   const isSelected = selected.includes(name);
@@ -177,7 +179,8 @@ export default function IngredientInput({ profile, initialIngredients = [], onSe
                 })}
               </div>
             </div>
-          ))}
+          );
+        })}
         </div>
 
         {/* ── Selected tray ────────────────────────────── */}
