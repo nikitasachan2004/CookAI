@@ -98,10 +98,19 @@ app.get('/api/recipes/:id', (request, response) => {
 });
 app.use((_request, response) => response.status(404).json({ error: 'Not found.' }));
 
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Unhandled server error:', err);
+  res.status(500).json({ error: 'Internal server error.' });
+});
+
 const port = Number(process.env.PORT) || 3001;
 
 connectDB()
   .then(initializeMatching)
   .then(() => {
     app.listen(port, '0.0.0.0', () => console.log(`Cookai API listening on port ${port}`));
+  })
+  .catch((err) => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
   });

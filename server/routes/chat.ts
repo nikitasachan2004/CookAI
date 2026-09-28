@@ -5,7 +5,6 @@ import { matchRecipes } from '../matching.js';
 
 export const chatRouter = Router();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 const chatSchema = z.object({
   messages: z.array(z.object({
     role: z.enum(['user', 'model']),
@@ -37,6 +36,7 @@ chatRouter.post('/', async (req, res) => {
       return res.status(500).json({ error: 'Gemini API key not configured' });
     }
 
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ 
         model: 'gemini-2.5-flash',
         systemInstruction: SYSTEM_PROMPT,

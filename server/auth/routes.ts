@@ -9,6 +9,16 @@ import { sendOtpEmail } from './email.js';
 
 export const authRouter = Router();
 
+const cookieOptions: {
+  httpOnly: boolean;
+  sameSite: 'none' | 'lax';
+  secure: boolean;
+} = {
+  httpOnly: true,
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  secure: process.env.NODE_ENV === 'production',
+};
+
 const rateLimits = new Map<string, { count: number; windowStart: number }>();
 const RL_WINDOW_MS = 60 * 1000;
 const RL_MAX_ATTEMPTS = 5;
@@ -60,9 +70,7 @@ authRouter.post('/signup', async (req, res) => {
   // Issue login cookie immediately
   const token = jwt.sign({ userId: account._id, email }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '7d' });
   res.cookie('jwt', token, { 
-    httpOnly: true, 
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
-    secure: process.env.NODE_ENV === 'production',
+    ...cookieOptions,
     maxAge: 7 * 24 * 3600000 
   });
   
@@ -155,9 +163,7 @@ authRouter.post('/set-password', async (req, res) => {
 
   const token = jwt.sign({ userId: account._id, email }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '7d' });
   res.cookie('jwt', token, { 
-    httpOnly: true, 
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
-    secure: process.env.NODE_ENV === 'production',
+    ...cookieOptions,
     maxAge: 7 * 24 * 3600000 
   });
   
@@ -179,17 +185,15 @@ authRouter.post('/login', async (req, res) => {
 
   const token = jwt.sign({ userId: account._id, email }, process.env.JWT_SECRET || 'dev-secret', { expiresIn: '7d' });
   res.cookie('jwt', token, { 
-    httpOnly: true, 
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
-    secure: process.env.NODE_ENV === 'production',
+    ...cookieOptions,
     maxAge: 7 * 24 * 3600000 
   });
   
   res.status(200).json({ userId: account._id, email });
 });
 
-authRouter.post('/logout', (req, res) => {
-  res.clearCookie('jwt');
+authRouter.post('/logout', (_req, res) => {
+  res.clearCookie('jwt', cookieOptions);
   res.status(204).end();
 });
 
