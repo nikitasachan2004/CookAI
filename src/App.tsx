@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, Suspense, lazy } from 'react';
-import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 import type { Profile } from './types';
 
 const LandingPage = lazy(() => import('./components/LandingPage'));
@@ -309,6 +309,16 @@ function AppFlow({ profile: initialProfile, onProfileChange }: { profile: Profil
   );
 }
 
+function RecipeDetailRoute() {
+  const { recipeId } = useParams<{ recipeId: string }>();
+  const navigate = useNavigate();
+  return (
+    <div className="main-panel">
+      <RecipeDetail recipeId={recipeId ?? ''} onBack={() => navigate('/recipes')} />
+    </div>
+  );
+}
+
 /* ─── Root App ──────────────────────────────────────────────── */
 export default function App() {
   const navigate = useNavigate();
@@ -353,7 +363,7 @@ export default function App() {
             <Route path="/" element={<LandingPage onGetStarted={() => navigate('/app')} />} />
             <Route path="/about" element={<AboutPage onGetStarted={() => navigate('/app')} />} />
             <Route path="/recipes" element={<RecipesBrowsePage onGetStarted={() => navigate('/app')} />} />
-            <Route path="/recipes/:recipeId" element={<div className="main-panel"><RecipeDetail recipeId={location.pathname.split('/').pop() ?? ''} onBack={() => navigate('/recipes')} /></div>} />
+            <Route path="/recipes/:recipeId" element={<RecipeDetailRoute />} />
             <Route path="/app" element={<AppFlow profile={profile} onProfileChange={setProfile} />} />
             <Route path="*" element={<LandingPage onGetStarted={() => navigate('/app')} />} />
           </Routes>
