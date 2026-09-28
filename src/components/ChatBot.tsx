@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, User, X, Send, Sparkles } from 'lucide-react';
+import { User, X, Send, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { sendChatMessage } from '../api';
 import './ChatBot.css';

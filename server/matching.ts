@@ -151,8 +151,31 @@ function recipeCoverageScore(query: SparseVector, recipe: SparseVector, recipeMa
   return dot / (recipeMag * recipeMag);
 }
 
+let allRecipes: Recipe[] = fallbackRecipes;
 let recipeVectors: { recipe: Recipe; vec: SparseVector; mag: number }[] = [];
-let allRecipes: Recipe[] = [];
+
+function rebuildVectors() {
+  N = allRecipes.length;
+  docFrequency.clear();
+
+  for (const recipe of allRecipes) {
+    const seen = new Set<string>();
+    for (const ing of recipe.ingredients) {
+      if (!seen.has(ing.name)) {
+        docFrequency.set(ing.name, (docFrequency.get(ing.name) ?? 0) + 1);
+        seen.add(ing.name);
+      }
+    }
+  }
+
+  recipeVectors = allRecipes.map((r) => {
+    const vec = buildRecipeVector(r);
+    return { recipe: r, vec, mag: magnitude(vec) };
+  });
+}
+
+// Initial synchronous build with fallback data so matching is never empty
+rebuildVectors();
 
 export async function initializeMatching() {
   try {
@@ -174,23 +197,7 @@ export async function initializeMatching() {
   } else {
     allRecipes = fallbackRecipes;
   }
-  N = allRecipes.length;
-  docFrequency.clear();
-
-  for (const recipe of allRecipes) {
-    const seen = new Set<string>();
-    for (const ing of recipe.ingredients) {
-      if (!seen.has(ing.name)) {
-        docFrequency.set(ing.name, (docFrequency.get(ing.name) ?? 0) + 1);
-        seen.add(ing.name);
-      }
-    }
-  }
-
-  recipeVectors = allRecipes.map((r) => {
-    const vec = buildRecipeVector(r);
-    return { recipe: r, vec, mag: magnitude(vec) };
-  });
+  rebuildVectors();
 }
 
 // ─── Build query vector from user's available ingredients ──────────────────

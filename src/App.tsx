@@ -1,7 +1,6 @@
-import { useState, useCallback, useEffect, Suspense, lazy } from 'react';
-import { Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useCallback, useEffect, useRef, Suspense, lazy } from 'react';
+import { Routes, Route, Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 import type { Profile } from './types';
-import { GlassFilter } from '@/components/ui/liquid-glass-button';
 
 const LandingPage = lazy(() => import('./components/LandingPage'));
 const AboutPage = lazy(() => import('./components/AboutPage'));
@@ -105,16 +104,39 @@ function GlobalHeader({
   const isAppRoute = location.pathname === '/app';
   const isLanding  = location.pathname === '/';
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pillRef = useRef<HTMLDivElement>(null);
 
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
+  // Close mobile menu on outside click and Escape key
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+    const handleClickOutside = (e: MouseEvent) => {
+      if (pillRef.current && !pillRef.current.contains(e.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <header className={`app-header${isAppRoute ? ' app-header--app' : ''}${isLanding ? ' app-header--landing' : ''}`}>
-      <div className="header-liquid-pill">
-        <div className="header-liquid-glass" style={{ backdropFilter: 'url("#container-glass")' }} />
+      <div className="header-liquid-pill" ref={pillRef}>
+        <div className="header-liquid-glass" />
         <div className="header-inner">
           <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
             <button type="button" onClick={onGoHome} className="brand-button" aria-label="COOKAI — go to home">
@@ -175,8 +197,10 @@ function GlobalHeader({
               className="mobile-menu-btn mobile-only" 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-nav-overlay"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 {mobileMenuOpen ? (
                   <path d="M18 6L6 18M6 6l12 12" />
                 ) : (
@@ -186,27 +210,28 @@ function GlobalHeader({
             </button>
           </div>
         </div>
-      </div>
 
-      <GlassFilter />
-
-      {/* Mobile Menu Overlay */}
-      <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'is-open' : ''}`}>
-        <nav className="mobile-nav">
-          <Link to="/" className="mobile-nav-link">Home</Link>
-          <Link to="/recipes" className="mobile-nav-link">Recipes</Link>
-          <Link to="/about" className="mobile-nav-link">About</Link>
-          <button type="button" onClick={() => { onOpenManual(); setMobileMenuOpen(false); }} className="mobile-nav-link" style={{ background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', font: 'inherit' }}>Manual</button>
-          <hr className="mobile-nav-divider" />
-          {!authLoaded ? null : user ? (
-            <>
-              <div className="mobile-nav-user">{user.email}</div>
-              <button type="button" onClick={async () => { await logout(); window.location.reload(); }} className="mobile-nav-link text-danger" style={{ textAlign: 'left' }}>Log out</button>
-            </>
-          ) : (
-            <Link to="/app?action=login" className="mobile-nav-link">Log in</Link>
-          )}
-        </nav>
+        {/* Mobile Menu Dropdown inside header-liquid-pill */}
+        <div id="mobile-nav-overlay" className={`mobile-menu-overlay ${mobileMenuOpen ? 'is-open' : ''}`}>
+          <nav className="mobile-nav" aria-label="Mobile navigation">
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className={`mobile-nav-link${location.pathname === '/' ? ' nav-link--active' : ''}`}>Home</Link>
+            <Link to="/recipes" onClick={() => setMobileMenuOpen(false)} className={`mobile-nav-link${location.pathname === '/recipes' ? ' nav-link--active' : ''}`}>Recipes</Link>
+            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className={`mobile-nav-link${location.pathname === '/about' ? ' nav-link--active' : ''}`}>About</Link>
+            <button type="button" onClick={() => { onOpenManual(); setMobileMenuOpen(false); }} className="mobile-nav-link" style={{ background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', font: 'inherit' }}>Manual</button>
+            {isAppRoute && profile && (
+              <button type="button" onClick={() => { onEditProfile(); setMobileMenuOpen(false); }} className="mobile-nav-link" style={{ background: 'none', border: 'none', textAlign: 'left', width: '100%', cursor: 'pointer', font: 'inherit' }}>Edit profile ({profile.name})</button>
+            )}
+            <hr className="mobile-nav-divider" />
+            {!authLoaded ? null : user ? (
+              <>
+                <div className="mobile-nav-user">{user.email}</div>
+                <button type="button" onClick={async () => { setMobileMenuOpen(false); await logout(); window.location.reload(); }} className="mobile-nav-link text-danger" style={{ textAlign: 'left' }}>Log out</button>
+              </>
+            ) : (
+              <Link to="/app?action=login" onClick={() => setMobileMenuOpen(false)} className="mobile-nav-link">Log in</Link>
+            )}
+          </nav>
+        </div>
       </div>
     </header>
   );
@@ -284,6 +309,16 @@ function AppFlow({ profile: initialProfile, onProfileChange }: { profile: Profil
   );
 }
 
+function RecipeDetailRoute() {
+  const { recipeId } = useParams<{ recipeId: string }>();
+  const navigate = useNavigate();
+  return (
+    <div className="main-panel">
+      <RecipeDetail recipeId={recipeId ?? ''} onBack={() => navigate('/recipes')} />
+    </div>
+  );
+}
+
 /* ─── Root App ──────────────────────────────────────────────── */
 export default function App() {
   const navigate = useNavigate();
@@ -328,7 +363,7 @@ export default function App() {
             <Route path="/" element={<LandingPage onGetStarted={() => navigate('/app')} />} />
             <Route path="/about" element={<AboutPage onGetStarted={() => navigate('/app')} />} />
             <Route path="/recipes" element={<RecipesBrowsePage onGetStarted={() => navigate('/app')} />} />
-            <Route path="/recipes/:recipeId" element={<div className="main-panel"><RecipeDetail recipeId={location.pathname.split('/').pop() ?? ''} onBack={() => navigate('/recipes')} /></div>} />
+            <Route path="/recipes/:recipeId" element={<RecipeDetailRoute />} />
             <Route path="/app" element={<AppFlow profile={profile} onProfileChange={setProfile} />} />
             <Route path="*" element={<LandingPage onGetStarted={() => navigate('/app')} />} />
           </Routes>
