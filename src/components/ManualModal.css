@@ -218,3 +218,43 @@
 .manual-action-btn:active {
   transform: translateY(0);
 }
+
+/* Responsive & Safe Area Support */
+@media (max-width: 640px) {
+  .manual-modal-backdrop {
+    padding: 12px;
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .manual-modal-card {
+    max-height: calc(85vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    max-height: calc(85dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    border-radius: 20px;
+  }
+
+  .manual-modal-header {
+    padding: 14px 16px;
+  }
+
+  .manual-modal-body {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .manual-modal-close-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .manual-action-btn {
+    min-height: 44px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .manual-step-item {
+    padding: 12px;
+    gap: 12px;
+  }
+}
